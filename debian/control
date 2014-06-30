@@ -1,0 +1,32 @@
+Source: haskell-happstack-ghcjs
+Maintainer: Clifford Beshers <beshers@seereason.com>
+Priority: optional
+Section: haskell
+Build-Depends: debhelper (>= 7.0)
+               , haskell-devscripts (>= 0.8)
+               , cdbs
+               , ghc
+               , ghc-prof
+               , libghc-ghcjs-dom-dev (>= 0.0.10)
+               , libghc-ghcjs-dom-prof (>= 0.0.10)
+Build-Depends-Indep: ghc-doc
+                     , libghc-ghcjs-dom-doc (>= 0.0.10)
+
+Package: haskell-happstack-ghcjs-utils
+Architecture: any
+Section: misc
+Depends: ${shlibs:Depends}
+         , ${haskell:Depends}
+         , ${misc:Depends}
+Recommends: ${haskell:Recommends}
+Suggests: ${haskell:Suggests}
+Conflicts: ${haskell:Conflicts}
+Provides: ${haskell:Provides}
+Replaces: ${haskell:Replaces}
+Description: Library and examples for building happstack applications with ghcjs/ghc
+ Library and examples for building happstack applications with ghcjs/ghc
+ .
+  Author: Clifford Beshers <beshers@seereason.com>
+  Upstream-Maintainer: Clifford Beshers <beshers@seereason.com>
+ .
+ Files associated with the happstack-ghcjs package.
