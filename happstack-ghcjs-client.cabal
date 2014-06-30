@@ -1,0 +1,30 @@
+Name: happstack-ghcjs-client
+Version: 0.1
+Author:         Clifford Beshers <beshers@seereason.com>
+Maintainer:     Clifford Beshers <beshers@seereason.com>
+License:        AllRightsReserved
+Copyright:      (c) 2014, SeeReason Partners LLC
+Synopsis:       Library and examples for building happstack applications with ghcjs/ghc
+Description:    Library and examples for building happstack applications with ghcjs/ghc
+category: Web
+Cabal-version:  >= 1.9
+build-type:     Custom
+data-dir: ""
+
+flag ghcjs
+    description: Tell cabal we are using ghcjs (work around until hackage supports impl(ghcjs))
+    default: True
+
+-- This is compiled with ghcjs
+
+Executable happstack-ghcjs-client
+  Hs-Source-Dirs:  client
+  Main-Is: Client.hs
+  Build-Depends:
+     base >=4.2 && <5,
+     ghcjs-dom >= 0.0.7
+
+    -- Make sure ghcjs gets turned off if ghcjs-base is not avaialbe
+  if flag(ghcjs)
+        build-depends: ghcjs-base
+
