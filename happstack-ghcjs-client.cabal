@@ -20,6 +20,7 @@ flag ghcjs
 Executable happstack-ghcjs-client
   Hs-Source-Dirs:  client
   Main-Is: Client.hs
+  Buildable: True
   Build-Depends:
      base >=4.2 && <5,
      ghcjs-dom >= 0.0.7
