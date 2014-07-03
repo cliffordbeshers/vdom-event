@@ -1,4 +1,4 @@
-Name: happstack-ghcjs
+Name: happstack-ghcjs-server
 Version: 0.1
 Author: Clifford Beshers <beshers@seereason.com>
 Maintainer:     Clifford Beshers <beshers@seereason.com>
@@ -11,15 +11,14 @@ Cabal-version:  >= 1.9
 build-type:     Custom
 data-dir: ""
 
-Executable happstack-ghcjs-client
-  Hs-Source-Dirs:  server
-  Main-Is: Client.hs
-  Build-Depends:
-     base >=4.2 && <5,
-     ghcjs-dom >= 0.0.10
-
 Executable happstack-ghcjs-server
-  Hs-Source-Dirs:  server
+  Hs-Source-Dirs: server
   Main-Is: Server.hs
   Build-Depends:
-     base >=4.2 && <5
+     base >=4.2 && <5,
+     directory,
+     filepath,
+     happstack-server,
+     hslogger,
+     mtl,
+     time
