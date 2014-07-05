@@ -13,6 +13,8 @@ import System.Log.Logger (debugM, logM, Priority(ALERT, DEBUG, INFO), rootLogger
 --import StaticResources
 import EmbedGHCJS
 
+-- Currently, the routing is messed up.
+
 data LogMode
     = Production
     | Development
