@@ -3,7 +3,7 @@ module Main where
 import Control.Monad as Monad (msum)
 import Control.Monad.Trans as Trans (liftIO)
 import Data.Time.Format (FormatTime(..))
-import Happstack.Server (asContentType, Browsing(EnableBrowsing), Conf(logAccess, port), dir, LogAccess, nullConf, Response, serveDirectory, serveFile, ServerPartT, simpleHTTP)
+import Happstack.Server (asContentType, Browsing(EnableBrowsing), Conf(logAccess, port), dir, dirs, LogAccess, nullConf, Response, serveDirectory, serveFile, ServerPartT, simpleHTTP)
 import Happstack.Server.Internal.LogFormat (formatRequestCombined)
 import System.Directory (createDirectoryIfMissing)
 import System.FilePath as FilePath ((<.>), (</>))
@@ -55,9 +55,9 @@ ghcjsHandler mode package =
   msum $ [ foo ] ++ map servejs ["/lib.js", "/rts.js", "/lib1.js", "/out.js" ]
   where servejs fp = do
           liftIO $ logM "Server.hs/ghcjsHandler" ALERT $ "Serving now " ++ (basepath package </> fp)
-          dir fp $ serveFile (asContentType "application/javascript") $ (basepath package) </> fp
-        foo = dir "/index.html" $ do liftIO $ putStrLn "Server.hs/ghcjsHandler" >> putStrLn ("Serving / with "  ++ (basepath package </> "index.html"))
-                                     serveFile (asContentType "text/html") $ basepath package </> "index.html"
+          dirs fp $ serveFile (asContentType "application/javascript") $ (basepath package) </> fp
+        foo = dirs "/index.html" $ do liftIO $ putStrLn "Server.hs/ghcjsHandler" >> putStrLn ("Serving / with "  ++ (basepath package </> "index.html"))
+                                      serveFile (asContentType "text/html") $ basepath package </> "index.html"
         basepath p = 
           case mode of
             Production -> "/usr/bin" </> (p <.> "jsexe")
