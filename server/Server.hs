@@ -12,7 +12,9 @@ import System.Log.Handler.Simple (fileHandler, streamHandler)
 import System.Log.Logger (debugM, logM, Priority(ALERT, DEBUG, INFO), rootLoggerName, setHandlers, setLevel, updateGlobalLogger)
 --import StaticResources
 import EmbedGHCJS
-
+import EmbeddedPath
+import BootstrapModule 
+import PDFObjectModule 
 -- Currently, the routing is messed up.
 
 data LogMode

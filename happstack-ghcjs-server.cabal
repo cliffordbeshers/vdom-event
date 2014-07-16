@@ -16,9 +16,17 @@ Executable happstack-ghcjs-server
   Main-Is: Server.hs
   Build-Depends:
      base >=4.2 && <5,
+     blaze-html,
+     bytestring,
+     containers,
+     directory,
      directory,
      filepath,
+     file-embed,
      happstack-server,
      hslogger,
      mtl,
-     time
+     text,
+     time,
+     web-routes,
+     web-routes-th
