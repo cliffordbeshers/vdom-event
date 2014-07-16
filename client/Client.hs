@@ -1,3 +1,4 @@
+{- LANGUAGE OverloadedStrings -}
 module Main where
 
 -- import GHCJS.Concurrent
@@ -9,11 +10,15 @@ module Main where
 import GHCJS.DOM (webViewGetDomDocument, runWebGUI)
 import GHCJS.DOM.Document (documentGetBody)
 import GHCJS.DOM.HTMLElement (htmlElementSetInnerHTML)
+import ZipTree
+import AdminConsole (content)
 
-f n = replicate n ' '
+import Data.Text.Lazy as Text (Text, unpack)
+
+default(String)
 
 main = runWebGUI $ \ webView -> do
     Just doc <- webViewGetDomDocument webView
     Just body <- documentGetBody doc
-    putStrLn "Hello, world!"
-    htmlElementSetInnerHTML body ("<h1>Hello World.</h1>")
+    putStrLn "Hello, world blaze!"
+    htmlElementSetInnerHTML body $ unpack $ renderHtml content
