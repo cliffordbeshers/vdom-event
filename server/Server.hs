@@ -15,6 +15,7 @@ import EmbedGHCJS
 import EmbeddedPath
 import BootstrapModule 
 import PDFObjectModule 
+import LiveDevel
 -- Currently, the routing is messed up.
 
 data LogMode
