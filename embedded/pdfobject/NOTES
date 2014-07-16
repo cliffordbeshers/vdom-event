@@ -1,0 +1,6 @@
+
+pdfobject is a little javascript library that irons out some
+inconsistencies in the embedding of pdfs.  It looks around for Adobe
+Acrobat, etc.  The Chrome built-in viewer has broken parameter
+passing, I know.  Having something to smooth these bumps may be a good
+thing.
