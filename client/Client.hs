@@ -12,6 +12,8 @@ import GHCJS.DOM.Document (documentGetBody)
 import GHCJS.DOM.HTMLElement (htmlElementSetInnerHTML)
 import ZipTree
 import AdminConsole (content)
+import Text.Blaze.Html.Renderer.Text (renderHtml)
+import JavaScript.JQuery
 
 import Data.Text.Lazy as Text (Text, unpack)
 

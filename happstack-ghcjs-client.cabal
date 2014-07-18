@@ -29,6 +29,7 @@ Executable happstack-ghcjs-client
      containers,
      mtl,
      ghcjs-dom >= 0.0.7,
+     ghcjs-jquery,
      text
 
     -- Make sure ghcjs gets turned off if ghcjs-base is not avaialbe
