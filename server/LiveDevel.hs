@@ -25,11 +25,11 @@ import Data.ByteString.Char8 as B8 (unpack)
 default (String)
 
 -- TODO move this to a more sensible place.
-wysihtml5wrangler :: String
-wysihtml5wrangler = B8.unpack $(embedFile "Clckwrks/AVR3/wysihtml5wrangler.js")
-
 basepath :: FilePath
-basepath = "/home/beshers/alldarcs/src.seereason.com/appraisalscribe-unstable/Clckwrks/AVR3"
+basepath = "/home/beshers/alldarcs/src.seereason.com/appraisalscribe-unstable" </> "embedded/livedevel"
+
+wysihtml5wrangler :: String
+wysihtml5wrangler = B8.unpack $(embedFile (basepath </> "wysihtml5wrangler.js"))
 
 livedeveljs :: FilePath
 livedeveljs = basepath </> "livedevel.js"
