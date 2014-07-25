@@ -1,0 +1,9 @@
+#!/usr/bin/make -f
+
+DEB_CABAL_PACKAGE = happstack-ghcjs-client
+HC = ghcjs
+
+include /usr/share/cdbs/1/rules/debhelper.mk
+include /usr/share/cdbs/1/class/hlibrary.mk
+
+build/happstack-ghcjs-client:: build-ghc-stamp
