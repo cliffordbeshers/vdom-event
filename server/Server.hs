@@ -66,6 +66,10 @@ ghcjsHandler mode package =
             Production -> "/usr/bin" </> (p <.> "jsexe")
             Development -> "/home/beshers/alldarcs/src.seereason.com/happstack-ghcjs-client/dist/build/happstack-ghcjs-client" </> (p <.> "jsexe")
 
+zingHandler :: LogMode -> GHCJSPackageName -> ServerPartT IO Response
+zingHandler mode package =
+  dir "zing" $ application
+
 setupLogger :: FilePath -> LogMode -> IO ()
 setupLogger logDir m = do
     createDirectoryIfMissing True logDir
