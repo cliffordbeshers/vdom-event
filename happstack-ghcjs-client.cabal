@@ -22,6 +22,7 @@ Executable happstack-ghcjs-client
   Main-Is: Client.hs
   Buildable: True
   Build-Depends:
+     aeson,
      base >=4.2 && <5,
      blaze-builder,
      blaze-markup,
