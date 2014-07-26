@@ -22,20 +22,19 @@ import GHCJS.Foreign
 import GHCJS.Marshal
 import Data.Aeson.TH
 import Common
-
--- thetallguy: if you have an aeson FromJSON instance you can combine that with the 
--- FromJSRef instance for an aeson Value to build a FromJSRef instance for it
+import           Data.Default
 
 import Data.Text.Lazy as Text (Text, unpack)
 
-default(String)
+default(Text)
 
-foo :: ToJSRef v => v -> IO (JSRef v)
-foo v = toJSRef v
 
 main = runWebGUI $ \ webView -> do
     Just doc <- webViewGetDomDocument webView
     Just body <- documentGetBody doc
-    putStrLn "Hello, world blaze!"
-    foo $ MarshalMe 1 "hello"
+    putStrLn $ unpack "Hello, world blaze!"
+    foop
     htmlElementSetInnerHTML body $ unpack $ renderHtml content
+
+
+foop = ajax "/ajax" [] def

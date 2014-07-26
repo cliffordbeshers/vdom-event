@@ -21,12 +21,9 @@ import System.Directory
 import System.FilePath
 import Data.FileEmbed (embedFile)
 import Data.ByteString.Char8 as B8 (unpack)
+import BasePath
 
 default (String)
-
--- TODO move this to a more sensible place.
-basepath :: FilePath
-basepath = "/home/beshers/alldarcs/src.seereason.com/appraisalscribe-unstable" </> "embedded/livedevel"
 
 wysihtml5wrangler :: String
 wysihtml5wrangler = B8.unpack $(embedFile (basepath </> "wysihtml5wrangler.js"))

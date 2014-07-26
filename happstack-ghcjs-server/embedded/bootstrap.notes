@@ -1,0 +1,5 @@
+http://getbootstrap.com/2.3.2/
+unzip bootstrap-3.0.2-dist.zip 
+mv dist bootstrap
+darcs add -r bootstrap
+# few enough files that we can just add them all.

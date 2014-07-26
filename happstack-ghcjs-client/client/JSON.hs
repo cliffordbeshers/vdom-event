@@ -1,3 +1,7 @@
+-- thetallguy: if you have an aeson FromJSON instance you can combine that with the 
+-- FromJSRef instance for an aeson Value to build a FromJSRef instance for it
+
+
 10:51:20 PM) thetallguy: I believe I've found the pieces to do it, but it looks a little arduous, and I wondered if I'd missed a trick
 (10:53:53 PM) luite: thetallguy: if you have an aeson FromJSON instance you can combine that with the FromJSRef instance for an aeson Value to build a FromJSRef instance for it
 (10:54:31 PM) thetallguy: I don't see any deriving of the the To/FromJSon

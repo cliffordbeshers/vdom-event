@@ -28,6 +28,7 @@ Executable happstack-ghcjs-client
      blaze-markup,
      blaze-html,
      containers,
+     data-default,
      mtl,
      ghcjs-dom >= 0.0.7,
      ghcjs-jquery,
