@@ -1,0 +1,21 @@
+It turns out that there are a bunch of live projects forked from
+wysihtml5.  bootstrap-wysihtml5 adds nice formatting, but is now
+stale, still at bootstrap2.
+
+bootstrap3-wysihtml5 (https://github.com/schnawel007/bootstrap3-wysihtml5)
+and bootstrap3-wysihtml5-bower (https://github.com/Waxolunist/bootstrap3-wysihtml5-bower) seem alive.
+
+Choosing the latter, since it seems to have a lot of javascript
+packaging additions, which I don't need, but give me some confidence
+that the maintainer is active.
+
+Importing bootstrap3-wysihtml5-bower:
+
+- git clone https://github.com/Waxolunist/bootstrap3-wysihtml5-bower
+- mv bootstrap3-wysihtml5-bower  bootstrap3-wysihtml5-bower.git
+- cp -r bootstrap3-wysihtml5-bower/dist  bootstrap3-wysihtml5-bower
+- ACTUALLY, I COPIED ONLY bootstrap3-wysihtml5.all.min.js  bootstrap3-wysihtml5-bower.git/dist/bootstrap3-wysihtml5.css because the js has all the modules built in and I didn't want the minified css so I can debug stuff.
+- darcs add embedded/bootstrap3-wysihtml5-bower
+
+Now for the haskell wrapper.
+
