@@ -27,6 +27,7 @@ Executable happstack-ghcjs-client
      blaze-builder,
      blaze-markup,
      blaze-html,
+     bytestring >= 0.10,
      containers,
      data-default,
      mtl,

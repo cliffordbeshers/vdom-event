@@ -3,7 +3,7 @@ module Main where
 import Control.Monad as Monad (msum)
 import Control.Monad.Trans as Trans (liftIO)
 import Data.Time.Format (FormatTime(..))
-import Happstack.Server (asContentType, Browsing(EnableBrowsing), Conf(logAccess, port), dir, dirs, LogAccess, nullConf, Response, serveDirectory, serveFile, ServerPartT, simpleHTTP)
+import Happstack.Server
 import Happstack.Server.Internal.LogFormat (formatRequestCombined)
 import System.Directory (createDirectoryIfMissing)
 import System.FilePath as FilePath ((<.>), (</>))
@@ -50,8 +50,17 @@ handlers mode = do
        [ dir "/manifest.appcache" $ serveFile (asContentType "text/cache-manifest") "manifest.appcache"
        , dir "/favicon.ico" $ serveFile (asContentType "image/x-icon") "favicon.ico"
        , ghcjsHandler mode package
+       , ajaxHandler
        , serveDirectory EnableBrowsing [] "/home/beshers/alldarcs/src.seereason.com"
        ]
+
+ajaxHandler :: ServerPartT IO Response
+ajaxHandler = dirs "/ajax" $ h
+  where h = do
+          rq <- askRq 
+          liftIO $ print rq
+          ok $ toResponse "life model decoy"
+
 
 ghcjsHandler :: LogMode -> GHCJSPackageName -> ServerPartT IO Response
 ghcjsHandler mode package =
@@ -66,9 +75,9 @@ ghcjsHandler mode package =
             Production -> "/usr/bin" </> (p <.> "jsexe")
             Development -> "/home/beshers/alldarcs/src.seereason.com/happstack-ghcjs-client/dist/build/happstack-ghcjs-client" </> (p <.> "jsexe")
 
-zingHandler :: LogMode -> GHCJSPackageName -> ServerPartT IO Response
-zingHandler mode package =
-  dir "zing" $ application
+-- zingHandler :: LogMode -> GHCJSPackageName -> ServerPartT IO Response
+-- zingHandler mode package =
+--   dir "zing" $ application
 
 setupLogger :: FilePath -> LogMode -> IO ()
 setupLogger logDir m = do
