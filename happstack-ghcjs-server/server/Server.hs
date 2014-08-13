@@ -1,3 +1,4 @@
+{-# LANGUAGE ScopedTypeVariables #-}
 module Main where
 
 import Control.Monad as Monad (msum)
@@ -11,11 +12,13 @@ import System.IO (stdout)
 import System.Log.Handler.Simple (fileHandler, streamHandler)
 import System.Log.Logger (debugM, logM, Priority(ALERT, DEBUG, INFO), rootLoggerName, setHandlers, setLevel, updateGlobalLogger)
 --import StaticResources
+import Data.Aeson as Aeson (decode)
 import EmbedGHCJS
 import EmbeddedPath
 import BootstrapModule 
 import PDFObjectModule 
 import LiveDevel
+import Common
 -- Currently, the routing is messed up.
 
 data LogMode
@@ -59,6 +62,15 @@ ajaxHandler = dirs "/ajax" $ h
   where h = do
           rq <- askRq 
           liftIO $ print rq
+          let rqpath = foldr (</>) "" $ rqPaths rq
+          liftIO $ print rqpath
+          decodeBody (defaultBodyPolicy "/tmp/" 4096 4096 4096)
+          msgValue <- lookBS $ messageKey
+          let msg :: Maybe MarshalMe = decode msgValue
+          liftIO $ do
+            putStrLn "\n\n\nThe message is:"
+            print msg
+            putStrLn "\n\n\n"
           ok $ toResponse "life model decoy"
 
 

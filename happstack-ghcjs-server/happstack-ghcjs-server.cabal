@@ -15,6 +15,7 @@ Executable happstack-ghcjs-server
   Hs-Source-Dirs: server
   Main-Is: Server.hs
   Build-Depends:
+     aeson,
      base >=4.2 && <5,
      blaze-html,
      bytestring,

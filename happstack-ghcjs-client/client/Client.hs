@@ -39,10 +39,9 @@ default(Text)
 main = runWebGUI $ \ webView -> do
     Just doc <- webViewGetDomDocument webView
     Just body <- documentGetBody doc
-    putStrLn $ unpack $ tj $ MarshalMe 1 "one"
-    putStrLn $ unpack $ tj $ MarshalMe 2 "two"
-    ajaxJSON ajaxurl $ MarshalMe 1 "one"
-    putStrLn $ unpack $ tj $ MarshalMe 2 "two"
+    let message = MarshalMe 13 "thirteen"
+    putStrLn $ unpack $ tj $ message
+    ajaxJSON ajaxurl $ message
     return ()
 --    htmlElementSetInnerHTML body $ unpack $ renderHtml content
 
@@ -51,7 +50,7 @@ ajaxurl = "/ajax"
 
 
 ajaxJSON :: ToJSON a => T.Text -> a -> IO AjaxResult
-ajaxJSON url a = ajax url [("MarshalMe" :: Text, tj a)] def
+ajaxJSON url a = ajax url [(T.pack messageKey, tj a)] def
 
 tj :: ToJSON a => a -> T.Text
 tj = TE.decodeUtf8 . toStrict1 . A.encode 
