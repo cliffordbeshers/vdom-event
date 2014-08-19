@@ -12,7 +12,7 @@ build-type:     Custom
 data-dir: ""
 
 Executable happstack-ghcjs-server
-  Hs-Source-Dirs: server
+  Hs-Source-Dirs: server, /usr/share/happstack-ghcjs
   Main-Is: Server.hs
   Build-Depends:
      aeson,
