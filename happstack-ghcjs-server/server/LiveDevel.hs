@@ -26,7 +26,7 @@ import BasePath
 default (String)
 
 wysihtml5wrangler :: String
-wysihtml5wrangler = B8.unpack $(embedFile (basepath </> "wysihtml5wrangler.js"))
+wysihtml5wrangler = B8.unpack $(embedFile ("embedded/livedevel" </> "wysihtml5wrangler.js"))
 
 livedeveljs :: FilePath
 livedeveljs = basepath </> "livedevel.js"
