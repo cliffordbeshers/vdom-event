@@ -9,3 +9,96 @@ run the dom creation things in Admin console with bootstrap included.
 do all the pdf options and connect to dsf examples.
 
 ajax report lens element
+
+
+(11:45:46 AM) beshers@wave: feel like doing some packaging work?
+(11:45:58 AM) dsf: I feel like I am doing packaging work :-/
+(11:46:02 AM) beshers@wave: lol
+(11:46:27 AM) beshers@wave: well, I think I have some packaging work that will push appraisal/ghcjs off the launchpad
+(11:46:39 AM) dsf: great, I'm well positioned
+(11:46:55 AM) dsf: I pushed my rewrite of haskell-devscripts to Joachim
+(11:47:22 AM) beshers@wave: any cool features?
+(11:47:26 AM) beshers@wave: or just a cleanup?
+(11:47:53 AM) dsf: it supports ghcjs, fixes the ghcjs documentation, is "multi-compiler-ready"
+(11:48:20 AM) dsf: though I don't think Cabal is multi compiler ready
+(11:48:33 AM) dsf: that is, you have one package that builds the ghc and ghcjs libraries
+(11:48:44 AM) dsf: anyway, what do you need?
+(11:48:55 AM) beshers@wave: 2 secs
+(11:49:07 AM) dsf: new ghcjs packages coming up
+(11:49:46 AM) dsf: I'll be back in a couple of minutes too
+(11:57:26 AM) dsf: ok
+(11:57:50 AM) dsf: what's the scoop?
+(12:05:26 PM) beshers@wave: right, cabal is not multi compiler ready
+(12:05:57 PM) beshers@wave: check out happstack-ghcjs
+(12:06:07 PM) dsf: I can work around that
+(12:06:12 PM) dsf: ok
+(12:06:18 PM) beshers@wave: well, the question is how
+(12:06:25 PM) beshers@wave: I see two ways
+(12:06:35 PM) beshers@wave: you will see two subdirs
+(12:06:45 PM) beshers@wave: -client and -server, each with a cabal file
+(12:07:25 PM) beshers@wave: The former needs to build first and export    all.js, but also some haskell files
+(12:07:44 PM) beshers@wave: the haskell files will have conditional compilation based on ghcjs/ghc in them
+(12:08:05 PM) dsf: the handling of that stuff changed a bit with my new haskell-devscripts
+(12:08:11 PM) dsf: so should be easier
+(12:08:13 PM) beshers@wave: any javascript library referenced in the client will automatically be embedded into the server
+(12:08:27 PM) beshers@wave: so, two ways
+(12:08:51 PM) beshers@wave: 1:  two packages, -client exports files which are picked up by the server package
+(12:09:43 PM) beshers@wave: 2:  combine these into one package where the Setup.hs runs ghcjs first and then makes sure the files are available.
+(12:10:10 PM) dsf: sounds doable
+(12:10:22 PM) beshers@wave: I haven't quite nailed down the details all the files yet, but it kind of depends on whether we go with 1/2
+(12:10:36 PM) beshers@wave: does one sound better than the other to you?
+(12:11:00 PM) dsf: since they're in different repos two packages sound ok
+(12:11:21 PM) beshers@wave: same repo, two subdirs
+(12:11:28 PM) beshers@wave: but yes, they are designed to be separate
+(12:11:29 PM) dsf: oh right
+(12:11:37 PM) dsf: two cabal files
+(12:11:43 PM) beshers@wave: I tried two repos, it was impossible to keep in sync
+(12:11:50 PM) dsf: sure
+(12:12:00 PM) dsf: what is this server?
+(12:12:25 PM) beshers@wave: it's an example server using ghcjs and happstack
+(12:12:35 PM) dsf: ah
+(12:12:41 PM) beshers@wave: I tried putting it all into appraisalscribe and it was just a nightmare
+(12:12:54 PM) beshers@wave: too many unknowns
+(12:13:02 PM) beshers@wave: but this is starting to look really nice
+(12:13:29 PM) beshers@wave: the basics of client/server communication with Haskell types is there.
+(12:13:41 PM) dsf: so the server just needs to provide the result of building that executable with ghcjs
+(12:13:51 PM) dsf: and a debian package name
+(12:14:02 PM) beshers@wave: and the haskell source files
+(12:14:08 PM) beshers@wave: at least some of them
+(12:14:11 PM) beshers@wave: look at Common.hs
+(12:14:22 PM) beshers@wave: same data structures get used on client and server
+(12:14:34 PM) dsf: ah
+(12:15:01 PM) beshers@wave: the client says     ajax  MarshalMe and the server has an sp that decodes the MarshalMe
+(12:15:27 PM) dsf: ok, I will package
+(12:15:34 PM) beshers@wave: so there will be two master types,  ApplicationRequest, Application Response
+(12:15:53 PM) beshers@wave: and all the talk will be just elements of those types
+(12:16:00 PM) dsf: nice
+(12:17:03 PM) beshers@wave: the server will also know about jquery, bootstrap, etc., embed the ones that are referenced in the client code and serve them at a url determined by the module name.
+(12:17:18 PM) beshers@wave: that will be a wee bit of TH I will have you do as well.
+(12:17:40 PM) beshers@wave: so the packaging will not need to have that huge list of data files that always get misplaced on the server
+(12:18:51 PM) beshers@wave: i'm about to pull in the manifest code, which will ensure, with some more client side work, that the users never have to reload when we update the server
+(12:19:12 PM) beshers@wave: that will get rid of about 50% of our mysterious errors
+(12:19:18 PM) dsf: sounds nice!
+(12:19:38 PM) beshers@wave: after we settle on the packaging, then you and jeremy work on running processes in the background
+(12:20:00 PM) beshers@wave: so, instead of Request --- wait for pdf to build -- Response
+(12:20:42 PM) beshers@wave: we want Request Response "build started id#"   Request "build id#"  Response "50%", etc.
+(12:20:56 PM) beshers@wave: that's like another 25% of our mysterious failures
+(12:21:21 PM) dsf: yeah
+(12:21:42 PM) beshers@wave: Then, lenses that can cope with failure, and an error box in the UI.
+(12:22:09 PM) beshers@wave: that error box will include whether server communications failed or not.
+(12:22:16 PM) beshers@wave: Another big source of mystery
+(12:23:21 PM) beshers@wave: that covers the big failures we have that cause panic on our side and confusion on theirs.
+(12:23:27 PM) dsf: indeed
+(12:23:36 PM) dsf: we should take this to public
+(12:23:39 PM) beshers@wave: and it basically means that after that...
+(12:23:40 PM) dsf: too late
+(12:23:59 PM) beshers@wave: ...we have a generic application server
+(12:24:10 PM) dsf: 100 haskell
+(12:24:11 PM) dsf: sweet
+(12:24:13 PM) beshers@wave: I'm saving it and writing it up in a tex file
+(12:24:28 PM) beshers@wave: so that happstack-ghcjs will have a documented structure
+(12:24:33 PM) beshers@wave: 'cause it's bloody complicated
+(12:24:45 PM) dsf: heh
+(12:24:59 PM) beshers@wave: but I have verified that when it is done right, the web apps work much better
+(12:25:27 PM) beshers@wave: so that's what's happening this week
+
