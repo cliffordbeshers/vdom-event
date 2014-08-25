@@ -10,6 +10,9 @@ category: Web
 Cabal-version:  >= 1.9
 build-type:     Custom
 data-dir: ""
+data-files:
+    client/Common.hs
+    client/Client.hs
 
 flag ghcjs
     description: Tell cabal we are using ghcjs (work around until hackage supports impl(ghcjs))
