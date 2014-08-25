@@ -1,3 +1,4 @@
+-- requires autobuilder-seereason
 import Debian.Debianize
 import Debian.AutoBuilder.Details.Atoms (seereasonDefaultAtoms)
 import Debian.Relation (BinPkgName(..), Relation(Rel))
