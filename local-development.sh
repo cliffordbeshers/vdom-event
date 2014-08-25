@@ -11,7 +11,7 @@ set -x
 )
 
 ( cd happstack-ghcjs-server
-  cabal -f local-development configure
+  cabal configure -f local-development
   cabal build
   cabal run
 )
