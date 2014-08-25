@@ -8,4 +8,5 @@ import System.FilePath
 -- reloaded for development.
 
 basepath :: FilePath
-basepath = "/home/beshers/alldarcs/src.seereason.com/happstack-ghcjs/happstack-ghcjs-server" </> "embedded/livedevel"
+basepath = "embedded/livedevel"
+-- "/home/beshers/alldarcs/src.seereason.com/happstack-ghcjs/happstack-ghcjs-server" </> 
