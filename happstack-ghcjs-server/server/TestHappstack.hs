@@ -1,4 +1,4 @@
-{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TemplateHaskell #-}
 module Main where
 
 import Control.Monad as Monad (msum)
@@ -10,6 +10,11 @@ import System.Directory (createDirectoryIfMissing)
 import System.FilePath as FilePath ((<.>), (</>))
 import System.IO (stdout)
 import Data.Aeson as Aeson (decode)
+import Manifest
+import Template
+import Data.Text as Text
+import Data.FileEmbed
+import Data.ByteString as B (ByteString)
 
 debugM x y = putStr x >> putStr ":" >> putStrLn y
 
@@ -22,18 +27,33 @@ main = do
 
 
 handlers :: ServerPartT IO Response
-handlers = msum 
-           [ nullDir >> ok (toResponse ("plain text" ++ ":" ++ "nullDir"))
-           , dirs "index.html" $ ok (toResponse ("plain text" ++ ":" ++ "/index.html"))
-           , notFound (toResponse ("plain text" ++ ":" ++ "notFound"))
-           ]
+handlers = msum [ rootHandler
+                , manifestHandler [ WSE $ Text.pack "/manifest.appcache" 
+                                  , WSE $ Text.pack "index.html"
+                                  , WSE $ Text.pack "favicon.ico"
+                                  ]
+                , faviconHandler favicon
+                , notFound (toResponse ("plain text" ++ ":" ++ "notFound"))
+                ]
 
--- handlers :: ServerPartT IO Response
--- handlers = do
--- --  path (\s -> ok (toResponse $ show ("plain text", ("path", fromReqURI s :: Maybe String))))
--- --  nullDir >> ok (toResponse ("plain text" ++ ":" ++ "nullDir"))
--- --  anyPath $ ok (toResponse ("plain text" ++ ":" ++ "anyPath"))
---   notFound (toResponse ("plain text" ++ ":" ++ "notFound"))
---   trailingSlash >> ok (toResponse ("plain text" ++ ":" ++ "trailingSlash"))
---   noTrailingSlash >> ok (toResponse ("plain text" ++ ":" ++ "noTrailingSlash"))
---   ok $ toResponse "just plain text"
+
+application = htmlTemplate (Text.pack "Test Happstack") [] []
+
+rootHandler :: ServerPartT IO Response
+rootHandler = msum [ nullDir >> ok (toResponse application)
+                   , dirs "index.html" $ ok (toResponse application)
+                   ]
+
+manifestHandler :: WS -> ServerPartT IO Response
+manifestHandler ws = dirs "manifest.appcache" $ ok $ setMimeType $ toResponse (genManifest ws)
+  where setMimeType = setHeader "Content-Type" manifestMimeType
+        manifestMimeType = "text/cache-manifest"
+
+favicon :: B.ByteString
+favicon = $(embedFile "server/favicon.ico")
+
+faviconHandler :: B.ByteString -> ServerPartT IO Response
+faviconHandler favicon = dirs "/favicon.ico" $ ok $ setMimeType $ toResponse favicon
+  where setMimeType = setHeader "Content-Type" manifestMimeType
+        manifestMimeType = "text/cache-manifest"
+
