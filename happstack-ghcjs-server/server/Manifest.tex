@@ -1,0 +1,21 @@
+http://www.html5rocks.com/en/tutorials/appcache/beginner/
+
+The manifest lists all the resources that are needed for offline
+execution.
+
+I want to use the same mechanism to ensure that the application
+reloads when the server updates.
+
+For now, I will turn off caching for the url /manifest.cache so that
+the browser is forced to go back for it.
+
+http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.9
+
+
+-- This code is buggy.  getCurrentTime is only run if *THIS MODULE IS RECOMPILED.*
+-- In order to ensure that it is updated for every run, we have to touch this source file.
+-- The correct answer is to append the checksums of every file as a comment to it's reference in the manifest.
+
+buildDate :: Text
+buildDate = Text.pack $(runIO getCurrentTime >>= lift . show)
+
