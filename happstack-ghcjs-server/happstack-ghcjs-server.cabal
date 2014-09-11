@@ -40,6 +40,7 @@ Executable happstack-ghcjs-server
      happstack-server,
      hslogger,
      mtl,
+     network,
      network-uri,
      text,
      template-haskell,
