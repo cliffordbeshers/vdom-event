@@ -38,6 +38,7 @@ Executable happstack-ghcjs-server
      mtl,
      network-uri,
      text,
+     template-haskell,
      th-lift,
      time,
      web-routes,
