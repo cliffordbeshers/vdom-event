@@ -29,6 +29,7 @@ Executable happstack-ghcjs-server
      blaze-html,
      bytestring,
      containers,
+     cryptohash,
      directory,
      filepath,
      file-embed,
