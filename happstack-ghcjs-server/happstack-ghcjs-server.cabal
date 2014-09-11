@@ -24,6 +24,7 @@ Executable happstack-ghcjs-server
   Main-Is: Server.hs
   GHC-options: -threaded -O2 -Wall -Wwarn -fno-warn-name-shadowing -fno-warn-type-defaults
   Extensions:
+    PackageImports,
     TemplateHaskell
   Build-Depends:
      aeson,
