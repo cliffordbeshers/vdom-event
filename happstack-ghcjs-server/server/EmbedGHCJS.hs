@@ -12,8 +12,7 @@ type GHCJSPackageName = String
 
 ghcjsHandler :: LogMode -> GHCJSPackageName -> ServerPartT IO Response
 ghcjsHandler mode package = do
-  dirs "/"
-  msum $ [ foo ] ++ map servejs ["/lib.js", "/rts.js", "/lib1.js", "/out.js" ]
+  dirs "/" $  msum $ [ foo ] ++ map servejs ["/lib.js", "/rts.js", "/lib1.js", "/out.js" ]
   where servejs fp = do
           liftIO $ logM "Server.hs/ghcjsHandler" ALERT $ "Serving now <<<" ++ (basepath' package </> fp) ++ ">>>"
           dirs fp $ serveFile (asContentType "application/javascript") $ (basepath' package) </> fp
