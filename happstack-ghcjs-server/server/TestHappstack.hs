@@ -14,7 +14,11 @@ import Manifest
 import Template
 import Data.Text as Text
 import Data.FileEmbed
-import Data.ByteString as B (ByteString)
+import qualified Data.ByteString as B
+
+import qualified Text.Blaze.Html5 as H (body, div, docTypeHtml, head, link, meta, title, toMarkup)
+import qualified Text.Blaze.Html5.Attributes as HA (content, href, httpEquiv, manifest, rel, type_)
+import Text.Blaze.Html.Renderer.Utf8  (renderHtml)
 
 debugM x y = putStr x >> putStr ":" >> putStrLn y
 
@@ -28,16 +32,15 @@ main = do
 
 handlers :: ServerPartT IO Response
 handlers = msum [ rootHandler
-                , manifestHandler [ WSE $ Text.pack "/manifest.appcache" 
-                                  , WSE $ Text.pack "index.html"
-                                  , WSE $ Text.pack "favicon.ico"
+                , manifestHandler [ WSE (Text.pack "index.html") (toStrict1 $ renderHtml application)
+                                  , WSE (Text.pack "favicon.ico") favicon
                                   ]
                 , faviconHandler favicon
                 , notFound (toResponse ("plain text" ++ ":" ++ "notFound"))
                 ]
 
 
-application = htmlTemplate (Text.pack "Test Happstack") [] []
+application = htmlTemplate (Text.pack "Test Happstack") [] [H.div $ H.toMarkup "Hello, world! Foo!"]
 
 rootHandler :: ServerPartT IO Response
 rootHandler = msum [ nullDir >> ok (toResponse application)
@@ -45,8 +48,11 @@ rootHandler = msum [ nullDir >> ok (toResponse application)
                    ]
 
 manifestHandler :: WS -> ServerPartT IO Response
-manifestHandler ws = dirs "manifest.appcache" $ ok $ setMimeType $ toResponse (genManifest ws)
-  where setMimeType = setHeader "Content-Type" manifestMimeType
+manifestHandler ws = dirs "manifest.appcache" $ ok $ setHeaders $ toResponse (genManifest ws)
+  where setHeaders = setMimeType . setCache . setExpires
+        setMimeType = setHeader "Content-Type" manifestMimeType
+        setCache = setHeader "Cache-Control" "no-cache"
+        setExpires = setHeader "Expires" "Thu, 01 Dec 1994 16:00:00 GMT" -- In the past, so instantly expires.
         manifestMimeType = "text/cache-manifest"
 
 favicon :: B.ByteString

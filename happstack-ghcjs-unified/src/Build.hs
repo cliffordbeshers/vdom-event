@@ -1,6 +1,22 @@
-{-# LANGUAGE ScopedTypeVariables #-}
-module Main where
+{-# LANGUAGE CPP #-}
 
+#ifdef ghcjs_HOST_OS
+#define SERVER 0
+#define CLIENT 1
+#else
+#define SERVER 1
+#define CLIENT 0
+#endif
+
+#if CLIENT
+import GHCJS.DOM (webViewGetDomDocument, runWebGUI)
+
+import WebImport
+import WebImport.JQuery
+import WebImport.Bootstrap
+#endif
+
+#if SERVER
 import Control.Monad as Monad (msum)
 import Control.Monad.Trans as Trans (liftIO)
 import Data.Time.Format (FormatTime(..))
@@ -11,22 +27,37 @@ import System.FilePath as FilePath ((<.>), (</>))
 import System.IO (stdout)
 import System.Log.Handler.Simple (fileHandler, streamHandler)
 import System.Log.Logger (debugM, logM, Priority(ALERT, DEBUG, INFO), rootLoggerName, setHandlers, setLevel, updateGlobalLogger)
---import StaticResources
-import Data.Aeson as Aeson (decode)
-import EmbedGHCJS
-import EmbeddedPath
-import BootstrapModule 
-import PDFObjectModule 
+
 import LiveDevel
-import LogType
-import Common
--- Currently, the routing is messed up.
+
+#endif
+
+
+#if SERVER
+data LogMode
+    = Production
+    | Development
+    deriving (Read, Show, Eq, Ord, Enum, Bounded)
+#endif
+
+main = 
+#if CLIENT
+  runWebGUI $ \ webView -> do
+    putStrLn "ghcjs_HOST_OS"
+#else
+  putStrLn "ghc_HOST_OS"
+#endif
+
+#if SERVER
+logMAccess' :: FormatTime t => LogAccess t
+logMAccess' host user time requestLine responseCode size referer userAgent =
+    logM "SimpleServer" DEBUG $ formatRequestCombined host user time requestLine responseCode size referer "" -- userAgent
 
 application :: GHCJSPackageName
-application = "ghcjs-dom-hello"
+application = "happstack-ghcjs"
 
-main :: IO ()
-main = do
+serverMain :: IO ()
+serverMain = do
   -- stdoutLog <- streamHandler stdout DEBUG
   updateGlobalLogger application (setLevel DEBUG)
   debugM application "Global logger started at level DEBUG."
@@ -36,39 +67,6 @@ main = do
   setupLogger logDir Development
   logM "Main.hs" ALERT $ "Setting logging directory to be top directory (" ++ logDir ++ ") "
   simpleHTTP (nullConf { port = p, logAccess = Just logMAccess' }) $ handlers Development
-  
-handlers :: LogMode -> ServerPartT IO Response
-handlers mode = do
-  let package = "happstack-ghcjs-client"
-  -- liftIO $ logM "Server.hs/handlers" ALERT $ "Serving " ++ package
-  msum $ -- staticResourceParts "/static" ++
-       [ dir "/manifest.appcache" $ serveFile (asContentType "text/cache-manifest") "manifest.appcache"
-       , dir "/favicon.ico" $ serveFile (asContentType "image/x-icon") "favicon.ico"
-       , ghcjsHandler mode package
-       , ajaxHandler
---       , serveDirectory EnableBrowsing [] "/home/beshers/alldarcs/src.seereason.com"
-       ]
-
-ajaxHandler :: ServerPartT IO Response
-ajaxHandler = dirs ajaxURL $ h
-  where h = do
-          rq <- askRq 
-          liftIO $ print rq
-          let rqpath = foldr (</>) "" $ rqPaths rq
-          liftIO $ print rqpath
-          decodeBody (defaultBodyPolicy "/tmp/" 4096 4096 4096)
-          msgValue <- lookBS $ messageKey
-          let msg :: Maybe MarshalMe = decode msgValue
-          liftIO $ do
-            putStrLn "\n\n\nThe message is:"
-            print msg
-            putStrLn "\n\n\n"
-          ok $ toResponse "life model decoy"
-
-
--- zingHandler :: LogMode -> GHCJSPackageName -> ServerPartT IO Response
--- zingHandler mode package =
---   dir "zing" $ application
 
 setupLogger :: FilePath -> LogMode -> IO ()
 setupLogger logDir m = do
@@ -92,3 +90,8 @@ setupLogger logDir m = do
           -- Access Log
           updateGlobalLogger "Happstack.Server.AccessLog.Combined"
             (setLevel INFO . setHandlers [accessLog])
+#endif
+
+--  do JQuery{..} <- wimport jQuery
+     
+   

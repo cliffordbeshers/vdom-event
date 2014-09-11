@@ -4,9 +4,11 @@ module Template (WebImport(..), htmlTemplate) where
 
 import Prelude as P
 import Data.Text (Text)
-import Text.Blaze.Html5 ((!), Markup, toMarkup)
+import Text.Blaze.Html5 ((!), Markup, toMarkup, toValue)
 import qualified Text.Blaze.Html5 as H (body, docTypeHtml, head, link, meta, title)
-import qualified Text.Blaze.Html5.Attributes as HA (content, href, httpEquiv, rel, type_)
+import qualified Text.Blaze.Html5.Attributes as HA (content, href, httpEquiv, manifest, rel, type_)
+import Favicon
+import Manifest (manifestURL)
 
 default (Text)
 
@@ -23,17 +25,10 @@ htmlTemplate :: Text       -- ^ title , cannot contain markup.
                 -> [Markup]  -- ^ contents to put inside \<body\> 
                 -> Markup
 htmlTemplate title imports bodies =  do 
-  H.docTypeHtml $ do
+  H.docTypeHtml ! HA.manifest (toValue manifestURL) $ do
       H.head $ do
         H.meta ! HA.httpEquiv "Content-Type" ! HA.content "text/html; charset=UTF-8"
-        H.link 
-          ! HA.rel "shortcut icon" 
-          ! HA.href "/favicon.ico" 
-          ! HA.type_ "image/x-icon"
-        H.link 
-          ! HA.rel "icon" 
-          ! HA.href "/favicon.ico" 
-          ! HA.type_ "image/x-icon"
+        faviconMarkup
         sequence_ $ headers imports
         H.title (toMarkup title)
       H.body $ do sequence_ bodies

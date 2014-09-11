@@ -9,6 +9,15 @@
 module Common where
 import Data.Aeson
 import GHC.Generics
+import Data.Text as T (Text, unpack, pack)
+
+
+ajaxURL :: String
+ajaxURL = "/ajax"
+
+ajaxURLT :: T.Text 
+ajaxURLT = T.pack ajaxURL
+
 
 
 data MarshalMe = MarshalMe { i :: Int, s :: String } deriving (Eq, Generic, Read, Show)

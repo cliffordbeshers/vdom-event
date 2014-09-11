@@ -41,12 +41,8 @@ main = runWebGUI $ \ webView -> do
     Just body <- documentGetBody doc
     let message = MarshalMe 13 "thirteen"
     putStrLn $ unpack $ tj $ message
-    ajaxJSON ajaxurl $ message
-    return ()
---    htmlElementSetInnerHTML body $ unpack $ renderHtml content
-
-ajaxurl :: T.Text 
-ajaxurl = "/ajax"
+    ajaxJSON ajaxURLT $ message
+    return () -- htmlElementSetInnerHTML body $ unpack $ renderHtml content
 
 
 ajaxJSON :: ToJSON a => T.Text -> a -> IO AjaxResult
