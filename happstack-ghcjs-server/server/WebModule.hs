@@ -3,7 +3,7 @@
 module WebModule where
 
 import Data.Text as T
-import "network" Network.URI
+import "network-uri" Network.URI
 import Text.Blaze.Html5 as H
 import qualified Text.Blaze.Html5.Attributes as HA (href, rel, src, type_)
 import Text.Blaze.Html.Renderer.Utf8  (renderHtml)

@@ -23,7 +23,7 @@ import Data.Time.Clock (getCurrentTime, UTCTime)
 
 import Language.Haskell.TH
 import Language.Haskell.TH.Lift
-import "network" Network.URI
+import "network-uri" Network.URI
 import EmbedURI (embedRelativeURI)
 import WebModule
 

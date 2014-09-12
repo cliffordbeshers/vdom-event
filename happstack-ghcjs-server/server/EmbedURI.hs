@@ -6,7 +6,7 @@ import Data.List (intercalate)
 import Data.Maybe (fromJust)
 import Language.Haskell.TH.Lift
 import Language.Haskell.TH
-import "network" Network.URI
+import "network-uri" Network.URI
 
 $(deriveLift ''URIAuth)
 $(deriveLift ''URI)
