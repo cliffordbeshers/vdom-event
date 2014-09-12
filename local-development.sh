@@ -5,10 +5,10 @@
 
 set -x
 
-( cd happstack-ghcjs-client
-  cabal --ghcjs configure
-  cabal build
-)
+# ( cd happstack-ghcjs-client
+#  cabal --ghcjs configure
+#  cabal build
+# )
 
 ( cd happstack-ghcjs-server
   cabal configure -f local-development

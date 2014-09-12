@@ -26,9 +26,12 @@ import Language.Haskell.TH.Lift
 import "network-uri" Network.URI
 import EmbedURI (embedRelativeURI)
 import WebModule
+import Text.Blaze.Html5 as H (ToValue(..))
 
 default (Text)
 
+instance ToValue URI where
+  toValue = toValue . show
 
 type WS = WebModule
 data WSE = WSE URI B.ByteString | WSN URI | WS_FALLBACK URI URI
