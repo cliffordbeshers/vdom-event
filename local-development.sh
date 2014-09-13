@@ -5,13 +5,14 @@
 
 set -x
 
-# ( cd happstack-ghcjs-client
-#  cabal --ghcjs configure
-#  cabal build
-# )
+( cd happstack-ghcjs-client
+  rm -rf dist
+  runhaskell Setup.hs --ghcjs configure
+  runhaskell Setup.hs build
+)
 
 ( cd happstack-ghcjs-server
-  cabal configure -f local-development
-  cabal build
-  cabal run
+  runhaskell Setup.hs configure -f local-development
+  runhaskell Setup.hs build
+  runhaskell Setup.hs run
 )

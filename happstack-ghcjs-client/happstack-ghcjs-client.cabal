@@ -34,7 +34,7 @@ Executable happstack-ghcjs-client
      containers,
      data-default,
      mtl,
-     ghcjs-dom >= 0.0.7,
+     ghcjs-dom >= 0.1,
      ghcjs-jquery,
      text
 
