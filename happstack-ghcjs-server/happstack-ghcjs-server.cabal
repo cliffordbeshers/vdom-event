@@ -17,6 +17,10 @@ flag local-development
   Manual: True
 
 Executable happstack-ghcjs-server
+  if impl(ghcjs)
+     cpp-options: -DCLIENT
+  else 
+     cpp-options: -DSERVER
   if flag (local-development)
      Hs-Source-Dirs: server, ../happstack-ghcjs-client/client
   else

@@ -14,5 +14,6 @@ set -x
 ( cd happstack-ghcjs-server
   runhaskell Setup.hs configure -f local-development
   runhaskell Setup.hs build
-  runhaskell Setup.hs run
+  dist/build/happstack-ghcjs-server/happstack-ghcjs-server
+  # runhaskell Setup.hs run
 )
