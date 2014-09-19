@@ -8,4 +8,5 @@ main =
     where
       customize =
           do utilsPackageNameBase ~= Just "happstack-ghcjs-server"
+             sourceFormat ~= Just Native3
              buildDepends %= (++ [[Rel (BinPkgName "happstack-ghcjs-client") Nothing Nothing]])
