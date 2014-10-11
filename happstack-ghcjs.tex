@@ -102,3 +102,409 @@ ajax report lens element
 (12:24:59 PM) beshers@wave: but I have verified that when it is done right, the web apps work much better
 (12:25:27 PM) beshers@wave: so that's what's happening this week
 
+
+
+(10/01/2014 05:24:57 PM) beshers: but I got Path_Pair to convert to aeson
+(10/01/2014 05:25:35 PM) beshers: and the instance handles a b recursively
+(10/01/2014 05:25:55 PM) beshers: so we can send messages
+(10/01/2014 05:26:17 PM) david: such as?
+(10/01/2014 05:26:44 PM) beshers: Get|Set ReportID LensPath Value
+(10/01/2014 05:27:10 PM) david: oh, yeah - well that's what it does
+(10/01/2014 05:27:12 PM) beshers: there will be more in there, user, etc.
+(10/01/2014 05:27:35 PM) beshers: that message will be the primary communication
+(12:42:57 PM) david: So cliff, what are we doing with the path stuff?
+(12:43:35 PM) beshers: making edit messages
+(12:44:15 PM) beshers: from client to server and back, encoded with aeson
+(12:44:48 PM) david: where are we doing it?
+(12:46:28 PM) beshers: What's this? data Path_List a = Path_Elems
+(12:46:42 PM) beshers: appraisalscribe.git/LensAeson.hs for the first step
+(12:46:46 PM) david: ok
+(12:46:57 PM) david: it is a list, but...
+(12:47:54 PM) beshers: I just pushed some more
+(12:47:54 PM) david: yeah, its a list
+(12:48:41 PM) david: list of what, you might ask
+(12:49:14 PM) beshers: Actually, I think that is exactly the question
+(12:49:51 PM) david: possibly something that is only present in types we have
+migrated away from
+(12:50:05 PM) beshers: ?
+(12:50:24 PM) beshers: let's just consider a fixed type
+(12:51:00 PM) beshers: The lens must focus on one of a small number of types,
+things which are editable
+(12:51:37 PM) beshers: Right now, we made them all JSON, but that's really not
+the right thing.
+(12:52:20 PM) beshers: They should either by instance Dynamic or we make a
+message with a constructor for each type.
+(12:52:23 PM) david: generally when you saw a path type you created a path that
+focused on a single element
+(12:52:28 PM) beshers: I'm leaning towards the latter.
+(12:53:04 PM) david: to be more general I thought to generate both a path to
+the entire list and a path to the nth element
+(12:53:19 PM) beshers: yes, but the components of the report have different
+types: Text, Boolean, Image.
+(12:53:26 PM) beshers: ugh.
+(12:53:39 PM) beshers: two different things
+(12:54:54 PM) david: the type Path_List has a type parameter which is the path
+type of the list element, but it has a single constructor Path_Elems which
+represent the whole list regardless of the element type
+(12:55:03 PM) david: (not deprecated)
+(12:55:23 PM) beshers: the general case is an editor for a type a, with lenses
+a b1, a b2...
+(12:56:31 PM) david: yeah, not clear why there isn't another constructor for
+the list's nth element
+(12:56:34 PM) beshers: Right, I got that, a lens from the top (Report) to the
+list and another lens relative to the list
+(12:56:47 PM) beshers: but first...
+(12:56:57 PM) david: but then you might want a lens on a sublist too
+(12:57:03 PM) beshers: but first...
+(12:57:09 PM) david: ya
+(12:57:15 PM) beshers: we have an editor
+(12:57:28 PM) beshers: edits type Document
+(12:57:32 PM) beshers: just for generality
+(12:58:02 PM) david: ok
+(12:58:58 PM) beshers: we need a type DocumentElements = A a | B b | C c, for
+all valid lenses of type Lens Document a
+(12:59:13 PM) beshers: So, it could just by Dynamic
+(12:59:31 PM) beshers: I wrote this somewhere, called it Universe
+(12:59:57 PM) beshers: and it is the list of types that the client can make
+atomic widgets to edit.
+(01:00:06 PM) david: the template haskell code could do that too without
+Dynaimc
+(01:00:28 PM) beshers: Or we could do it with generics.
+(01:00:28 PM) david: in fact, I think maybe it does
+(01:00:37 PM) beshers: but the point is...
+(01:01:10 PM) beshers: we can write one send/receive message for all edits of
+Document.
+(01:02:18 PM) beshers: so there is one type data Edit = Edit user time Opcode
+LensPath...
+(01:02:30 PM) david: right
+(01:03:04 PM) beshers: so a user does something on the client.
+(01:03:20 PM) david: its like Path_Report_JSONText
+(01:03:46 PM) david: no wait
+**** Conversation with public@conference.chat.seereason.org at Thu 02 Oct 2014
+01:04:10 PM CDT on beshers@chat.seereason.org/Wave (jabber) ****
+(12:46:04 PM) david: ya
+(12:46:09 PM) beshers: we have an editor
+(12:46:23 PM) beshers: edits type Document
+(12:46:27 PM) beshers: just for generality
+(12:46:57 PM) david: ok
+(12:47:52 PM) beshers: we need a type DocumentElements = A a | B b | C c, for
+all valid lenses of type Lens Document a
+(12:48:07 PM) beshers: So, it could just by Dynamic
+(12:48:25 PM) beshers: I wrote this somewhere, called it Universe
+(12:48:51 PM) beshers: and it is the list of types that the client can make
+atomic widgets to edit.
+(12:49:00 PM) david: the template haskell code could do that too without
+Dynaimc
+(12:49:22 PM) beshers: Or we could do it with generics.
+(12:49:22 PM) david: in fact, I think maybe it does
+(12:49:31 PM) beshers: but the point is...
+(12:50:04 PM) beshers: we can write one send/receive message for all edits of
+Document.
+(12:51:12 PM) beshers: so there is one type data Edit = Edit user time Opcode
+LensPath...
+(12:51:24 PM) david: right
+(12:51:58 PM) beshers: so a user does something on the client.
+(12:52:15 PM) david: its like Path_Report_JSONText
+(12:52:40 PM) david: no wait
+(12:53:02 PM) david: wait!
+(01:04:28 PM) beshers: Control-W does not work well in the chat room
+(01:04:31 PM) david: heh
+(01:04:43 PM) beshers: That's just the lensPath
+(01:04:55 PM) beshers: it's more complicated than that.
+(01:05:05 PM) david: right
+(01:05:22 PM) beshers: ooh, thunderstorm
+(01:05:32 PM) david: lucky
+(01:05:34 PM) david: !
+(01:08:42 PM)stepcut left the room.
+(01:10:58 PM) beshers: sorry, windows
+(01:11:40 PM) beshers: so a user does something on the client that creates an
+edit event.
+(01:11:44 PM) beshers: it's either
+(01:11:57 PM) david: The ToLens class currently assumes that there is a single
+Lens a b for any pair of types a b
+(01:12:44 PM) david: I think I'm not caught up with you
+(01:12:54 PM) beshers: NewDocument uuid | DeleteDocument uuid | SomeOtherMeta
+uuid | Set uuid Lens UniversalValue
+(01:14:04 PM) beshers: That's basically what a structured editor does
+(01:19:42 PM) david: ok...
+(01:20:26 PM) beshers: but there are more things than Set as we have learned
+(01:20:41 PM) beshers: delete list element, permute list,etc.
+(01:20:54 PM) david: yes
+(01:21:37 PM) beshers: we have to express all of those as a single monomorphic
+type
+(01:22:10 PM) beshers: and it has to be versioned, SafeCopy
+(01:22:22 PM) david: ok
+(01:22:36 PM) beshers: so that it can be a) sent via JSON, b) stored in acid
+(01:23:00 PM) beshers: c) handled with a simple case statement
+(01:27:35 PM) beshers: so, any event that modifies a report gets a) stored
+immediately in local storage on the client, b) applied to the report copy on
+the client, c) resulting changes displayed on the client window, d) sent to the
+server, e) appended to the database of user events, f) applied to the master
+cache of the report *if possible*, g) responded to with a complex message about
+success, failure, other edits from other users, h) the response has other user
+edits which get appended to the edit list, then steps b,c done again.
+(01:28:20 PM) david: whew, yeah
+(01:28:25 PM) beshers: This week we have slaughtered 94 pigs, so we have plenty
+of fresh pork.
+(01:28:39 PM) beshers: UI meat sales mail
+(01:28:49 PM) david: heh
+(01:28:59 PM) beshers: so, that's complex
+(01:29:36 PM) beshers: but if all the operations that can be done on a report
+are handled by one type and one function, a DSL and an evaluator, if you
+will...
+(01:30:03 PM) beshers: ...then the rest of it is all much, much simplified.
+(01:30:40 PM) beshers: in v3 I tried to do it with polymorphism and that's just
+too damn hard.
+(01:30:57 PM) beshers: given that everything has to be serialized and stored.
+(01:31:19 PM) david: It seems to me the template haskell code could be extended
+to do this
+(01:31:19 PM) beshers: so, here's a question I keep getting stuck on.
+(01:32:03 PM) beshers: I'm fine with that, as long as the result is monomorphic
+(01:32:14 PM) beshers: at least on the first pass
+(01:32:50 PM) beshers: Things that go into an acid-state database need to be
+for sanities sake
+(01:32:59 PM) beshers: otherwise, you get runtime errors on restart
+(01:33:08 PM) david: need to be...
+(01:33:10 PM) beshers: we've had enough of those, I think.
+(01:33:19 PM) david: monomorphic?
+(01:33:21 PM) beshers: sanity's
+(01:33:22 PM) beshers: yes
+(01:33:30 PM) david: sure
+(01:33:38 PM) beshers: Also, decoded.
+(01:33:46 PM) david: what is the question you keep getting stuck on?
+(01:34:15 PM) beshers: for example, right now some acid events have json in
+them that fails on restart.
+(01:34:36 PM) david: fails?
+(01:34:37 PM) beshers: how to organize the acid-state database of user events
+(01:35:22 PM) beshers: yeah, if user tries to delete something that is already
+deleted, the lens is corrupt and fails to decode
+(01:35:29 PM) beshers: bad
+(01:35:35 PM) beshers: not doing that again.
+(01:36:05 PM) beshers: so messages and their components all get encoded/decoded
+before being stored.
+(01:36:22 PM) beshers: and there is only one place where that happens.
+(01:37:09 PM) david: yes
+(01:37:11 PM) beshers: back to DB organization
+(01:37:32 PM) beshers: m users generating edits on n documents
+(01:38:22 PM) beshers: for every multi-user document, every request/response
+should find all edits from all users on that document since the last
+communication.
+(01:38:41 PM) beshers: so every message has current time and
+lasttimeIspoketotheserver
+(01:38:51 PM) beshers: Is that clear?
+(01:39:07 PM) david: yes
+(01:39:12 PM) beshers: so we're not shipping back and forth report elements,
+but rather operations on the report.
+(01:39:23 PM) david: yes
+(01:39:28 PM) beshers: and they get applied to the report on both sides by the
+same code.
+(01:39:44 PM) beshers: This allows for:
+(01:39:50 PM) beshers: infinite undo
+(01:40:05 PM) beshers: history/record keeping, including hours of billing
+(01:40:25 PM) beshers: wikipedia style tracking of who edited what
+(01:40:44 PM) beshers: the ability to flag fields modified since the last
+proofread or last visit
+(01:41:03 PM) beshers: conflict reporting
+(01:41:45 PM) beshers: so do you store edits by user?
+(01:41:59 PM) david: uh
+(01:42:03 PM) beshers: given that some edits create reports, it seems to be
+confusing to do it by report
+(01:42:21 PM) beshers: I think by user is the simplest
+(01:42:50 PM) beshers: It might not scale to a report with a million authors
+(01:42:54 PM) david: edits shall have a user attribute
+(01:42:59 PM) beshers: but that's twitter
+(01:43:32 PM) beshers: Yes, they must have that because we have to know who
+edited what
+(01:43:45 PM) david: and it shall be a key
+(01:44:01 PM) beshers: I think it's a table where user, report, time are keys
+(01:44:23 PM) beshers: yikees, I have to check for flooding
+(01:44:49 PM) david: our equivalent of a thunderstorm is a hot dry wind from
+the east :(
+(01:56:13 PM) beshers: yeah, we're getting all your rain
+(01:58:22 PM) david: so currently we have
+data Path_Report a
+= Path_Report_reportFolder (Path_FilePath a)
+| Path_Report_reportName (Path_Markup a)
+| Path_Report_reportDate (Path_Markup a)
+| Path_Report_reportContractDate (Path_Markup a)
+| Path_Report_reportInspectionDate (Path_Markup a)
+| Path_Report_reportEffectiveDate (Path_Markup a)
+| Path_Report_reportAuthors (Path_Authors a)
+| Path_Report_reportPreparer (Path_Markup a) ...
+(01:58:56 PM) david: we need a super path type that would be able to address,
+say one particular author
+(01:59:08 PM) beshers: So I propose we narrow 'a' to ReportLensTargetTypes
+(01:59:13 PM) beshers: or WebEditableTypes
+(01:59:15 PM) beshers: or something
+(02:00:12 PM) david: not sure about that
+(02:00:21 PM) david: not if we don't have to
+(02:00:24 PM) beshers: I suppose the real criteria are: ToJSON, FromJSON,
+ToACID whatever that is. and... caseable
+(02:01:00 PM) beshers: You don't have to change it there, you can make the
+messages more specific
+(02:01:10 PM) beshers: maybe
+(02:01:25 PM) david: then we have
+type Path_Authors a = Path_OMap AuthorID (Path_Author a)
+type Path_Authors_JSONText = Path_Authors Goal_JSONText
+type Path_Authors_Markup = Path_Authors Goal_Markup
+type Path_Authors_Report = Path_Authors Goal_Report
+type Path_Authors_ReportImages = Path_Authors Goal_ReportImages ...
+(02:01:39 PM) david: so a super path is a list of paths
+(02:02:06 PM) david: Path_Authors_Report looks bogus
+(02:02:09 PM) beshers: deriving instance (Generic a) => Generic (Path_Maybe a)
+instance (FromJSON a, Generic a) => FromJSON (Path_Maybe a)
+instance (ToJSON a, Generic a) => ToJSON (Path_Maybe a)
+
+(02:02:27 PM) beshers: that's what I did to create JSON instances
+(02:02:50 PM) beshers: There's one for *->*->* kinds as well
+(02:03:29 PM) david: not following
+(02:04:07 PM) beshers: look at LensAeson.hs
+(02:04:49 PM) beshers: I'm pretty sure that a should be changed to something
+monomorphic
+(02:04:59 PM) david: I see FromJSON and ToJSON instances
+(02:05:54 PM) david: I substitute concrete types in there, as you can see above
+- Path_Authors_JSONText, etc
+(02:06:27 PM) beshers: I think my point was, I don't need to know about lists
+of paths in the spine,
+(02:06:39 PM) david: spine
+(02:06:40 PM) david: ?
+(02:06:44 PM) beshers: yes, but that relies on decoding JSON after the fact
+(02:06:51 PM) beshers: and that is no longer allowed
+(02:07:12 PM) david: what's a spine? Explain about decoding JSON after the fact
+(02:07:36 PM) beshers: spine is generic haskell term for what you called super
+paths
+(02:07:41 PM) david: ok
+(02:07:54 PM) beshers: see Ralph Hinze's spine package
+(02:08:01 PM) beshers: but don't try to understand it....
+(02:08:17 PM) beshers: it's roughly what we have anyway
+(02:08:29 PM) beshers: re: JSON after the fact
+(02:09:08 PM) beshers: the lenses all have decodeJSON in them
+(02:09:12 PM) beshers: they should not
+(02:09:26 PM) david: in them?
+(02:09:33 PM) beshers: every lens should be applied to the report with the
+actual value
+(02:10:00 PM) beshers: yes, composed at the front of every lens is decodeJSON
+(02:10:09 PM) david: JSONText should not be a path goal type?
+(02:10:14 PM) beshers: correct
+(02:10:17 PM) david: got it
+(02:10:27 PM)stepcut [jeremy@chat.seereason.org/laptop] entered the room.
+(02:10:53 PM) beshers: The path should have a focus type of something that is
+actually in the report.
+(02:11:04 PM) beshers: normally, that means polymorphism
+(02:11:19 PM) beshers: but that makes the serialization a total pain
+(02:11:47 PM) beshers: so, then lenses themselves are polymorphic, that's fine
+(02:11:57 PM) beshers: but the paths and the contents of the messages must not
+be
+(02:12:17 PM) david: that sounds doable
+(02:12:59 PM) beshers: I also think...
+(02:13:08 PM) beshers: ...that we should have a ReportView type
+(02:13:26 PM) beshers: that strictly represents what the user can see/edit
+(02:14:03 PM) david: yes - I remember starting to put that into the old mimo
+package
+(02:14:21 PM) beshers: so all caching, computed stuff, goes elsewhere
+(02:14:46 PM) beshers: and a simple fold or traversal of the reportview gives
+you a reasonable representation of the whole thing
+(02:15:19 PM) beshers: so that adding and removing fields can be done for
+different templates without changing any of the control structures
+(02:15:58 PM) beshers: break
+(02:16:15 PM) david: ya
+(02:44:33 PM) stepcut: david: are you talking to yourself on the github
+commits?
+(02:45:01 PM) david: yes - I don't understand how or why that commit was
+created
+(02:48:42 PM) stepcut: you did a pull and then a push?
+(02:49:19 PM) stepcut: this is my guess -- you and cliff both pulled from the
+repo and made some modifications
+(02:49:26 PM) david: I tried to push, it said no, so then, yes, I pulled and
+then pushed
+(02:49:34 PM) stepcut:
+then cliff pushed this patch, https://github.com/seereason/appraisalscribe/
+commit/9e570b984df67588b43417ae6ea6a73c4217e780
+
+(02:49:46 PM) stepcut: then you tried to push a patch but were not up to date
+(02:49:58 PM) stepcut: so you pulled the head into your branch, merging it in,
+and then pushed that to the server
+(02:50:08 PM) stepcut: the merge gets its own patch
+(02:50:17 PM) stepcut: see isn't this much less confusing than darcs!
+(02:50:22 PM) david: ugh
+(02:50:35 PM) david: just unpleasant
+(02:50:38 PM) stepcut: now, if you wanted to avoid that extra patch then you
+should have done a rebase first to rebase your patch off of HEAD
+(02:51:07 PM) david: huh - ok
+(02:51:23 PM) stepcut: so simple and easy even linus could love it!
+(02:51:31 PM) david: don't be bitter
+(02:51:46 PM) david: :
+(02:51:47 PM) david: )
+(02:52:35 PM) stepcut: too late
+(02:52:59 PM) david: just need to fix git
+(02:54:01 PM) stepcut: yes.. and then switch linux over to being a microkernel
+and all will be good!
+(03:10:19 PM) david: in a backwards compatible way
+(03:16:04 PM) stepcut: the first step is convincing them that git is broken
+(03:17:02 PM) david: that sounds like a fool's errand
+(03:17:20 PM) david: just release an improved version where rebase is a no-op
+(03:20:16 PM) david: cliff: actually, the Path types we have now are spines
+(03:20:56 PM) david: just need to change the goal type to Markup or something
+(03:31:14 PM) stepcut: but the whole point of git is that pull and rebase are
+not the same -- they'd never accept it
+(03:36:29 PM) beshers: back.
+(03:36:41 PM) beshers: that spine import wasn't supposed to be in the patch
+(03:36:49 PM) beshers: I was just looking to compare
+(03:37:23 PM) beshers: re: don't be bitter -- TOO LATE!
+(03:38:26 PM) beshers: david: re: the Path types we have now are spines, good,
+then no work to do. Someday we could switch over if there was a benefit.
+(03:39:41 PM) beshers: how do I view the diff of a patch I just pulled?
+(03:41:12 PM) beshers: Is there some reason they print out all the noise about
+stuff that happens automatically...
+(03:41:28 PM) beshers: ...but hide the center of the checksum, which identifies
+the patch?
+(03:41:38 PM) beshers: 9e570b9..49109c2
+(03:42:32 PM) stepcut: git diff -1 perhaps?
+(03:43:24 PM) stepcut: no wait
+(03:44:13 PM) beshers: Git thinks of its data more like a set of snapshots of a
+mini filesystem. Every time you commit, or save the state of your project in
+Git, it basically takes a picture of what all your files look like at that
+moment and stores a reference to that snapshot.
+(03:44:34 PM) stepcut: I think you go to github and look at the patch there
+(03:44:36 PM) beshers: That's the first bit of info about git I've ever liked.
+(03:44:57 PM) beshers: haha, that's what I've done in the past
+(03:45:03 PM) beshers: but that's not a solution
+(03:47:09 PM) stepcut: git log -1 -p
+(03:47:27 PM) stepcut: to show the last patch
+(03:48:01 PM) stepcut: git log -2..-3 -p
+(03:48:18 PM) stepcut: that would show the second and third patches
+(separately)
+(03:51:48 PM) beshers: thanks
+(04:10:07 PM) beshers: github told me I had unread notifications with a little
+icon at the top. So I clicked it and got a page that said, you have no unread
+notifications
+(04:23:06 PM)david left the room (Replaced by new connection).
+(04:23:06 PM)david [david@chat.seereason.org/Garage] entered the room.
+(04:23:23 PM) david: efficiency!
+(04:54:45 PM) stepcut: I ordered some items on Amazon and selected 'no rush'
+for some of the groupings so I could get the $1 credit. Seems I will be getting
+the credit and those items are probably going to arrive in two days anyway
+(04:56:44 PM) stepcut: I really needed toilet paper -- but the chain lube could
+wait :)
+(05:01:46 PM) beshers: they aren't interchangeable?
+(05:02:52 PM) stepcut: hard to say
+(12:06:08 AM) beshers: git diff COMMIT^ COMMIT , where COMMIT is the checksum
+of the patchset
+(12:06:18 AM) beshers: of the commit, I guess.
+(12:06:28 AM) beshers: ^ indicates the ancestor.
+(12:52:47 AM) beshers: git diff -p COMMIT
+(05:35:20 AM)david left the room (Replaced by new connection).
+(05:35:23 AM)david [david@chat.seereason.org/Garage] entered the room.
+(06:18:03 AM) stepcut: I have an idea for a blog post titled: Do Repeat
+Yourself
+(06:18:51 AM) david: for the haskell community?
+(06:27:29 AM) david: ubuntu is broken:
+Do you want to continue [Y/n]? y
+E: Internal Error, No file name for libssl1.0.0
+(06:30:38 AM) david: dpkg --configure -a fixes it tho
+(06:55:24 AM) stepcut: yeah. Something about double entry book keeping and how
+putting type signatures on things even though the compiler could infer the type
+is still a good idea.
+(06:55:29 AM) stepcut: alas, I have other things to do :)
+(07:17:07 AM)The account has disconnected and you are no longer in this chat.
+You will be automatically rejoined in the chat when the account reconnects.
