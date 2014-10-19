@@ -1,0 +1,1 @@
+module GHCJSStub.Foreign  where

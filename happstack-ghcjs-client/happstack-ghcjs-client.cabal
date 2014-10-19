@@ -23,8 +23,14 @@ flag ghcjs
 Executable happstack-ghcjs-client
   Hs-Source-Dirs:  client
   Main-Is: Client.hs
+  if impl(ghcjs)
+     cpp-options: -DCLIENT
+  else 
+     cpp-options: -DSERVER
   Buildable: True
   cpp-options: -DCLIENT
+  if flag (ghcjs)
+     Build-Depends: ghcjs-base, ghcjs-dom >=0.1, ghcjs-jquery
   Build-Depends:
      aeson,
      base >=4.2 && <5,
@@ -35,10 +41,5 @@ Executable happstack-ghcjs-client
      containers,
      data-default,
      mtl,
-     ghcjs-dom >= 0.1,
-     ghcjs-jquery,
      text
-
-  if (ghcjs)
-     build-depends: ghcjs-base
 

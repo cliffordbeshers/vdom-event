@@ -10,6 +10,11 @@ import System.Log.Logger (debugM, logM, Priority(ALERT, DEBUG, INFO), rootLogger
 
 type GHCJSPackageName = String
 
+--rootHandler :: ServerPartT IO Response
+--rootHandler = msum [ nullDir >> ok (toResponse application)
+--                   , dirs "index.html" $ ok (toResponse application)
+--                   ]
+
 ghcjsHandler :: LogMode -> GHCJSPackageName -> ServerPartT IO Response
 ghcjsHandler mode package = do
   dirs "/" $  msum $ [ foo ] ++ map servejs ["/lib.js", "/rts.js", "/lib1.js", "/out.js" ]
