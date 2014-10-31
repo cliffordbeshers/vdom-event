@@ -1,8 +1,10 @@
+{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 module Main where
 
 import Control.Monad as Monad (msum)
 import Control.Monad.Trans as Trans (liftIO)
+import Data.Text as Text (Text, pack)
 import Data.Time.Format (FormatTime(..))
 import Happstack.Server
 import Happstack.Server.Internal.LogFormat (formatRequestCombined)
@@ -17,19 +19,32 @@ import EmbedGHCJS
 import EmbeddedPath
 import BootstrapModule 
 import PDFObjectModule 
+import Manifest
+import ManifestURL
+import Favicon
+import WebModule
 import LiveDevel
 import LogType
 import Common
+import Template
 -- Currently, the routing is messed up.
+import qualified Text.Blaze.Html5 as H (Markup, body, div, docTypeHtml, head, link, meta, title, toMarkup)
+import qualified Text.Blaze.Html5.Attributes as HA (content, href, httpEquiv, manifest, rel, type_)
+import Text.Blaze.Html.Renderer.Utf8  (renderHtml)
+import qualified Data.ByteString as B
+import Data.FileEmbed
 
-application :: GHCJSPackageName
-application = "ghcjs-dom-hello"
+applicationName :: GHCJSPackageName
+applicationName = "TestHappstack"
+
+application :: H.Markup
+application = htmlTemplate (Text.pack "Test Happstack") [] [H.div $ H.toMarkup "Hello, world! FooFooFooFoo!"]
 
 main :: IO ()
 main = do
   -- stdoutLog <- streamHandler stdout DEBUG
-  updateGlobalLogger application (setLevel DEBUG)
-  debugM application "Global logger started at level DEBUG."
+  updateGlobalLogger applicationName (setLevel DEBUG)
+  debugM applicationName "Global logger started at level DEBUG."
   let p = 8010
   debugM "SimpleServer" $ "Starting server on port " ++ show p
   let logDir = "_local"
@@ -43,11 +58,30 @@ handlers mode = do
   -- liftIO $ logM "Server.hs/handlers" ALERT $ "Serving " ++ package
   msum $ -- staticResourceParts "/static" ++
        [ dir "/manifest.appcache" $ serveFile (asContentType "text/cache-manifest") "manifest.appcache"
-       , dir "/favicon.ico" $ serveFile (asContentType "image/x-icon") "favicon.ico"
+       , manifestHandler [ wse "text/html" (Text.pack "index.html") (toStrict1 $ renderHtml application)
+                         , wse (Text.pack "favicon.ico") favicon
+                         ]
+       , rootHandler
+       , faviconHandler favicon
        , ghcjsHandler mode package
        , ajaxHandler
---       , serveDirectory EnableBrowsing [] "/home/beshers/alldarcs/src.seereason.com"
        ]
+
+rootHandler :: ServerPartT IO Response
+rootHandler = msum [ nullDir >> ok (toResponse application)
+                   , dirs "index.html" $ ok (toResponse application)
+                   ]
+
+
+
+-- manifestHandler :: WS -> ServerPartT IO Response
+manifestHandler ws = dirs "manifest.appcache" $ ok $ setHeaders $ toResponse (genManifest ws)
+  where setHeaders = setMimeType . setCache . setExpires
+        setMimeType = setHeader "Content-Type" manifestMimeType
+        setCache = setHeader "Cache-Control" "no-cache"
+        setExpires = setHeader "Expires" "Thu, 01 Dec 1994 16:00:00 GMT" -- In the past, so instantly expires.
+        manifestMimeType = "text/cache-manifest"
+
 
 ajaxHandler :: ServerPartT IO Response
 ajaxHandler = dirs ajaxURL $ h
@@ -92,3 +126,5 @@ setupLogger logDir m = do
           -- Access Log
           updateGlobalLogger "Happstack.Server.AccessLog.Combined"
             (setLevel INFO . setHandlers [accessLog])
+
+

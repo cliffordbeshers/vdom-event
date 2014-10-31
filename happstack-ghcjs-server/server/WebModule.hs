@@ -2,18 +2,34 @@
 {-# LANGUAGE PackageImports #-}
 module WebModule where
 
-import Data.Text as T
+import Control.Monad as Monad (mplus)
+import Data.Text as T (Text)
 import "network-uri" Network.URI
-import Text.Blaze.Html5 as H
-import qualified Text.Blaze.Html5.Attributes as HA (href, rel, src, type_)
+import Data.ByteString as B (ByteString) -- Force Strict
+import Text.Blaze.Html5 as H (Markup, ToValue(..), ToMarkup(..), link, (!), script, docTypeHtml, head, body)
+import qualified Text.Blaze.Html5.Attributes as HA (href, rel, src, type_, manifest)
 import Text.Blaze.Html.Renderer.Utf8  (renderHtml)
-import Data.ByteString as B -- Force Strict
+import Happstack.Server (ServerPartT, Response)
+import ModuleScopeURL
+import ManifestURL (manifestURL)
 
 default (T.Text)
 
+instance ToValue URI where
+  toValue = toValue . show
+
+type WS = WebModule
+data WSE = WSE URI B.ByteString | WSN URI | WS_FALLBACK URI URI
+
+wse mt u b = convert $ WebModule [WI mt u b]
+
+convert :: WebModule -> [WSE]
+convert (WebModule wis) = map cv wis
+  where cv (WI _ uri content) = WSE uri content
+
 data WebModule = WebModule [WebImport]
 
-data MimeType = MT_CSS | MT_Javascript
+data MimeType = MT_CSS | MT_Javascript| MT_HTML | MT_Favicon
 
 data WebImport = WI MimeType URI B.ByteString
 
@@ -23,3 +39,28 @@ instance ToMarkup WebImport where
   toMarkup (WI MT_Javascript uri content) =   
     H.script ! HA.type_ "text/javascript" ! HA.src (toValue . show $ uri) $ return ()
 
+
+
+data WebSite = WebSite { serverpart :: ServerPartT IO Response 
+                       , baseURL :: [ModuleScopeURL]
+                       , headMarkup :: Markup
+                       , bodyMarkup :: Markup
+                       , manifest :: [URI] -- ?
+                       }
+
+runWebSite :: WebSite -> ServerPartT IO Response
+runWebSite = serverpart
+
+wsum :: WebSite -> WebSite -> WebSite
+wsum a b = WebSite { serverpart = (serverpart a `mplus` serverpart b)
+                   , baseURL = baseURL a ++ baseURL b
+                   , headMarkup = headMarkup a >> headMarkup b
+                   , bodyMarkup = bodyMarkup a >> bodyMarkup b
+                   , manifest = []
+                   }
+
+homePage :: WebSite -> Markup
+homePage ws = 
+  H.docTypeHtml ! HA.manifest (toValue $ manifestURL) $ do
+    H.head (headMarkup ws)
+    H.body (bodyMarkup ws)

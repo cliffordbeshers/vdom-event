@@ -1,6 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE PackageImports #-}
-{-# LANGUAGE TemplateHaskell #-}
 
 -- Generate an html5 manifest file, a list of all resources
 -- to be cached (or not) for offline 
@@ -23,25 +22,11 @@ import Data.Time.Clock (getCurrentTime, UTCTime)
 
 import Language.Haskell.TH
 import Language.Haskell.TH.Lift
-import "network-uri" Network.URI
-import EmbedURI (embedRelativeURI)
+import Network.URI
 import WebModule
-import Text.Blaze.Html5 as H (ToValue(..))
+import ManifestURL (manifestURL)
 
 default (Text)
-
-instance ToValue URI where
-  toValue = toValue . show
-
-type WS = WebModule
-data WSE = WSE URI B.ByteString | WSN URI | WS_FALLBACK URI URI
-
-convert :: WebModule -> [WSE]
-convert (WebModule wis) = map cv wis
-  where cv (WI _ uri content) = WSE uri content
-
-manifestURL :: URI
-manifestURL = $(embedRelativeURI "/manifest.appcache")
 
 genManifest :: WS -> Text
 genManifest = genManifestChecksum

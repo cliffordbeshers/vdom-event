@@ -40,7 +40,7 @@ handlers = msum [ rootHandler
                 ]
 
 
-application = htmlTemplate (Text.pack "Test Happstack") [] [H.div $ H.toMarkup "Hello, world! Foo!"]
+application = htmlTemplate (Text.pack "Test Happstack") [] [H.div $ H.toMarkup "Hello, world! FooFooFooFoo!"]
 
 rootHandler :: ServerPartT IO Response
 rootHandler = msum [ nullDir >> ok (toResponse application)

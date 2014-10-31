@@ -8,7 +8,7 @@ import Text.Blaze.Html5 ((!), Markup, toMarkup, toValue)
 import qualified Text.Blaze.Html5 as H (body, docTypeHtml, head, link, meta, title)
 import qualified Text.Blaze.Html5.Attributes as HA (content, href, httpEquiv, manifest, rel, type_)
 import Favicon
-import Manifest (manifestURL)
+import ManifestURL (manifestURL)
 
 default (Text)
 
@@ -25,7 +25,7 @@ htmlTemplate :: Text       -- ^ title , cannot contain markup.
                 -> [Markup]  -- ^ contents to put inside \<body\> 
                 -> Markup
 htmlTemplate title imports bodies =  do 
-  H.docTypeHtml ! HA.manifest (toValue manifestURL) $ do
+  H.docTypeHtml ! HA.manifest (toValue $ show manifestURL) $ do
       H.head $ do
         H.meta ! HA.httpEquiv "Content-Type" ! HA.content "text/html; charset=UTF-8"
         faviconMarkup
