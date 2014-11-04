@@ -1,8 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE PackageImports #-}
+{-# LANGUAGE TemplateHaskell #-}
 module WebModule where
 
 import Control.Monad as Monad (mplus)
+import Control.Monad.Trans as Monad
 import Data.Text as T (Text)
 import "network-uri" Network.URI
 import Data.ByteString as B (ByteString) -- Force Strict
@@ -12,6 +14,7 @@ import Text.Blaze.Html.Renderer.Utf8  (renderHtml)
 import Happstack.Server (ServerPartT, Response)
 import ModuleScopeURL
 import ManifestURL (manifestURL)
+import Data.Lens.Template (nameMakeLens)
 
 default (T.Text)
 
@@ -28,6 +31,8 @@ convert (WebModule wis) = map cv wis
   where cv (WI _ uri content) = WSE uri content
 
 data WebModule = WebModule [WebImport]
+
+data WebModuleM
 
 data MimeType = MT_CSS | MT_Javascript| MT_HTML | MT_Favicon
 
@@ -47,6 +52,8 @@ data WebSite = WebSite { serverpart :: ServerPartT IO Response
                        , bodyMarkup :: Markup
                        , manifest :: [URI] -- ?
                        }
+
+$(nameMakeLens ''WebSite (Just . (++ "Lens")))
 
 runWebSite :: WebSite -> ServerPartT IO Response
 runWebSite = serverpart

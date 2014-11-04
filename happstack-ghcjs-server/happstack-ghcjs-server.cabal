@@ -38,6 +38,8 @@ Executable happstack-ghcjs-server
      bytestring,
      containers,
      cryptohash,
+     data-lens,
+     data-lens-template,
      directory,
      filepath,
      file-embed,

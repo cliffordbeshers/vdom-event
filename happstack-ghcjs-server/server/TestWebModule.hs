@@ -9,20 +9,22 @@ import WebModule
 import ModuleScopeURL
 
 faviconWebSite :: WebSite
-faviconWebSite = WebSite { serverpart = faviconHandler favicon
-                  , baseURL = [faviconURLMS]
-                  , headMarkup = toMarkup ""
-                  , bodyMarkup = toMarkup ""
-                  , manifest = []
-                  }
+faviconWebSite = 
+  WebSite { serverpart = faviconHandler favicon
+          , baseURL = [faviconURLMS]
+          , headMarkup = return ()
+          , bodyMarkup = return ()
+          , manifest = []
+          }
 
 home :: WebSite
-home = WebSite { serverpart = rootHandler $ toMarkup "Hello, world!"
-               , baseURL = []
-               , headMarkup = return ()
-               , bodyMarkup = return ()
-               , manifest = []
-               }
+home = 
+  WebSite { serverpart = rootHandler $ toMarkup "Hello, world!"
+          , baseURL = []
+          , headMarkup = return ()
+          , bodyMarkup = return ()
+          , manifest = []
+          }
 
 defaultHandler :: Markup -> ServerPartT IO Response
 defaultHandler m = nullDir >> ok (toResponse m)
