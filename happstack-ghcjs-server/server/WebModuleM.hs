@@ -1,8 +1,10 @@
 {-# LANGUAGE FlexibleContexts #-}
 module WebModuleM where
 
+import Control.Monad as Monad (mplus)
 import Control.Monad.RWS.Lazy
 import WebModule
+import Happstack.Server as Happstack (ServerPartT, Response)
 import Text.Blaze.Html5 (Markup)
 import Data.Lens.Strict
 
@@ -20,14 +22,14 @@ runfoo = runRWS foo  13 (5,7)
 modifyL :: MonadState s m => Lens s a -> (a -> a) -> m ()
 modifyL lens f = modify (modL lens f)
 
-putMarkup :: MonadState WebSite m => Lens WebSite Markup -> Markup -> m ()
-putMarkup lens markup = modifyL lens (>> markup)
+putServerPart :: MonadState WebSite m => ServerPartT IO Response -> m ()
+putServerPart sp = modifyL serverpartLens (`mplus` sp)
 
 putHead :: MonadState WebSite m => Markup -> m ()
-putHead = putMarkup headMarkupLens
+putHead markup = modifyL headMarkupLens (>> markup)
   
 putBody :: MonadState WebSite m => Markup -> m ()
-putBody = putMarkup bodyMarkupLens
+putBody markup = modifyL bodyMarkupLens (>> markup)
 
 wimport :: MonadState WebSite m => a ->  m a
 wimport a = do

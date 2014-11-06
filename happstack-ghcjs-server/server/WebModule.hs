@@ -32,7 +32,7 @@ convert (WebModule wis) = map cv wis
 
 data WebModule = WebModule [WebImport]
 
-data WebModuleM
+newtype WebModuleM = WebModuleM { unWebModule :: WebModule }
 
 data MimeType = MT_CSS | MT_Javascript| MT_HTML | MT_Favicon
 
