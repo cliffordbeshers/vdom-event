@@ -17,11 +17,21 @@ foo = do
 
 runfoo = runRWS foo  13 (5,7)
 
+modifyL :: MonadState s m => Lens s a -> (a -> a) -> m ()
+modifyL lens f = modify (modL lens f)
+
 putMarkup :: MonadState WebSite m => Lens WebSite Markup -> Markup -> m ()
-putMarkup lens markup = modify (modL lens (>> markup))
+putMarkup lens markup = modifyL lens (>> markup)
 
 putHead :: MonadState WebSite m => Markup -> m ()
 putHead = putMarkup headMarkupLens
   
 putBody :: MonadState WebSite m => Markup -> m ()
 putBody = putMarkup bodyMarkupLens
+
+wimport :: MonadState WebSite m => a ->  m a
+wimport a = do
+  ws <- get
+  putHead (headMarkup ws)
+  putBody (bodyMarkup ws)
+  return a
