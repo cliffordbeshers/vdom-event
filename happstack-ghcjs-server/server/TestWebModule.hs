@@ -6,6 +6,7 @@ import Happstack.Server
 import Text.Blaze.Html5 as H (Markup, toMarkup)
 import Favicon
 import WebModule
+import WebModuleM
 import ModuleScopeURL
 
 faviconWebSite :: WebSite
@@ -43,7 +44,10 @@ rootHandler m = msum [ defaultHandler m
 website :: WebSite
 website = home `wsum` faviconWebSite
 
+websiteM = return website
+
 main = do
   let p = 8010
   print ("Serving on localhost",p)
-  simpleHTTP (nullConf { port = p }) $ runWebSite website
+  sp <- runWebSiteM websiteM
+  simpleHTTP (nullConf { port = p }) $ sp
