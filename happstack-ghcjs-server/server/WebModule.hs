@@ -55,9 +55,6 @@ data WebSite = WebSite { serverpart :: ServerPartT IO Response
 
 $(nameMakeLens ''WebSite (Just . (++ "Lens")))
 
-runWebSite :: WebSite -> ServerPartT IO Response
-runWebSite = serverpart
-
 wsum :: WebSite -> WebSite -> WebSite
 wsum a b = WebSite { serverpart = (serverpart a `mplus` serverpart b)
                    , baseURL = baseURL a ++ baseURL b

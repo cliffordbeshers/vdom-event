@@ -2,6 +2,8 @@
 module WebModuleM where
 
 import Control.Monad as Monad (mplus)
+import Control.Monad.State
+import Control.Monad.Trans
 import Control.Monad.RWS.Lazy
 import WebModule
 import Happstack.Server as Happstack (ServerPartT, Response)
@@ -18,6 +20,8 @@ foo = do
 
 
 runfoo = runRWS foo  13 (5,7)
+
+type WebSiteM a = State WebSite a
 
 modifyL :: MonadState s m => Lens s a -> (a -> a) -> m ()
 modifyL lens f = modify (modL lens f)
@@ -37,3 +41,15 @@ wimport a = do
   putHead (headMarkup ws)
   putBody (bodyMarkup ws)
   return a
+  
+
+mzeroWebSite :: WebSite
+mzeroWebSite = WebSite { serverpart = mzero
+                       , baseURL = []
+                       , headMarkup = return ()
+                       , bodyMarkup = return ()
+                       , manifest = []
+                       }
+
+runWebSiteM :: State WebSite WebSite -> ServerPartT IO Response
+runWebSiteM m = serverpart $ evalState m mzeroWebSite
