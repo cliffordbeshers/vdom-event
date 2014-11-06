@@ -21,7 +21,7 @@ foo = do
 
 runfoo = runRWS foo  13 (5,7)
 
-type WebSiteM a = State WebSite a
+type WebSiteM = RWS () () WebSite
 
 modifyL :: MonadState s m => Lens s a -> (a -> a) -> m ()
 modifyL lens f = modify (modL lens f)
@@ -51,5 +51,5 @@ mzeroWebSite = WebSite { serverpart = mzero
                        , manifest = []
                        }
 
-runWebSiteM :: State WebSite WebSite -> ServerPartT IO Response
-runWebSiteM m = serverpart $ evalState m mzeroWebSite
+runWebSiteM :: WebSiteM a -> ServerPartT IO Response
+runWebSiteM m = let (_, s, _) = runRWS m () mzeroWebSite in serverpart s
