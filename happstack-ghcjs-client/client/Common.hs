@@ -19,7 +19,6 @@ ajaxURLT :: T.Text
 ajaxURLT = T.pack ajaxURL
 
 
-
 data MarshalMe = MarshalMe { i :: Int, s :: String } deriving (Eq, Generic, Read, Show)
 
 -- This will work when ghcjs gets upgraded.
