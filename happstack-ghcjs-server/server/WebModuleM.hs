@@ -1,4 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE TypeSynonymInstances #-}
 module WebModuleM where
 
 import Control.Monad as Monad (mplus)
@@ -21,7 +23,12 @@ foo = do
 
 runfoo = runRWS foo  13 (5,7)
 
-type WebSiteM = RWST () () WebSite
+newtype WebSiteM m a = WebSiteM { unWebSiteM :: RWST () () WebSite m a }
+
+
+instance Monad m => Monad (WebSiteM m) where
+  return = WebSiteM . return
+  a >>= b = WebSiteM $ unWebSiteM a >>= 
 
 modifyL :: MonadState s m => Lens s a -> (a -> a) -> m ()
 modifyL lens f = modify (modL lens f)
@@ -55,3 +62,15 @@ runWebSiteM :: Monad m => WebSiteM m a -> m (ServerPartT IO Response)
 runWebSiteM m = do
   (_, s, _) <- runRWST m () mzeroWebSite
   return $ serverpart s
+
+runWebSite :: WebSite -> ServerPartT IO Response
+runWebSite = serverpart
+
+
+
+-- instance MonadPlus (WebSiteM m) where
+--   mzero = return mzeroWebSite
+--   a `mplus` b = do a' <- a
+--                    b' <- b
+--                    return $ a' `wsum` b'
+

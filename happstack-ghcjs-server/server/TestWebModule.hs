@@ -50,4 +50,5 @@ main = do
   let p = 8010
   print ("Serving on localhost",p)
   sp <- runWebSiteM websiteM
+  let sp = runWebSite website
   simpleHTTP (nullConf { port = p }) $ sp
