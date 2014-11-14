@@ -55,13 +55,13 @@ data WebSite = WebSite { serverpart :: ServerPartT IO Response
 
 $(nameMakeLens ''WebSite (Just . (++ "Lens")))
 
-wsum :: WebSite -> WebSite -> WebSite
-wsum a b = WebSite { serverpart = (serverpart a `mplus` serverpart b)
-                   , baseURL = baseURL a ++ baseURL b
-                   , headMarkup = headMarkup a >> headMarkup b
-                   , bodyMarkup = bodyMarkup a >> bodyMarkup b
-                   , manifest = []
-                   }
+wplus :: WebSite -> WebSite -> WebSite
+wplus a b = WebSite { serverpart = (serverpart a `mplus` serverpart b)
+                    , baseURL = baseURL a `mplus` baseURL b
+                    , headMarkup = headMarkup a >> headMarkup b
+                    , bodyMarkup = bodyMarkup a >> bodyMarkup b
+                    , manifest = manifest a `mplus` manifest b
+                    }
 
 homePage :: WebSite -> Markup
 homePage ws = 
