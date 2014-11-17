@@ -16,7 +16,7 @@ import Text.Blaze.Html5 (Markup)
 import Data.Lens.Strict
 
 
-newtype WebSiteM m a = WebSiteM { unWebSiteM :: RWST () () WebSite m a }
+newtype WebSiteM m a = WebSiteM { unWebSiteM :: StateT WebSite m a }
 
 instance Functor m => Functor (WebSiteM m) where
   fmap f = WebSiteM . fmap f . unWebSiteM
@@ -48,8 +48,8 @@ wimport a = do
   putBody (bodyMarkup ws)
   return a
   
-mkWebSiteM :: Monad m => WebSite -> a -> WebSiteM m a
-mkWebSiteM = WebSiteM . put
+mkWebSiteM :: Monad m => WebSite -> WebSiteM m ()
+mkWebSiteM ws = WebSiteM (put ws)
 
 
 
@@ -61,28 +61,18 @@ mzeroWebSite = WebSite { serverpart = mzero
                        , manifest = []
                        }
 
-runWebSiteM :: Monad m => WebSiteM m a -> m (ServerPartT IO Response)
+runWebSiteM :: Monad m => WebSiteM m a -> m WebSite
 runWebSiteM m = do
-  s <- runWebSiteM' m
-  return $ serverpart s
-
-runWebSiteM' :: Monad m => WebSiteM m a -> m WebSite
-runWebSiteM' m = do               
-  (_, s, _) <- runRWST (unWebSiteM m) () mzeroWebSite
+  s <- execStateT (unWebSiteM m) mzeroWebSite
   return s
 
-runWebSite :: WebSite -> ServerPartT IO Response
-runWebSite = serverpart
 
-
-
-instance (Monad m, MonadPlus m) => MonadPlus (WebSiteM m) where
-   mzero = WebSiteM mzero
-   WebSiteM a `mplus` WebSiteM b = do
-     a' :: WebSite <- liftM $ runWebSiteM' a
-     b' <- lift $ runWebSiteM' b
-     mkWebSiteM $ a' `wplus` b'
-
+-- instance (Monad m, MonadPlus m) => MonadPlus (WebSiteM m) where
+--    mzero = WebSiteM mzero
+--    WebSiteM a `mplus` WebSiteM b = do
+--      a' :: WebSite <- liftM $ runWebSiteM' a
+--      b' <- lift $ runWebSiteM' b
+--      mkWebSiteM $ a' `wplus` b'
 
 instance (Applicative m, MonadPlus m) => Alternative (WebSiteM m) where
   empty = WebSiteM mzero

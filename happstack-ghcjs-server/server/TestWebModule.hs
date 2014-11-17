@@ -41,14 +41,17 @@ rootHandler m = msum [ defaultHandler m
                      , indexDotHtml m
                      ]
 
-website :: WebSite
-website = home `wsum` faviconWebSite
+--website :: WebSite
+--website = home `wsum` faviconWebSite
 
-websiteM = return website
+websiteM :: Monad m => WebSiteM m ()
+websiteM = do
+  mkWebSiteM faviconWebSite
+  mkWebSiteM home
 
 main = do
   let p = 8010
   print ("Serving on localhost",p)
-  sp <- runWebSiteM websiteM
-  let sp = runWebSite website
-  simpleHTTP (nullConf { port = p }) $ sp
+  ws <- runWebSiteM websiteM
+--  let sp = runWebSite website
+  simpleHTTP (nullConf { port = p }) $ serverpart ws
