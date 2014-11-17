@@ -1,8 +1,11 @@
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE TypeSynonymInstances #-}
+{-# OPTIONS_GHC -fno-warn-overlapping-patterns #-}
 module WebModuleM where
 
+import Control.Applicative
 import Control.Monad as Monad (mplus)
 import Control.Monad.State
 import Control.Monad.Trans
@@ -12,23 +15,19 @@ import Happstack.Server as Happstack (ServerPartT, Response)
 import Text.Blaze.Html5 (Markup)
 import Data.Lens.Strict
 
-foo :: RWS Int String (Int,Int) Float
-foo = do
-  i <- ask
-  (j,k) <- get
-  tell $ show (i, (j,k))
-  put (i+j, i+k)
-  return ( fromIntegral (i * j * k))
-
-
-runfoo = runRWS foo  13 (5,7)
 
 newtype WebSiteM m a = WebSiteM { unWebSiteM :: RWST () () WebSite m a }
 
+instance Functor m => Functor (WebSiteM m) where
+  fmap f = WebSiteM . fmap f . unWebSiteM
+
+instance (Applicative m, Monad m) => Applicative (WebSiteM m) where
+  pure = WebSiteM . pure
+  WebSiteM f <*> WebSiteM a = WebSiteM $ f <*> a
 
 instance Monad m => Monad (WebSiteM m) where
-  return = WebSiteM . return
-  a >>= b = WebSiteM $ unWebSiteM a >>= 
+    return = WebSiteM . return
+    m >>= k = WebSiteM (unWebSiteM m  >>= unWebSiteM . k )
 
 modifyL :: MonadState s m => Lens s a -> (a -> a) -> m ()
 modifyL lens f = modify (modL lens f)
@@ -49,6 +48,10 @@ wimport a = do
   putBody (bodyMarkup ws)
   return a
   
+mkWebSiteM :: Monad m => WebSite -> a -> WebSiteM m a
+mkWebSiteM = WebSiteM . put
+
+
 
 mzeroWebSite :: WebSite
 mzeroWebSite = WebSite { serverpart = mzero
@@ -60,17 +63,28 @@ mzeroWebSite = WebSite { serverpart = mzero
 
 runWebSiteM :: Monad m => WebSiteM m a -> m (ServerPartT IO Response)
 runWebSiteM m = do
-  (_, s, _) <- runRWST m () mzeroWebSite
+  s <- runWebSiteM' m
   return $ serverpart s
+
+runWebSiteM' :: Monad m => WebSiteM m a -> m WebSite
+runWebSiteM' m = do               
+  (_, s, _) <- runRWST (unWebSiteM m) () mzeroWebSite
+  return s
 
 runWebSite :: WebSite -> ServerPartT IO Response
 runWebSite = serverpart
 
 
 
--- instance MonadPlus (WebSiteM m) where
---   mzero = return mzeroWebSite
---   a `mplus` b = do a' <- a
---                    b' <- b
---                    return $ a' `wsum` b'
+instance (Monad m, MonadPlus m) => MonadPlus (WebSiteM m) where
+   mzero = WebSiteM mzero
+   WebSiteM a `mplus` WebSiteM b = do
+     a' :: WebSite <- liftM $ runWebSiteM' a
+     b' <- lift $ runWebSiteM' b
+     mkWebSiteM $ a' `wplus` b'
 
+
+instance (Applicative m, MonadPlus m) => Alternative (WebSiteM m) where
+  empty = WebSiteM mzero
+  WebSiteM mzero <|> b = b
+  a <|> _ = a
