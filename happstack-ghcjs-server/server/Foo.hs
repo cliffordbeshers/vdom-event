@@ -7,7 +7,7 @@ import Data.Monoid
 -- import Control.Monad.RWS.Lazy
 import Control.Monad.State
 -- import Control.Monad.Trans.State
-
+import qualified GHCJSStub.JQuery as JQuery (on, Event(..), EventType(..), HandlerSettings, JQuery)
 
 -- foo :: RWS Int String (Int,Int) Float
 -- foo = do
@@ -60,13 +60,15 @@ instance (Applicative m, MonadPlus m) => Alternative (Bar m) where
   a <|> _ = a
 
 
-data S = S { sone :: Int, stwo :: String } deriving Show
+data Head = Head String deriving (Eq, Show)
+data Body = Body String deriving (Eq, Show)
+data S = S { heads :: [Head], bodies :: [Body]} deriving Show
 
 splus :: S -> S -> S
-splus a b = S { sone = sone a + sone b, stwo = stwo a <> stwo b }
+splus a b = S { heads = heads a <> heads b, bodies = bodies a <> bodies b }
 
 instance Monoid S where
-  mempty = S 0 ""
+  mempty = S [] []
   mappend = splus
 
 newtype WrapS m a = WrapS { unWrapS :: StateT S m a }
@@ -87,8 +89,6 @@ instance (Applicative m, MonadPlus m) => Alternative (WrapS m) where
   WrapS mzero <|> b = b
   a <|> _ = a
 
-type JQuery = String
-
 --instance MonadTrans WrapS where
 --   lift m = WrapS m -- $ do
 --     a <- m
@@ -98,18 +98,34 @@ type JQuery = String
 --         a <- m
 --         return (a, s)
 
+tellHead :: Monad m => [Head] -> WrapS m ()
+tellHead hs = WrapS $ modify (f hs)
+  where f xs (S hs bs) = S (hs ++ xs) bs
 
-jquery :: Monad m => WrapS m JQuery
-jquery = do
-  WrapS $ modify $ splus (S 17 "17")
-  return "jquery"
+tellBody :: Monad m => [Body] -> WrapS m ()
+tellBody hs = WrapS $ modify (f hs)
+  where f xs (S hs bs) = S hs (bs ++ xs)
+  
+wimport :: Monad m => S -> a -> WrapS m a
+wimport s bindings = do
+  tellHead (heads s)
+  tellBody (bodies s)
+  return bindings
+
+jquery :: Monad m => WrapS m JQueryBindings
+jquery = wimport (S [Head "jquery import"] [Body "jquery initialization"]) jQueryBindings
+
+data JQueryBindings = JQueryBindings { on :: (JQuery.Event -> IO ()) -> JQuery.EventType -> JQuery.HandlerSettings -> JQuery.JQuery -> IO (IO ()) }
+
+jQueryBindings :: JQueryBindings
+jQueryBindings = JQueryBindings { on = JQuery.on }
 
 data BootStrap = BootStrap
+
 bootstrap :: Monad m => WrapS m BootStrap
 bootstrap = do
-  WrapS $ modify $ splus (S 11 "11")
+  WrapS $ modify $ splus (S [Head "bootstrap import"] [Body "bootstrap initialization"])
   return BootStrap
-
 
 website :: Monad m => WrapS m String
 website = do

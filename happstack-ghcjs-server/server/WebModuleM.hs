@@ -6,10 +6,8 @@
 module WebModuleM where
 
 import Control.Applicative
-import Control.Monad as Monad (mplus)
-import Control.Monad.State
-import Control.Monad.Trans
-import Control.Monad.RWS.Lazy
+import Control.Monad as Monad
+import Control.Monad.Trans.State
 import WebModule
 import Happstack.Server as Happstack (ServerPartT, Response)
 import Text.Blaze.Html5 (Markup)
@@ -29,21 +27,29 @@ instance Monad m => Monad (WebSiteM m) where
     return = WebSiteM . return
     m >>= k = WebSiteM (unWebSiteM m  >>= unWebSiteM . k )
 
-modifyL :: MonadState s m => Lens s a -> (a -> a) -> m ()
-modifyL lens f = modify (modL lens f)
+-- modifyL :: Monad m => Lens s a -> (a -> a) -> WebSiteM m WebSite
+modifyL lens f = WebSiteM $ modify (modL lens f)
 
-putServerPart :: MonadState WebSite m => ServerPartT IO Response -> m ()
-putServerPart sp = modifyL serverpartLens (`mplus` sp)
+putServerPart :: Monad m => ServerPartT IO Response -> WebSiteM m ()
+putServerPart sp = undefined -- modifyL serverpartLens (`mplus` sp)
 
-putHead :: MonadState WebSite m => Markup -> m ()
+putHead :: Monad m => Markup -> WebSiteM m ()
 putHead markup = modifyL headMarkupLens (>> markup)
   
-putBody :: MonadState WebSite m => Markup -> m ()
+putBody :: Monad m => Markup -> WebSiteM m ()
 putBody markup = modifyL bodyMarkupLens (>> markup)
 
-wimport :: MonadState WebSite m => a ->  m a
-wimport a = do
-  ws <- get
+-- wimport :: MonadState WebSite m => a ->  m a
+-- wimport a = do
+--   ws <- get
+--   putHead (headMarkup ws)
+--   putBody (bodyMarkup ws)
+--   return a
+  
+--wimport :: Monad m => WebSiteM m a ->  WebSiteM m a
+wimport :: Monad m => WebSite -> a ->  WebSiteM m a
+wimport ws a = 
+  putServerPart (serverpart ws)
   putHead (headMarkup ws)
   putBody (bodyMarkup ws)
   return a
@@ -61,10 +67,13 @@ mzeroWebSite = WebSite { serverpart = mzero
                        , manifest = []
                        }
 
-runWebSiteM :: Monad m => WebSiteM m a -> m WebSite
-runWebSiteM m = do
-  s <- execStateT (unWebSiteM m) mzeroWebSite
-  return s
+runWebSiteM :: Monad m => WebSiteM m a -> m (a, WebSite)
+runWebSiteM m = runStateT (unWebSiteM m) mzeroWebSite
+
+evalWebSiteM :: Monad m => WebSiteM m a -> m (a,WebSite)
+evalWebSiteM m = do
+  (a,ws) <- runStateT (unWebSiteM m) mzeroWebSite
+  return (a,ws)
 
 
 -- instance (Monad m, MonadPlus m) => MonadPlus (WebSiteM m) where
