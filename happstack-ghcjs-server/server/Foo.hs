@@ -8,6 +8,10 @@ import Data.Monoid
 import Control.Monad.State
 -- import Control.Monad.Trans.State
 import qualified GHCJSStub.JQuery as JQuery (on, Event(..), EventType(..), HandlerSettings, JQuery)
+import Text.Blaze.Html5 (Markup, ToMarkup(..))
+import Text.Blaze.Html5 as H (script, style)
+import Data.Lens.Strict
+
 
 -- foo :: RWS Int String (Int,Int) Float
 -- foo = do
@@ -60,9 +64,23 @@ instance (Applicative m, MonadPlus m) => Alternative (Bar m) where
   a <|> _ = a
 
 
-data Head = Head String deriving (Eq, Show)
-data Body = Body String deriving (Eq, Show)
-data S = S { heads :: [Head], bodies :: [Body]} deriving Show
+
+data WM_Header = WMH_JavaScript String | WMH_CSS String deriving (Eq, Show)
+data WM_Body = WMB_Initialization String deriving (Eq, Show)
+data S = S { heads :: [WM_Header], bodies :: [WM_Body]} deriving Show
+
+wm_Header_toMarkup h =
+  case h of
+    WMH_JavaScript s -> H.script $ toMarkup s
+    WMH_CSS s -> H.style $ toMarkup s
+
+wm_Body_toMarkup b =
+  case b of
+    WMB_Initialization s -> H.script $ toMarkup s
+
+
+instance ToMarkup WM_Header where
+  toMarkup = wm_Header_toMarkup
 
 splus :: S -> S -> S
 splus a b = S { heads = heads a <> heads b, bodies = bodies a <> bodies b }
@@ -98,11 +116,11 @@ instance (Applicative m, MonadPlus m) => Alternative (WrapS m) where
 --         a <- m
 --         return (a, s)
 
-tellHead :: Monad m => [Head] -> WrapS m ()
+tellHead :: Monad m => [WM_Header] -> WrapS m ()
 tellHead hs = WrapS $ modify (f hs)
   where f xs (S hs bs) = S (hs ++ xs) bs
 
-tellBody :: Monad m => [Body] -> WrapS m ()
+tellBody :: Monad m => [WM_Body] -> WrapS m ()
 tellBody hs = WrapS $ modify (f hs)
   where f xs (S hs bs) = S hs (bs ++ xs)
   
@@ -113,7 +131,7 @@ wimport s bindings = do
   return bindings
 
 jquery :: Monad m => WrapS m JQueryBindings
-jquery = wimport (S [Head "jquery import"] [Body "jquery initialization"]) jQueryBindings
+jquery = wimport (S [WMH_JavaScript "jquery import"] [WMB_Initialization "jquery initialization"]) jQueryBindings
 
 data JQueryBindings = JQueryBindings { on :: (JQuery.Event -> IO ()) -> JQuery.EventType -> JQuery.HandlerSettings -> JQuery.JQuery -> IO (IO ()) }
 
@@ -124,22 +142,29 @@ data BootStrap = BootStrap
 
 bootstrap :: Monad m => WrapS m BootStrap
 bootstrap = do
-  WrapS $ modify $ splus (S [Head "bootstrap import"] [Body "bootstrap initialization"])
+  WrapS $ modify $ splus (S 
+                          [WMH_JavaScript "bootstrap javascript import", WMH_CSS "bootstrap css import"] 
+                          [WMB_Initialization "bootstrap initialization"])
   return BootStrap
 
-website :: Monad m => WrapS m String
+-- modifyL :: Monad m => Lens s a -> (a -> a) -> WebSiteM m WebSite
+modifyL lens f = WrapS $ modify (modL lens f)
+
+website :: Monad m => WrapS m ()
 website = do
   jq <- jquery
   bs <- bootstrap
-  return "Hello, World"
+  tellBody $ [WMB_Initialization "Hello, World"]
+  return ()
   
-website2 :: Monad m => WrapS m String
+website2 :: Monad m => WrapS m ()
 website2 = do
   jq <- jquery
   bs <- bootstrap
-  return "Goodbye, World"
+  tellBody $ [WMB_Initialization "Goodbye, World"]
+  return ()
 
-x :: Monad m => WrapS m String
+x :: Monad m => WrapS m ()
 x = website >> website2
 
 
