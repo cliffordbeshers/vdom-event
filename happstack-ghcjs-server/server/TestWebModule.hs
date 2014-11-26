@@ -13,8 +13,8 @@ faviconWebSite :: WebSite
 faviconWebSite = 
   WebSite { serverpart = faviconHandler favicon
           , baseURL = [faviconURLMS]
-          , headMarkup = return ()
-          , bodyMarkup = return ()
+          , headers = []
+          , bodies = []
           , manifest = []
           }
 
@@ -22,8 +22,8 @@ home :: WebSite
 home = 
   WebSite { serverpart = rootHandler $ toMarkup "Hello, world!"
           , baseURL = []
-          , headMarkup = return ()
-          , bodyMarkup = return ()
+          , headers = []
+          , bodies = []
           , manifest = []
           }
 
@@ -52,6 +52,6 @@ websiteM = do
 main = do
   let p = 8010
   print ("Serving on localhost",p)
-  ws <- runWebSiteM websiteM
+  ((), ws) <- runWebSiteM websiteM
 --  let sp = runWebSite website
   simpleHTTP (nullConf { port = p }) $ serverpart ws
