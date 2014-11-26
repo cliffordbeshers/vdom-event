@@ -33,11 +33,11 @@ modifyL lens f = WebSiteM $ modify (modL lens f)
 putServerPart :: Monad m => ServerPartT IO Response -> WebSiteM m ()
 putServerPart sp = undefined -- modifyL serverpartLens (`mplus` sp)
 
-putHead :: Monad m => Markup -> WebSiteM m ()
-putHead markup = modifyL headMarkupLens (>> markup)
+-- putHead :: Monad m => Markup -> WebSiteM m ()
+-- putHead markup = modifyL headersLens (>> markup)
   
-putBody :: Monad m => Markup -> WebSiteM m ()
-putBody markup = modifyL bodyMarkupLens (>> markup)
+-- putBody :: Monad m => Markup -> WebSiteM m ()
+-- putBody markup = modifyL bodiesLens (>> markup)
 
 -- wimport :: MonadState WebSite m => a ->  m a
 -- wimport a = do
@@ -46,14 +46,23 @@ putBody markup = modifyL bodyMarkupLens (>> markup)
 --   putBody (bodyMarkup ws)
 --   return a
   
---wimport :: Monad m => WebSiteM m a ->  WebSiteM m a
-wimport :: Monad m => WebSite -> a ->  WebSiteM m a
-wimport ws a = 
-  putServerPart (serverpart ws)
-  putHead (headMarkup ws)
-  putBody (bodyMarkup ws)
-  return a
+tellServerPart :: Monad m => ServerPartT IO Response -> WebSiteM m ()
+tellServerPart sp = modifyL serverpartLens (`mplus` sp)
+
+tellHead :: Monad m => [WM_Header] -> WebSiteM m ()
+tellHead xs = modifyL headersLens (++ xs)
+
+tellBody :: Monad m => [WM_Body] -> WebSiteM m ()
+tellBody xs = modifyL bodiesLens (++ xs)
   
+wimport :: Monad m => WebSite -> a -> WebSiteM m a
+wimport s bindings = do
+  tellServerPart (serverpart s)
+  tellHead (headers s)
+  tellBody (bodies s)
+  return bindings
+
+
 mkWebSiteM :: Monad m => WebSite -> WebSiteM m ()
 mkWebSiteM ws = WebSiteM (put ws)
 
@@ -62,8 +71,8 @@ mkWebSiteM ws = WebSiteM (put ws)
 mzeroWebSite :: WebSite
 mzeroWebSite = WebSite { serverpart = mzero
                        , baseURL = []
-                       , headMarkup = return ()
-                       , bodyMarkup = return ()
+                       , headers = []
+                       , bodies = []
                        , manifest = []
                        }
 

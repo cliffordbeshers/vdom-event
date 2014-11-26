@@ -16,7 +16,7 @@ import Data.Lens.Strict
 
 data WM_Header = WMH_JavaScript String | WMH_CSS String deriving (Eq, Show)
 data WM_Body = WMB_Initialization String deriving (Eq, Show)
-data WebSite = WebSite { heads :: [WM_Header], bodies :: [WM_Body]} deriving Show
+data WebSite = WebSite { headers :: [WM_Header], bodies :: [WM_Body]} deriving Show
 newtype WebSiteM m a = WebSiteM { unWebSiteM :: StateT WebSite m a }
 
 
@@ -35,7 +35,7 @@ instance ToMarkup WM_Header where
   toMarkup = wm_Header_toMarkup
 
 splus :: WebSite-> WebSite-> WebSite
-splus a b = WebSite { heads = heads a <> heads b, bodies = bodies a <> bodies b }
+splus a b = WebSite { headers = headers a <> headers b, bodies = bodies a <> bodies b }
 
 instance Monoid WebSite where
   mempty = WebSite [] []
@@ -76,7 +76,7 @@ tellBody hs = WebSiteM $ modify (f hs)
   
 wimport :: Monad m => WebSite -> a -> WebSiteM m a
 wimport s bindings = do
-  tellHead (heads s)
+  tellHead (headers s)
   tellBody (bodies s)
   return bindings
 
