@@ -18,8 +18,34 @@ faviconWebSite =
           , manifest = []
           }
 
-home :: WebSite
-home = 
+
+htmlHandler :: FilePath -> Markup -> ServerPartT IO Response
+htmlHandler fp m = dirs fp $ ok (toResponse m)
+
+helloWorld :: Monad m => WebSiteM m ()
+helloWorld = tellBody $ [WMB_Initialization "Hello, World"]
+goodbyeWorld :: Monad m => WebSiteM m ()
+goodbyeWorld = tellBody $ [WMB_Initialization "Goodbye, World"]
+
+
+-- Compiling the website should generate an html page that is attached to defaultHandler and indexDotHtml.
+-- That html page should include all the headers and bodies.
+
+-- The client generated .js file should be referenced in one of those headers.
+
+-- So I need a website that compiles the client code and the appropriate headers and serverparts.
+
+-- That file should be loaded with Template haskell (server only) and attached to the 
+-- defaultHandler and indexDotHtml.
+
+-- This should be compiled with ghcjs, functions that generate dom
+-- There should be a path for the client code returned by something that compiles the website
+
+home :: Monad m => WebSiteM m ()
+home = helloWorld >> goodbyeWorld
+
+home' :: WebSite
+home' = 
   WebSite { serverpart = rootHandler $ toMarkup "Hello, world!"
           , baseURL = []
           , headers = []
@@ -27,19 +53,6 @@ home =
           , manifest = []
           }
 
-defaultHandler :: Markup -> ServerPartT IO Response
-defaultHandler m = nullDir >> ok (toResponse m)
-
-htmlHandler :: FilePath -> Markup -> ServerPartT IO Response
-htmlHandler fp m = dirs fp $ ok (toResponse m)
-
-indexDotHtml :: Markup -> ServerPartT IO Response
-indexDotHtml = htmlHandler "index.html"
-
-rootHandler :: Markup -> ServerPartT IO Response
-rootHandler m = msum [ defaultHandler m
-                     , indexDotHtml m
-                     ]
 
 --website :: WebSite
 --website = home `wsum` faviconWebSite
@@ -47,7 +60,7 @@ rootHandler m = msum [ defaultHandler m
 websiteM :: Monad m => WebSiteM m ()
 websiteM = do
   mkWebSiteM faviconWebSite
-  mkWebSiteM home
+  home
 
 main = do
   let p = 8010

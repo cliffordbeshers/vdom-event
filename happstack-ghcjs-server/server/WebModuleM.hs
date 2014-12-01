@@ -66,8 +66,6 @@ wimport s bindings = do
 mkWebSiteM :: Monad m => WebSite -> WebSiteM m ()
 mkWebSiteM ws = WebSiteM (put ws)
 
-
-
 mzeroWebSite :: WebSite
 mzeroWebSite = WebSite { serverpart = mzero
                        , baseURL = []
@@ -78,6 +76,36 @@ mzeroWebSite = WebSite { serverpart = mzero
 
 runWebSiteM :: Monad m => WebSiteM m a -> m (a, WebSite)
 runWebSiteM m = runStateT (unWebSiteM m) mzeroWebSite
+
+compileWebSiteM :: Monad m => WebSiteM m a -> WebSiteM m a
+compileWebSiteM m = WebSiteM $ modify f
+  where f :: WebSite -> WebSite
+        f ws = ws { serverpart = serverpart ws `msum` headerpart ws }
+
+headerpart :: WebSite -> ServertPartT IO Response
+headerpart ws = rootHandler (templateMarkup ws) `mplus` resourceHandler ws
+
+-- This is the sole html page pulled from the server, it includes all
+-- the javascript, css, initialization code, etc. as well as a DOM
+-- element which serves as the application root.
+templateMarkup ws = undefined
+
+-- This is the sum of all the server parts needed for imported applications, javascript, css, etc.
+resourceHandler ws = undefined
+
+defaultHandler :: Markup -> ServerPartT IO Response
+defaultHandler m = nullDir >> ok (toResponse m)
+
+indexDotHtml :: Markup -> ServerPartT IO Response
+indexDotHtml = htmlHandler "index.html"
+
+rootHandler :: Markup -> ServerPartT IO Response
+rootHandler m = msum [ defaultHandler m
+                     , indexDotHtml m
+                     ]
+
+
+
 
 evalWebSiteM :: Monad m => WebSiteM m a -> m (a,WebSite)
 evalWebSiteM m = do
