@@ -50,7 +50,6 @@ instance ToMarkup WebImport where
 data WM_Header = WMH_JavaScript String | WMH_CSS String deriving (Eq, Show)
 data WM_Body = WMB_Initialization String deriving (Eq, Show)
 
-
 data WebSite = WebSite { serverpart :: ServerPartT IO Response 
                        , baseURL :: [ModuleScopeURL]
                        , headers :: [WM_Header]
@@ -75,8 +74,6 @@ instance ToMarkup WM_Header where
 
 instance ToMarkup WM_Body where
   toMarkup = wm_Body_toMarkup
-
-
 
 
 $(nameMakeLens ''WebSite (Just . (++ "Lens")))

@@ -1,6 +1,6 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
-module Template (WebImport(..), htmlTemplate) where
+module Template (WebImport(..), htmlTemplate, htmlTemplate') where
 
 import Prelude as P
 import Data.Text (Text)
@@ -33,4 +33,17 @@ htmlTemplate title imports bodies =  do
         H.title (toMarkup title)
       H.body $ do sequence_ bodies
                   sequence_ $ scripts imports
+    
+htmlTemplate' :: Text       -- ^ title , cannot contain markup.
+                -> [Markup]  -- ^ extra tags to include in \<head\>
+                -> [Markup]  -- ^ contents to put inside \<body\> 
+                -> Markup
+htmlTemplate' title imports bodies =  do 
+  H.docTypeHtml ! HA.manifest (toValue $ show manifestURL) $ do
+      H.head $ do
+        H.meta ! HA.httpEquiv "Content-Type" ! HA.content "text/html; charset=UTF-8"
+        faviconMarkup
+        sequence_ imports
+        H.title (toMarkup title)
+      H.body $ sequence_ bodies
     

@@ -18,10 +18,6 @@ faviconWebSite =
           , manifest = []
           }
 
-
-htmlHandler :: FilePath -> Markup -> ServerPartT IO Response
-htmlHandler fp m = dirs fp $ ok (toResponse m)
-
 helloWorld :: Monad m => WebSiteM m ()
 helloWorld = tellBody $ [WMB_Initialization "Hello, World"]
 goodbyeWorld :: Monad m => WebSiteM m ()
@@ -65,6 +61,6 @@ websiteM = do
 main = do
   let p = 8010
   print ("Serving on localhost",p)
-  ((), ws) <- runWebSiteM websiteM
+  ((), ws) <- runWebSiteM $ compileWebSiteM websiteM
 --  let sp = runWebSite website
   simpleHTTP (nullConf { port = p }) $ serverpart ws

@@ -9,9 +9,11 @@ import Control.Applicative
 import Control.Monad as Monad
 import Control.Monad.Trans.State
 import WebModule
-import Happstack.Server as Happstack (ServerPartT, Response)
-import Text.Blaze.Html5 (Markup)
+import Happstack.Server as Happstack (ServerPartT, Response, nullDir, ok, toResponse, dirs)
+import Text.Blaze.Html5 (Markup, toMarkup)
 import Data.Lens.Strict
+import Template
+import Data.Text as Text (pack)
 
 
 newtype WebSiteM m a = WebSiteM { unWebSiteM :: StateT WebSite m a }
@@ -77,21 +79,21 @@ mzeroWebSite = WebSite { serverpart = mzero
 runWebSiteM :: Monad m => WebSiteM m a -> m (a, WebSite)
 runWebSiteM m = runStateT (unWebSiteM m) mzeroWebSite
 
-compileWebSiteM :: Monad m => WebSiteM m a -> WebSiteM m a
+compileWebSiteM :: Monad m => WebSiteM m a -> WebSiteM m ()
 compileWebSiteM m = WebSiteM $ modify f
   where f :: WebSite -> WebSite
-        f ws = ws { serverpart = serverpart ws `msum` headerpart ws }
+        f ws = ws { serverpart = mkTemplatePart ws `mplus` serverpart ws}
 
-headerpart :: WebSite -> ServertPartT IO Response
-headerpart ws = rootHandler (templateMarkup ws) `mplus` resourceHandler ws
+mkTemplatePart :: WebSite -> ServerPartT IO Response
+mkTemplatePart ws = rootHandler (templateMarkup ws)
 
 -- This is the sole html page pulled from the server, it includes all
 -- the javascript, css, initialization code, etc. as well as a DOM
 -- element which serves as the application root.
-templateMarkup ws = undefined
-
--- This is the sum of all the server parts needed for imported applications, javascript, css, etc.
-resourceHandler ws = undefined
+templateMarkup ws = htmlTemplate' title (hs ws) (bs ws)
+  where title = Text.pack "Need a title"
+        hs = map toMarkup . headers
+        bs = map toMarkup . bodies
 
 defaultHandler :: Markup -> ServerPartT IO Response
 defaultHandler m = nullDir >> ok (toResponse m)
@@ -103,8 +105,8 @@ rootHandler :: Markup -> ServerPartT IO Response
 rootHandler m = msum [ defaultHandler m
                      , indexDotHtml m
                      ]
-
-
+htmlHandler :: FilePath -> Markup -> ServerPartT IO Response
+htmlHandler fp m = dirs fp $ ok (toResponse m)
 
 
 evalWebSiteM :: Monad m => WebSiteM m a -> m (a,WebSite)
