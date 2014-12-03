@@ -1,7 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 module Main where
 
-import Control.Monad (msum)
+import Control.Monad (MonadPlus(..))
 import Happstack.Server
 import Text.Blaze.Html5 as H (Markup, toMarkup)
 import Favicon
@@ -42,7 +42,7 @@ home = helloWorld >> goodbyeWorld
 
 home' :: WebSite
 home' = 
-  WebSite { serverpart = rootHandler $ toMarkup "Hello, world!"
+  WebSite { serverpart = mzero
           , baseURL = []
           , headers = []
           , bodies = []

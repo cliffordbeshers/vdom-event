@@ -39,7 +39,7 @@ htmlTemplate' :: Text       -- ^ title , cannot contain markup.
                 -> [Markup]  -- ^ contents to put inside \<body\> 
                 -> Markup
 htmlTemplate' title imports bodies =  do 
-  H.docTypeHtml ! HA.manifest (toValue $ show manifestURL) $ do
+  H.docTypeHtml {- ! HA.manifest (toValue $ show manifestURL) -} $ do
       H.head $ do
         H.meta ! HA.httpEquiv "Content-Type" ! HA.content "text/html; charset=UTF-8"
         faviconMarkup
