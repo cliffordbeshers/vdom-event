@@ -8,6 +8,7 @@ module WebModuleM where
 import Control.Applicative
 import Control.Monad as Monad
 import Control.Monad.Trans.State
+import Markable
 import WebModule
 import Happstack.Server as Happstack (ServerPartT, Response, nullDir, ok, toResponse, dirs)
 import Text.Blaze.Html5 (Markup, toMarkup)

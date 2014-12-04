@@ -5,6 +5,7 @@ import Control.Monad (MonadPlus(..))
 import Happstack.Server
 import Text.Blaze.Html5 as H (Markup, toMarkup)
 import Favicon
+import Markable
 import WebModule
 import WebModuleM
 import ModuleScopeURL
@@ -13,7 +14,7 @@ faviconWebSite :: WebSite
 faviconWebSite = 
   WebSite { serverpart = faviconHandler favicon
           , baseURL = [faviconURLMS]
-          , headers = []
+          , headers = [WMH_Favicon faviconURLMS]
           , bodies = []
           , manifest = []
           }

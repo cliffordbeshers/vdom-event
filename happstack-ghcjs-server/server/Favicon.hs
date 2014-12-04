@@ -3,15 +3,18 @@
 module Favicon where
 
 import Data.Text (Text, unpack)
-import Text.Blaze.Html5 ((!), Markup, toMarkup, toValue)
+import Text.Blaze.Html5 ((!), Markup, ToMarkup(..), toValue)
 import qualified Text.Blaze.Html5 as H (body, docTypeHtml, head, link, meta, title)
 import qualified Text.Blaze.Html5.Attributes as HA (content, href, httpEquiv, rel, type_)
 import qualified Data.ByteString as B
+import Network.URI (URI)
 import Data.FileEmbed
 import Happstack.Server
+import Markable
 import ModuleScopeURL
 
 default (Text)
+
 
 faviconURL :: Text
 faviconURL = "/favicon.ico"
@@ -27,15 +30,14 @@ faviconHandler favicon = dirs "/favicon.ico" $ ok $ setMimeType $ toResponse fav
   where setMimeType = setHeader "Content-Type" manifestMimeType
         manifestMimeType = "text/cache-manifest"
 
-
-faviconMarkup :: Markup
-faviconMarkup =
+faviconMarkup :: URI -> Markup
+faviconMarkup uri =
   do
     H.link 
       ! HA.rel "shortcut icon" 
-      ! HA.href (toValue faviconURL)
+      ! HA.href (toValue $ show uri)
       ! HA.type_ "image/x-icon"
     H.link 
       ! HA.rel "icon" 
-      ! HA.href (toValue faviconURL)
+      ! HA.href (toValue $ show uri)
       ! HA.type_ "image/x-icon"
