@@ -38,9 +38,7 @@ tellBody xs = tell $ mempty { bodies = xs }
   
 wimport :: Monad m => WebSite -> a -> WebSiteM m a
 wimport s bindings = do
-  tellServerPart (serverpart s)
-  tellHead (headers s)
-  tellBody (bodies s)
+  tell s
   return bindings
 
 
