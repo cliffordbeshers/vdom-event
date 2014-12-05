@@ -65,6 +65,6 @@ websiteM = do
 main = do
   let p = 8010
   print ("Serving on localhost",p)
-  ((), ws) <- runWebSiteM $ compileWebSiteM websiteM
+  ((), ws) <- runWebSiteM' $ compileWebSiteM websiteM
 --  let sp = runWebSite website
   simpleHTTP (nullConf { port = p }) $ serverpart ws

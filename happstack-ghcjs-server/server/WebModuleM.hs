@@ -28,7 +28,10 @@ instance (Applicative m, Monad m) => Applicative (WebSiteM m) where
 
 instance Monad m => Monad (WebSiteM m) where
     return = WebSiteM . return
-    m >>= k = WebSiteM (unWebSiteM m  >>= unWebSiteM . k )
+    m >>= k = WebSiteM $ StateT $ \s -> do
+      ~(a, w) <- runWebSiteM m s
+      ~(b, w') <- runWebSiteM (k a) w
+      return (b, w `wplus` w')
 
 -- modifyL :: Monad m => Lens s a -> (a -> a) -> WebSiteM m WebSite
 modifyL lens f = WebSiteM $ modify (modL lens f)
@@ -61,8 +64,11 @@ mzeroWebSite = WebSite { serverpart = mzero
                        , manifest = []
                        }
 
-runWebSiteM :: Monad m => WebSiteM m a -> m (a, WebSite)
-runWebSiteM m = runStateT (unWebSiteM m) mzeroWebSite
+runWebSiteM :: Monad m => WebSiteM m a -> WebSite -> m (a, WebSite)
+runWebSiteM m = runStateT (unWebSiteM m)
+
+runWebSiteM' :: Monad m => WebSiteM m a -> m (a, WebSite)
+runWebSiteM' m = runStateT (unWebSiteM m) mzeroWebSite
 
 compileWebSiteM :: Monad m => WebSiteM m a -> WebSiteM m ()
 compileWebSiteM m = WebSiteM $ modify f
