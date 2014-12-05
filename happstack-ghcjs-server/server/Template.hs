@@ -42,6 +42,7 @@ htmlTemplate' title imports bodies =  do
       H.head $ do
         H.meta ! HA.httpEquiv "Content-Type" ! HA.content "text/html; charset=UTF-8"
         sequence_ imports
+        H.link ! HA.href "Hello"
         H.title (toMarkup title)
       H.body $ sequence_ bodies
     

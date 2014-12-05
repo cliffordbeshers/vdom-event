@@ -33,22 +33,6 @@ instance Monad m => Monad (WebSiteM m) where
 -- modifyL :: Monad m => Lens s a -> (a -> a) -> WebSiteM m WebSite
 modifyL lens f = WebSiteM $ modify (modL lens f)
 
-putServerPart :: Monad m => ServerPartT IO Response -> WebSiteM m ()
-putServerPart sp = undefined -- modifyL serverpartLens (`mplus` sp)
-
--- putHead :: Monad m => Markup -> WebSiteM m ()
--- putHead markup = modifyL headersLens (>> markup)
-  
--- putBody :: Monad m => Markup -> WebSiteM m ()
--- putBody markup = modifyL bodiesLens (>> markup)
-
--- wimport :: MonadState WebSite m => a ->  m a
--- wimport a = do
---   ws <- get
---   putHead (headMarkup ws)
---   putBody (bodyMarkup ws)
---   return a
-  
 tellServerPart :: Monad m => ServerPartT IO Response -> WebSiteM m ()
 tellServerPart sp = modifyL serverpartLens (`mplus` sp)
 

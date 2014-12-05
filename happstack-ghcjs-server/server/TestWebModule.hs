@@ -1,4 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE RecordWildCards #-}
 module Main where
 
 import Control.Monad (MonadPlus(..))
@@ -9,6 +10,7 @@ import Markable
 import WebModule
 import WebModuleM
 import ModuleScopeURL
+import JQueryWebModule
 
 faviconWebSite :: WebSite
 faviconWebSite = 
@@ -57,6 +59,7 @@ home' =
 websiteM :: Monad m => WebSiteM m ()
 websiteM = do
   mkWebSiteM faviconWebSite
+  JQueryBindings{..} <- jQuery
   home
 
 main = do
