@@ -118,3 +118,5 @@ x :: Monad m => WebSiteM m ()
 x = website >> website2
 
 
+runWebSiteM :: Monad m => WebSiteM m a -> (a,WebSite)
+runWebSiteM m = runStateT (unWebSiteM m) mzeroWebSite

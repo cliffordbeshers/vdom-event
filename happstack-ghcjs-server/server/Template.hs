@@ -41,8 +41,10 @@ htmlTemplate' title imports bodies =  do
   H.docTypeHtml {- ! HA.manifest (toValue $ show manifestURL) -} $ do
       H.head $ do
         H.meta ! HA.httpEquiv "Content-Type" ! HA.content "text/html; charset=UTF-8"
-        sequence_ imports
         H.link ! HA.href "Hello"
+        sequence_ imports
         H.title (toMarkup title)
+        H.link ! HA.href "Goodbye"
+        H.link ! HA.href "This style tag must be added by something external."
       H.body $ sequence_ bodies
     
