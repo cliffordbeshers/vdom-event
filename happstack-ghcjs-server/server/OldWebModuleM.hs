@@ -7,7 +7,7 @@ module WebModuleM where
 
 import Control.Applicative
 import Control.Monad as Monad
-import Control.Monad.Trans.Writer
+import Control.Monad.Trans.State
 import Markable
 import WebModule
 import Happstack.Server as Happstack (ServerPartT, Response, nullDir, ok, toResponse, dirs)
@@ -15,26 +15,35 @@ import Text.Blaze.Html5 (Markup, toMarkup)
 import Data.Lens.Strict
 import Template
 import Data.Text as Text (pack)
-import Data.Monoid
 
 
-type WebSiteM = WriterT WebSite
+newtype WebSiteM m a = WebSiteM { unWebSiteM :: StateT WebSite m a }
 
-instance Monoid WebSite where
-  mempty = mzeroWebSite
-  mappend = wplus
+instance Functor m => Functor (WebSiteM m) where
+  fmap f = WebSiteM . fmap f . unWebSiteM
 
-modifyL :: Monad m => Lens WebSite a -> (a -> a) -> WebSiteM m a -> WebSiteM m a
-modifyL lens f = censor (modL lens f)
+instance (Applicative m, Monad m) => Applicative (WebSiteM m) where
+  pure = WebSiteM . pure
+  WebSiteM f <*> WebSiteM a = WebSiteM $ f <*> a
+
+instance Monad m => Monad (WebSiteM m) where
+    return = WebSiteM . return
+    m >>= k = WebSiteM $ StateT $ \s -> do
+      ~(a, w) <- runWebSiteM m s
+      ~(b, w') <- runWebSiteM (k a) w
+      return (b, w `wplus` w')
+
+-- modifyL :: Monad m => Lens s a -> (a -> a) -> WebSiteM m WebSite
+modifyL lens f = WebSiteM $ modify (modL lens f)
 
 tellServerPart :: Monad m => ServerPartT IO Response -> WebSiteM m ()
-tellServerPart sp = tell $ mempty { serverpart = sp }
+tellServerPart sp = modifyL serverpartLens (`mplus` sp)
 
 tellHead :: Monad m => [WM_Header] -> WebSiteM m ()
-tellHead xs = tell $ mempty { headers = xs }
+tellHead xs = modifyL headersLens (++ xs)
 
 tellBody :: Monad m => [WM_Body] -> WebSiteM m ()
-tellBody xs = tell $ mempty { bodies = xs }
+tellBody xs = modifyL bodiesLens (++ xs)
   
 wimport :: Monad m => WebSite -> a -> WebSiteM m a
 wimport s bindings = do
@@ -45,7 +54,7 @@ wimport s bindings = do
 
 
 mkWebSiteM :: Monad m => WebSite -> WebSiteM m ()
-mkWebSiteM ws = tell ws
+mkWebSiteM ws = WebSiteM (put ws)
 
 mzeroWebSite :: WebSite
 mzeroWebSite = WebSite { serverpart = mzero
@@ -55,13 +64,14 @@ mzeroWebSite = WebSite { serverpart = mzero
                        , manifest = []
                        }
 
-runWebSiteM  = runWriterT
+runWebSiteM :: Monad m => WebSiteM m a -> WebSite -> m (a, WebSite)
+runWebSiteM m = runStateT (unWebSiteM m)
 
--- This is probably mapWriterT composed with runWriterT or something.
-compileWebSiteM :: Monad m => WebSiteM m a -> m (a, WebSite)
-compileWebSiteM m = do
-  (a,ws) <- runWebSiteM m
-  return (a, f ws)
+runWebSiteM' :: Monad m => WebSiteM m a -> m (a, WebSite)
+runWebSiteM' m = runStateT (unWebSiteM m) mzeroWebSite
+
+compileWebSiteM :: Monad m => WebSiteM m a -> WebSiteM m ()
+compileWebSiteM m = WebSiteM $ modify f
   where f :: WebSite -> WebSite
         f ws = ws { serverpart = mkTemplatePart ws `mplus` serverpart ws}
 
@@ -88,3 +98,22 @@ rootHandler m = msum [ defaultHandler m
                      ]
 htmlHandler :: FilePath -> Markup -> ServerPartT IO Response
 htmlHandler fp m = dirs fp $ ok (toResponse m)
+
+
+evalWebSiteM :: Monad m => WebSiteM m a -> m (a,WebSite)
+evalWebSiteM m = do
+  (a,ws) <- runStateT (unWebSiteM m) mzeroWebSite
+  return (a,ws)
+
+
+-- instance (Monad m, MonadPlus m) => MonadPlus (WebSiteM m) where
+--    mzero = WebSiteM mzero
+--    WebSiteM a `mplus` WebSiteM b = do
+--      a' :: WebSite <- liftM $ runWebSiteM' a
+--      b' <- lift $ runWebSiteM' b
+--      mkWebSiteM $ a' `wplus` b'
+
+instance (Applicative m, MonadPlus m) => Alternative (WebSiteM m) where
+  empty = WebSiteM mzero
+  WebSiteM mzero <|> b = b
+  a <|> _ = a

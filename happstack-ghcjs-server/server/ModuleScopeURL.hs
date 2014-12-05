@@ -24,7 +24,7 @@ moduleScopeURL fp = do
   
 moduleScopeURLtoURI :: ModuleScopeURL -> URI
 moduleScopeURLtoURI (ModuleScopeURL s fp) =
-  fromJust . parseURI $ moduleNameToPath s </> fp
+  fromJust . parseRelativeReference $ moduleNameToPath s </> fp
   
 moduleNameToPath :: String -> FilePath
 moduleNameToPath = map dotToSlash
