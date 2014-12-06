@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE TemplateHaskell #-}
 module ModuleScopeURL (ModuleScopeURL, moduleScopeURL, moduleScopeURLtoURI
+                      , moduleScopeURLtoFilePath
                       , URI
                       ) where
 
@@ -26,6 +27,10 @@ moduleScopeURLtoURI :: ModuleScopeURL -> URI
 moduleScopeURLtoURI (ModuleScopeURL s fp) =
   fromJust . parseRelativeReference $ moduleNameToPath s </> fp
   
+moduleScopeURLtoFilePath :: ModuleScopeURL -> FilePath
+moduleScopeURLtoFilePath (ModuleScopeURL s fp) =
+  moduleNameToPath s </> fp
+
 moduleNameToPath :: String -> FilePath
 moduleNameToPath = map dotToSlash
   where dotToSlash c = if c == '.' then '/' else c
