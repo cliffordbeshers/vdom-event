@@ -31,6 +31,7 @@ moduleScopeURLtoFilePath :: ModuleScopeURL -> FilePath
 moduleScopeURLtoFilePath (ModuleScopeURL s fp) =
   moduleNameToPath s </> fp
 
+-- dot is a legal character, why not leave it?
 moduleNameToPath :: String -> FilePath
-moduleNameToPath = map dotToSlash
-  where dotToSlash c = if c == '.' then '/' else c
+moduleNameToPath = id -- map dotToSlash
+--  where dotToSlash c = if c == '.' then '_' else c
