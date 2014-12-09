@@ -24,16 +24,19 @@ data JQueryBindings = JQueryBindings { on :: (JQuery.Event -> IO ()) -> JQuery.E
 baseurl:: ModuleScopeURL
 baseurl = $(moduleScopeURL "")
 
+basepath :: FilePath
 basepath = moduleScopeURLtoFilePath baseurl
+
+(+++) :: ModuleScopeURL -> FilePath -> ModuleScopeURL
+(+++) = moduleScopeAppend
 
 jQuery :: Monad m => WebSiteM m JQueryBindings
 jQuery = wimport ws jQueryBindings
   where ws = mzeroWebSite { serverpart = jQuerySP
-                          , headers = [WMH_JavaScript "jquery import"] 
+                          , headers = [WMH_JavaScript (baseurl +++ jsFilePath)] 
                           , bodies = [WMB_Initialization "jquery initialization"]
                           , baseURL = [baseurl]
                           }
-
 jQuerySP :: ServerPartT IO Response
 jQuerySP = dir basepath $ uriRest (serveEmbedded "jQuery" jQueryFileMap)
 
@@ -51,9 +54,6 @@ serveEmbedded filemapname filemap fpa = do
 jQueryBindings :: JQueryBindings
 jQueryBindings = JQueryBindings { on = JQuery.on }
 
-imports :: [WM_Header]
-imports = [ WMH_JavaScript ( jsFilePath)
-          ]
 
 -- FIXME: the mimetype should be determined statically.
 

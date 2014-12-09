@@ -2,6 +2,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 module ModuleScopeURL (ModuleScopeURL, moduleScopeURL, moduleScopeURLtoURI
                       , moduleScopeURLtoFilePath
+                      , moduleScopeAppend
                       , URI
                       ) where
 
@@ -13,10 +14,15 @@ import Data.Typeable
 import Data.Data
 import Data.Maybe (fromJust)
 import Network.URI
+import Text.Blaze.Html5 as H (ToValue(..))
 
 data ModuleScopeURL = ModuleScopeURL String FilePath deriving (Eq,Show)
 
 $(deriveLift ''ModuleScopeURL)
+
+-- should probably be a functor, but it's a fixed type.
+moduleScopeAppend :: ModuleScopeURL -> FilePath -> ModuleScopeURL
+moduleScopeAppend (ModuleScopeURL s fp1) fp2 = ModuleScopeURL s (fp1 </> fp2)
 
 moduleScopeURL :: FilePath -> Q Exp -- ModuleScopeURL
 moduleScopeURL fp = do
@@ -35,3 +41,7 @@ moduleScopeURLtoFilePath (ModuleScopeURL s fp) =
 moduleNameToPath :: String -> FilePath
 moduleNameToPath = id -- map dotToSlash
 --  where dotToSlash c = if c == '.' then '_' else c
+
+instance ToValue ModuleScopeURL where
+  toValue  = toValue . show . moduleScopeURLtoURI
+

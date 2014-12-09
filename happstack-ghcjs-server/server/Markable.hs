@@ -10,8 +10,8 @@ import ModuleScopeURL
 
 -- All the types that can be serialized into the HTML head section.
 data WM_Header = 
-  WMH_JavaScript String |
-  WMH_CSS String  |
+  WMH_JavaScript ModuleScopeURL |
+  WMH_CSS ModuleScopeURL  |
   WMH_Favicon ModuleScopeURL
 
   deriving (Eq, Show)

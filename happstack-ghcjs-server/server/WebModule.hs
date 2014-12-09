@@ -71,8 +71,8 @@ instance Show WebSite where
 
 wm_Header_toMarkup h =
   case h of
-    WMH_JavaScript s -> H.script $ toMarkup s
-    WMH_CSS s -> H.style $ toMarkup s
+    WMH_JavaScript u -> H.script ! HA.type_ "application/javascript" ! HA.src (toValue u) $ return ()
+    WMH_CSS u -> H.link ! HA.rel "stylesheet" ! HA.type_ "text/css" ! HA.href (toValue u)
     WMH_Favicon uri -> faviconMarkup (moduleScopeURLtoURI uri)
 
 wm_Body_toMarkup b =
