@@ -4,7 +4,7 @@ module JQueryWebModule (jQueryModule, JQueryBindings(..)) where
 import qualified GHCJSStub.JQuery as JQuery (on, Event(..), EventType(..), HandlerSettings, JQuery)
 import Control.Monad.Trans (liftIO)
 import Markable
-import ServeEmbedded
+import ServeEmbedded (serveEmbedded, verifyEmbeddedFP)
 import WebModule
 import WebModuleM
 import ModuleScopeURL
@@ -63,10 +63,10 @@ jQueryFileMap = M.fromList $(embedDir "embedded/jquery")
 
 -- This value incorporates a test that ensures we have the right path at compile time
 jsFilePath :: FilePath
-jsFilePath = let fp = "jquery-1.11.0.min.js" in
-  if M.member fp jQueryFileMap
-  then fp
-  else error "JQueryWebModule.jsFilePath bad path for jQuery javascript"
+[jsFilePath] =  map v fps
+  where v = verifyEmbeddedFP "JQueryWebModule:jQueryFileMap" jQueryFileMap
+        fps = ["jquery-1.11.0.min.js"]
+
 
 -- Not using WebRoutes yet, not sure I can get it to cooperate with ghcjs.
 

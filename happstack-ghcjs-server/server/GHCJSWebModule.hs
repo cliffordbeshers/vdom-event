@@ -1,5 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
-module EmbedGHCJS (ghcjsWebModule, GHCJSBindings) where
+module GHCJSWebModule (ghcjsWebModule, GHCJSBindings(..)) where
 
 import Markable
 import ServeEmbedded
@@ -19,7 +19,7 @@ import Data.ByteString as B (ByteString)
 
 
 -- There's really nothing to run, since this will be main.
-data GHCJSBindings = GHCJSBindings
+data GHCJSBindings = GHCJSBindings { start :: Int }
 
 baseurl:: ModuleScopeURL
 baseurl = $(moduleScopeURL "")
@@ -34,8 +34,11 @@ basepath = moduleScopeURLtoFilePath baseurl
 ghcjsFileMap :: Map FilePath B.ByteString
 ghcjsFileMap = Map.fromList $(embedDir "/usr/bin/happstack-ghcjs-client.jsexe")
 
+ghcjsBindings :: GHCJSBindings
+ghcjsBindings = GHCJSBindings { start = 1 }
+
 ghcjsWebModule :: Monad m => WebSiteM m GHCJSBindings
-ghcjsWebModule = wimport ws GHCJSBindings
+ghcjsWebModule = wimport ws ghcjsBindings
   where ws = mzeroWebSite { serverpart = ghcjsSP
                           , headers = [WMH_JavaScript (baseurl +++ jsFilePath)]
                           , bodies = [WMB_Initialization "jquery initialization"]

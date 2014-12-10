@@ -12,6 +12,7 @@ import WebModuleM
 import ModuleScopeURL
 import JQueryWebModule
 import BootstrapWebModule
+import GHCJSWebModule
 
 faviconWebSite :: WebSite
 faviconWebSite = 
@@ -62,6 +63,7 @@ websiteM = do
   mkWebSiteM faviconWebSite
   JQueryBindings{..} <- jQueryModule
   BootstrapBindings{..} <- bootstrapModule
+  GHCJSBindings{..} <- ghcjsWebModule
   home
 
 main = do
