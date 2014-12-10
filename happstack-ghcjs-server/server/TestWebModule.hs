@@ -11,6 +11,7 @@ import WebModule
 import WebModuleM
 import ModuleScopeURL
 import JQueryWebModule
+import BootstrapWebModule
 
 faviconWebSite :: WebSite
 faviconWebSite = 
@@ -59,7 +60,8 @@ home' =
 websiteM :: Monad m => WebSiteM m ()
 websiteM = do
   mkWebSiteM faviconWebSite
-  JQueryBindings{..} <- jQuery
+  JQueryBindings{..} <- jQueryModule
+  BootstrapBindings{..} <- bootstrapModule
   home
 
 main = do

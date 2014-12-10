@@ -1,9 +1,10 @@
 {-# LANGUAGE TemplateHaskell #-}
-module JQueryWebModule (jQuery, JQueryBindings(..)) where
+module JQueryWebModule (jQueryModule, JQueryBindings(..)) where
 
 import qualified GHCJSStub.JQuery as JQuery (on, Event(..), EventType(..), HandlerSettings, JQuery)
 import Control.Monad.Trans (liftIO)
 import Markable
+import ServeEmbedded
 import WebModule
 import WebModuleM
 import ModuleScopeURL
@@ -30,8 +31,8 @@ basepath = moduleScopeURLtoFilePath baseurl
 (+++) :: ModuleScopeURL -> FilePath -> ModuleScopeURL
 (+++) = moduleScopeAppend
 
-jQuery :: Monad m => WebSiteM m JQueryBindings
-jQuery = wimport ws jQueryBindings
+jQueryModule :: Monad m => WebSiteM m JQueryBindings
+jQueryModule = wimport ws jQueryBindings
   where ws = mzeroWebSite { serverpart = jQuerySP
                           , headers = [WMH_JavaScript (baseurl +++ jsFilePath)] 
                           , bodies = [WMB_Initialization "jquery initialization"]
@@ -39,16 +40,6 @@ jQuery = wimport ws jQueryBindings
                           }
 jQuerySP :: ServerPartT IO Response
 jQuerySP = dir basepath $ uriRest (serveEmbedded "jQuery" jQueryFileMap)
-
-serveEmbedded :: String -> Map FilePath B.ByteString -> FilePath -> ServerPartT IO Response
-serveEmbedded filemapname filemap fpa = do
-  let fp = "/" `makeRelative` fpa
-  liftIO $ putStrLn ("serveEmbedded("++ fp ++ ")")
-  case M.lookup fp filemap of
-    Just bs -> do mt <- guessContentTypeM mimeTypes fp
-                  ok $ setHeader "content-type" mt $ toResponse bs
-    Nothing -> notFound . toResponse $ "filepath " ++ fp ++ " not found in filemap " ++ filemapname
-
 
 -- Do Not Export
 jQueryBindings :: JQueryBindings
