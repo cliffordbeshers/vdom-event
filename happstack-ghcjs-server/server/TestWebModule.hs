@@ -11,6 +11,7 @@ import WebModule
 import WebModuleM
 import ModuleScopeURL
 import JQueryWebModule
+import JQueryUIWebModule
 import BootstrapWebModule
 import GHCJSWebModule
 
@@ -62,6 +63,7 @@ websiteM :: Monad m => WebSiteM m ()
 websiteM = do
   mkWebSiteM faviconWebSite
   JQueryBindings{..} <- jQueryModule
+  JQueryUIBindings{..} <- jQueryUIModule
   BootstrapBindings{..} <- bootstrapModule
   GHCJSBindings{..} <- ghcjsWebModule
   home
