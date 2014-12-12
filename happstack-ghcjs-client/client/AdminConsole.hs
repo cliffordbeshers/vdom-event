@@ -45,7 +45,8 @@ import qualified Text.Blaze.Html5.Attributes as HA
 default (String)
 
 
-content = pdfEmbed "http://cs.au.dk/~hosc/local/LaSC-7-1-pp39-56.pdf"
+content = H.div $ "Hello, world!"
+-- content = pdfEmbed "http://cs.au.dk/~hosc/local/LaSC-7-1-pp39-56.pdf"
 pdfEmbed :: String -> H.Markup
 pdfEmbed u = H.embed ! HA.width "100%" ! HA.height "600px" 
                 ! HA.name "plugin" ! HA.src (H.toValue u) 
@@ -65,4 +66,3 @@ pdfCanvasUnfinished = H.div $ H.canvas ! HA.id "the-canvas" ! HA.style "border:1
   -- return $ container $ [ H.toMarkup $ markupConf (httpConf c)
   --                      , xxx
   --                      ]
-

@@ -33,7 +33,7 @@ basepath = moduleScopeURLtoFilePath baseurl
 jQueryUIModule :: Monad m => WebSiteM m JQueryUIBindings
 jQueryUIModule = wimport ws jQueryUIBindings
   where ws = mzeroWebSite { serverpart = jQueryUISP
-                          , headers = [WMH_JavaScript (baseurl +++ jsFilePath)] 
+                          , headers = [WMH_JavaScript (baseurl +++ jsFilePath), WMH_CSS (baseurl +++ cssFilePath)] 
                           , bodies = [WMB_Initialization "jQueryUI initialization"]
                           , baseURL = [baseurl]
                           }
@@ -52,7 +52,7 @@ jQueryUIFileMap = M.fromList $(embedDir "embedded/jquery-ui-1.11.2")
 
 -- This value incorporates a test that ensures we have the right path at compile time
 jsFilePath :: FilePath
-[jsFilePath] =  map v fps
+[jsFilePath, cssFilePath] =  map v fps
   where v = verifyEmbeddedFP "JQueryUIWebModule:jQueryUIFileMap" jQueryUIFileMap
         fps = ["jquery-ui.min.js", "jquery-ui.min.css"]
 
