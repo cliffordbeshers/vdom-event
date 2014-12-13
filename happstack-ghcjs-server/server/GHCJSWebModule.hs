@@ -32,7 +32,8 @@ basepath = moduleScopeURLtoFilePath baseurl
 
 -- Hard-coded path because template haskell staging, didn't want it in another file.
 ghcjsFileMap :: Map FilePath B.ByteString
-ghcjsFileMap = Map.fromList $(embedDir "/usr/bin/happstack-ghcjs-client.jsexe")
+-- ghcjsFileMap = Map.fromList $(embedDir "/usr/bin/happstack-ghcjs-client.jsexe")
+ghcjsFileMap = Map.fromList $(embedDir "../happstack-ghcjs-client/dist/build/happstack-ghcjs-client/happstack-ghcjs-client.jsexe")
 
 ghcjsBindings :: GHCJSBindings
 ghcjsBindings = GHCJSBindings { start = 1 }

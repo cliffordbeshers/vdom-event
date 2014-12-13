@@ -12,6 +12,7 @@ set -x
 ) &&
 
 ( cd happstack-ghcjs-server
+  rm -rf dist
   runhaskell Setup.hs configure -f local-development && \
   runhaskell Setup.hs build --ghc-option="-odir dist/build/tmp" --ghc-option="-hidir dist/build/tmp" && \
   dist/build/happstack-ghcjs-server/happstack-ghcjs-server
