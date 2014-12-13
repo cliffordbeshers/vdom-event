@@ -42,7 +42,7 @@ ghcjsWebModule :: Monad m => WebSiteM m GHCJSBindings
 ghcjsWebModule = wimport ws ghcjsBindings
   where ws = mzeroWebSite { serverpart = ghcjsSP
                           , headers = [WMH_JavaScript (baseurl +++ jsFilePath)]
-                          , bodies = [WMB_Initialization "jquery initialization"]
+                          , bodies = [WMB_Initialization "console.log('GHCJSWebModule initialization');"]
                           , baseURL = [baseurl]
                           }
 

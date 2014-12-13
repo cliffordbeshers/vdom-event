@@ -34,7 +34,7 @@ jQueryUIModule :: Monad m => WebSiteM m JQueryUIBindings
 jQueryUIModule = wimport ws jQueryUIBindings
   where ws = mzeroWebSite { serverpart = jQueryUISP
                           , headers = [WMH_JavaScript (baseurl +++ jsFilePath), WMH_CSS (baseurl +++ cssFilePath)] 
-                          , bodies = [WMB_Initialization "jQueryUI initialization"]
+                          , bodies = [WMB_Initialization "console.log('jQueryUIWebModule initialization');"]
                           , baseURL = [baseurl]
                           }
 jQueryUISP :: ServerPartT IO Response

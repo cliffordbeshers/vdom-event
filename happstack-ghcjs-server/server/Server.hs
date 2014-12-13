@@ -25,9 +25,9 @@ faviconWebSite =
           }
 
 helloWorld :: Monad m => WebSiteM m ()
-helloWorld = tellBody $ [WMB_Initialization "Hello, World"]
+helloWorld = tellBody $ [WMB_Initialization "console.log('Hello, World');"]
 goodbyeWorld :: Monad m => WebSiteM m ()
-goodbyeWorld = tellBody $ [WMB_Initialization "Goodbye, World"]
+goodbyeWorld = tellBody $ [WMB_Initialization "console.log('Goodbye, World');"]
 
 
 -- Compiling the website should generate an html page that is attached to defaultHandler and indexDotHtml.

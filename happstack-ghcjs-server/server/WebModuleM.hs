@@ -10,13 +10,14 @@ import Control.Monad as Monad
 import Control.Monad.Trans.Writer
 import Markable
 import WebModule
-import Happstack.Server as Happstack (ServerPartT, Response, nullDir, ok, toResponse, dirs)
+import Happstack.Server as Happstack (ServerPartT, Response, nullDir, ok, ToMessage(..), dirs)
+import Text.Blaze.Html5 (Markup, toMarkup)
 import Text.Blaze.Html5 (Markup, toMarkup)
 import Data.Lens.Strict
 import Template
 import Data.Text as Text (pack)
 import Data.Monoid
-
+import Text.Blaze.Html.Renderer.Pretty  (renderHtml)
 
 type WebSiteM = WriterT WebSite
 
@@ -74,15 +75,15 @@ templateMarkup ws = htmlTemplate' title (hs ws) (bs ws)
         hs = map toMarkup . headers
         bs = map toMarkup . bodies
 
-defaultHandler :: Markup -> ServerPartT IO Response
+defaultHandler :: ToMessage a => a -> ServerPartT IO Response
 defaultHandler m = nullDir >> ok (toResponse m)
 
-indexDotHtml :: Markup -> ServerPartT IO Response
+indexDotHtml :: ToMessage a => a -> ServerPartT IO Response
 indexDotHtml = htmlHandler "index.html"
 
-rootHandler :: Markup -> ServerPartT IO Response
+rootHandler :: ToMessage a => a -> ServerPartT IO Response
 rootHandler m = msum [ defaultHandler m
                      , indexDotHtml m
                      ]
-htmlHandler :: FilePath -> Markup -> ServerPartT IO Response
+htmlHandler :: ToMessage a => FilePath -> a -> ServerPartT IO Response
 htmlHandler fp m = dirs fp $ ok (toResponse m)

@@ -35,7 +35,7 @@ jQueryModule :: Monad m => WebSiteM m JQueryBindings
 jQueryModule = wimport ws jQueryBindings
   where ws = mzeroWebSite { serverpart = jQuerySP
                           , headers = [WMH_JavaScript (baseurl +++ jsFilePath)] 
-                          , bodies = [WMB_Initialization "jquery initialization"]
+                          , bodies = [WMB_Initialization "console.log('JQueryWebModule initialization');"]
                           , baseURL = [baseurl]
                           }
 jQuerySP :: ServerPartT IO Response
