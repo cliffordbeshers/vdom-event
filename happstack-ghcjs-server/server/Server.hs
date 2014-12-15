@@ -5,15 +5,15 @@ module Main where
 import Control.Monad (MonadPlus(..))
 import Happstack.Server
 import Text.Blaze.Html5 as H (Markup, toMarkup)
-import Favicon
-import Markable
-import WebModule
-import WebModuleM
-import ModuleScopeURL
-import JQueryWebModule
-import JQueryUIWebModule
-import BootstrapWebModule
-import GHCJSWebModule
+import WebModule.Favicon
+import WebModule.Markable
+import WebModule.WebModule
+import WebModule.WebModuleM
+import WebModule.ModuleScopeURL
+import WebModule.JQueryWebModule
+import WebModule.JQueryUIWebModule
+import WebModule.BootstrapWebModule
+import WebModule.GHCJSWebModule
 
 faviconWebSite :: WebSite
 faviconWebSite = 

@@ -1,5 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
-module WithLocation (withLocation, moduleNameTH) where
+module WebModule.WithLocation (withLocation, moduleNameTH) where
 import Language.Haskell.TH
 import Language.Haskell.TH.Lift
 

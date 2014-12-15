@@ -1,7 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
-module ManifestURL (manifestURL) where
+module WebModule.ManifestURL (manifestURL) where
 
-import EmbedURI (embedRelativeURI)
+import WebModule.EmbedURI (embedRelativeURI)
 import Network.URI
 
 manifestURL :: URI

@@ -1,14 +1,14 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
-module Template (WebImport(..), htmlTemplate, htmlTemplate') where
+module WebModule.Template (WebImport(..), htmlTemplate, htmlTemplate') where
 
 import Prelude as P
 import Data.Text (Text)
 import Text.Blaze.Html5 ((!), Markup, toMarkup, toValue)
 import qualified Text.Blaze.Html5 as H (body, docTypeHtml, head, link, meta, title)
 import qualified Text.Blaze.Html5.Attributes as HA (content, href, httpEquiv, manifest, rel, type_)
-import Favicon
-import ManifestURL (manifestURL)
+import WebModule.Favicon
+import WebModule.ManifestURL (manifestURL)
 
 default (Text)
 

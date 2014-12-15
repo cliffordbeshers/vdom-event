@@ -1,4 +1,4 @@
-module Markable where
+module WebModule.Markable where
 
 -- Existential quantification of distinct types did not work
 -- here because I need an Eq instance to nub import lists.
@@ -6,7 +6,7 @@ module Markable where
 import Text.Blaze.Html5 (ToMarkup(..))
 import Network.URI (URI)
 import qualified Data.ByteString as B (ByteString)
-import ModuleScopeURL
+import WebModule.ModuleScopeURL
 
 -- All the types that can be serialized into the HTML head section.
 data WM_Header = 

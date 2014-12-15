@@ -1,6 +1,6 @@
 {-# LANGUAGE PackageImports #-}
 {-# LANGUAGE TemplateHaskell #-}
-module EmbedURI (embedURI, embedRelativeURI, showURI, putURI, putURILn) where
+module WebModule.EmbedURI (embedURI, embedRelativeURI, showURI, putURI, putURILn) where
 
 import Data.List (intercalate)
 import Data.Maybe (fromJust)

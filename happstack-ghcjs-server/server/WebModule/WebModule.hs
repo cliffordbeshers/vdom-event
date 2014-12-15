@@ -2,7 +2,7 @@
 {-# LANGUAGE PackageImports #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# OPTIONS_GHC -fwarn-incomplete-patterns #-}
-module WebModule where
+module WebModule.WebModule where
 
 import Control.Monad as Monad (mplus)
 import Control.Monad.Trans as Monad
@@ -15,10 +15,10 @@ import Text.Blaze.Html5 as H (Markup, ToValue(..), ToMarkup(..), link, (!), scri
 import qualified Text.Blaze.Html5.Attributes as HA (href, rel, src, type_, manifest)
 import Text.Blaze.Html.Renderer.Utf8  (renderHtml)
 import Happstack.Server (ServerPartT, Response)
-import Markable
-import Favicon
-import ModuleScopeURL
-import ManifestURL (manifestURL)
+import WebModule.Markable
+import WebModule.Favicon
+import WebModule.ModuleScopeURL
+import WebModule.ManifestURL (manifestURL)
 import Data.Lens.Template (nameMakeLens)
 
 default (T.Text)

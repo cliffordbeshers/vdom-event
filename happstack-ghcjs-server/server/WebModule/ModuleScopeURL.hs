@@ -1,15 +1,15 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE TemplateHaskell #-}
-module ModuleScopeURL (ModuleScopeURL, moduleScopeURL, moduleScopeURLtoURI
-                      , moduleScopeURLtoFilePath
-                      , moduleScopeAppend
-                      , URI
-                      ) where
+module WebModule.ModuleScopeURL (ModuleScopeURL, moduleScopeURL, moduleScopeURLtoURI
+                                , moduleScopeURLtoFilePath
+                                , moduleScopeAppend
+                                , URI
+                                ) where
 
 import Language.Haskell.TH
 import Language.Haskell.TH.Lift
 import System.FilePath (FilePath, (</>))
-import WithLocation (moduleNameTH)
+import WebModule.WithLocation (moduleNameTH)
 import Data.Typeable
 import Data.Data
 import Data.Maybe (fromJust)

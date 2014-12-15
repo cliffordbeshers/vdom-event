@@ -1,11 +1,11 @@
 {-# LANGUAGE TemplateHaskell #-}
-module GHCJSWebModule (ghcjsWebModule, GHCJSBindings(..)) where
+module WebModule.GHCJSWebModule (ghcjsWebModule, GHCJSBindings(..)) where
 
-import Markable
-import ServeEmbedded
-import WebModule
-import WebModuleM
-import ModuleScopeURL
+import WebModule.Markable
+import WebModule.ServeEmbedded
+import WebModule.WebModule
+import WebModule.WebModuleM
+import WebModule.ModuleScopeURL
 
 import Happstack.Server
 import Control.Monad.Trans as Trans (liftIO)

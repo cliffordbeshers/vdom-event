@@ -1,13 +1,13 @@
 {-# LANGUAGE TemplateHaskell #-}
-module JQueryWebModule (jQueryModule, JQueryBindings(..)) where
+module WebModule.JQueryWebModule (jQueryModule, JQueryBindings(..)) where
 
 import qualified GHCJSStub.JQuery as JQuery (on, Event(..), EventType(..), HandlerSettings, JQuery)
 import Control.Monad.Trans (liftIO)
-import Markable
-import ServeEmbedded (serveEmbedded, verifyEmbeddedFP)
-import WebModule
-import WebModuleM
-import ModuleScopeURL
+import WebModule.Markable
+import WebModule.ServeEmbedded (serveEmbedded, verifyEmbeddedFP)
+import WebModule.WebModule
+import WebModule.WebModuleM
+import WebModule.ModuleScopeURL
 import Text.Blaze.Html5 (Markup, toMarkup)
 import Happstack.Server as Happstack (ServerPartT, FilterMonad, guessContentTypeM, mimeTypes, notFound, ok, Response, setHeader, ToMessage(toResponse),dirs, dir, uriRest)
 

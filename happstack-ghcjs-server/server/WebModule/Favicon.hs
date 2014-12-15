@@ -1,6 +1,6 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE OverloadedStrings #-}
-module Favicon where
+module WebModule.Favicon where
 
 import Data.Text (Text, unpack)
 import Text.Blaze.Html5 ((!), Markup, ToMarkup(..), toValue)
@@ -10,8 +10,8 @@ import qualified Data.ByteString as B
 import Network.URI (URI)
 import Data.FileEmbed
 import Happstack.Server
-import Markable
-import ModuleScopeURL
+import WebModule.Markable
+import WebModule.ModuleScopeURL
 
 default (Text)
 

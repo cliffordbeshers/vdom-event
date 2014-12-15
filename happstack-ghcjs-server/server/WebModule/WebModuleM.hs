@@ -3,18 +3,18 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# OPTIONS_GHC -fno-warn-overlapping-patterns #-}
-module WebModuleM where
+module WebModule.WebModuleM where
 
 import Control.Applicative
 import Control.Monad as Monad
 import Control.Monad.Trans.Writer
-import Markable
-import WebModule
+import WebModule.Markable
+import WebModule.WebModule
 import Happstack.Server as Happstack (ServerPartT, Response, nullDir, ok, ToMessage(..), dirs)
 import Text.Blaze.Html5 (Markup, toMarkup)
 import Text.Blaze.Html5 (Markup, toMarkup)
 import Data.Lens.Strict
-import Template
+import WebModule.Template
 import Data.Text as Text (pack)
 import Data.Monoid
 import Text.Blaze.Html.Renderer.Pretty  (renderHtml)
