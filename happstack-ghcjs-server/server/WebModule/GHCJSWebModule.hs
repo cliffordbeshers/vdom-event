@@ -8,10 +8,6 @@ import WebModule.WebModuleM
 import WebModule.ModuleScopeURL
 
 import Happstack.Server
-import Control.Monad.Trans as Trans (liftIO)
-import Control.Monad as Monad (msum)
-import System.FilePath
-import System.Log.Logger (debugM, logM, Priority(ALERT, DEBUG, INFO), rootLoggerName, setHandlers, setLevel, updateGlobalLogger)
 
 import Data.FileEmbed (embedDir)
 import Data.Map as Map (Map, fromList)

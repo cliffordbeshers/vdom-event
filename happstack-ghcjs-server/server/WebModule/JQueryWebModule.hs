@@ -1,22 +1,23 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE TemplateHaskell #-}
 module WebModule.JQueryWebModule (jQueryModule, JQueryBindings(..)) where
 
-import qualified GHCJSStub.JQuery as JQuery (on, Event(..), EventType(..), HandlerSettings, JQuery)
-import Control.Monad.Trans (liftIO)
+#if CLIENT
+import qualified GHCJS.JQuery as JQuery (on, Event, EventType, HandlerSettings, JQuery)
+#else
+import qualified GHCJSStub.JQuery as JQuery (on, Event, EventType, HandlerSettings, JQuery)
+#endif
 import WebModule.Markable
 import WebModule.ServeEmbedded (serveEmbedded, verifyEmbeddedFP)
 import WebModule.WebModule
 import WebModule.WebModuleM
 import WebModule.ModuleScopeURL
-import Text.Blaze.Html5 (Markup, toMarkup)
-import Happstack.Server as Happstack (ServerPartT, FilterMonad, guessContentTypeM, mimeTypes, notFound, ok, Response, setHeader, ToMessage(toResponse),dirs, dir, uriRest)
+import Happstack.Server as Happstack (ServerPartT, Response,  dir, uriRest)
 
-import Control.Monad.Trans.Writer
 import Data.FileEmbed (embedDir)
 import Data.Map (Map)
-import qualified Data.Map as M (fromList, lookup, member)
+import qualified Data.Map as M (fromList)
 import Data.ByteString as B (ByteString)
-import System.FilePath (makeRelative)
 
 
 data JQueryBindings = JQueryBindings { on :: (JQuery.Event -> IO ()) -> JQuery.EventType -> JQuery.HandlerSettings -> JQuery.JQuery -> IO (IO ()) }

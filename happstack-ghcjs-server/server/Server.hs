@@ -4,12 +4,10 @@ module Main where
 
 import Control.Monad (MonadPlus(..))
 import Happstack.Server
-import Text.Blaze.Html5 as H (Markup, toMarkup)
 import WebModule.Favicon
 import WebModule.Markable
 import WebModule.WebModule
 import WebModule.WebModuleM
-import WebModule.ModuleScopeURL
 import WebModule.JQueryWebModule
 import WebModule.JQueryUIWebModule
 import WebModule.BootstrapWebModule
@@ -68,6 +66,7 @@ websiteM = do
   GHCJSBindings{..} <- ghcjsWebModule
   home
 
+main :: IO ()
 main = do
   let p = 8010
   print ("Serving on localhost",p)

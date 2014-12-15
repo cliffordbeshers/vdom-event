@@ -2,7 +2,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE TypeSynonymInstances #-}
-{-# OPTIONS_GHC -fno-warn-overlapping-patterns #-}
+{-# OPTIONS_GHC -fno-warn-overlapping-patterns -fno-warn-orphans #-}
 module WebModule.WebModuleM where
 
 import Control.Monad as Monad (MonadPlus(mplus, mzero), msum)
@@ -11,9 +11,9 @@ import Data.Lens.Strict (Lens, modL)
 import Data.Monoid (Monoid(mappend, mempty))
 import Data.Text as Text (pack)
 import Happstack.Server as Happstack (dirs, nullDir, ok, Response, ServerPartT, ToMessage(..))
-import Text.Blaze.Html5 (ToMarkup(toMarkup))
+import Text.Blaze.Html5 (Markup, ToMarkup(toMarkup))
 import WebModule.Markable (WM_Body, WM_Header)
-import WebModule.Template (htmlTemplate')
+import WebModule.Template (htmlTemplate)
 import WebModule.WebModule (WebSite(..), wplus)
 
 type WebSiteM = WriterT WebSite
@@ -51,6 +51,7 @@ mzeroWebSite = WebSite { serverpart = mzero
                        , manifest = []
                        }
 
+runWebSiteM :: WriterT w m a -> m (a, w)
 runWebSiteM  = runWriterT
 
 -- This is probably mapWriterT composed with runWriterT or something.
@@ -67,10 +68,13 @@ mkTemplatePart ws = rootHandler (templateMarkup ws)
 -- This is the sole html page pulled from the server, it includes all
 -- the javascript, css, initialization code, etc. as well as a DOM
 -- element which serves as the application root.
-templateMarkup ws = htmlTemplate' title (hs ws) (bs ws)
+
+templateMarkup :: WebSite -> Markup
+templateMarkup ws = htmlTemplate useManifest title (hs ws) (bs ws)
   where title = Text.pack "Need a title"
         hs = map toMarkup . headers
         bs = map toMarkup . bodies
+        useManifest = False
 
 defaultHandler :: ToMessage a => a -> ServerPartT IO Response
 defaultHandler m = nullDir >> ok (toResponse m)

@@ -1,5 +1,6 @@
 {-# LANGUAGE PackageImports #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# OPTIONS -fno-warn-orphans #-}
 module WebModule.EmbedURI (embedURI, embedRelativeURI, showURI, putURI, putURILn) where
 
 import Data.List (intercalate)
@@ -20,15 +21,15 @@ embedRelativeURI = lift . fromJust . parseRelativeReference
 -- a URI show function that shows the record structure
 showURI :: URI -> String
 showURI u = "URI {" ++ (commas $ fields u) ++ "}"
-  where fields v = zipWith (\n v -> n ++ " = " ++ v) names (values v)
+  where fields v = zipWith (\n x -> n ++ " = " ++ x) names (values v)
         commas = intercalate ", "
         names = [ "uriScheme", "uriAuthority", "uriPath", "uriQuery", "uriFragment"]
-        values u = [ show $ uriScheme u
-                   , show $ uriAuthority u
-                   , show $ uriPath u
-                   , show $ uriQuery u
-                   , show $ uriFragment u
-                   ]
+        values uu = [ show $ uriScheme uu
+                    , show $ uriAuthority uu
+                    , show $ uriPath uu
+                    , show $ uriQuery uu
+                    , show $ uriFragment uu
+                    ]
   
 putURI :: URI -> IO ()
 putURI = putStr . showURI

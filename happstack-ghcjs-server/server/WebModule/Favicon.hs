@@ -24,7 +24,7 @@ favicon :: B.ByteString
 favicon = $(embedFile "server/favicon.ico")
 
 faviconHandler :: B.ByteString -> ServerPartT IO Response
-faviconHandler favicon = dirs "/favicon.ico" $ ok $ setMimeType $ toResponse favicon
+faviconHandler bs = dirs "/favicon.ico" $ ok $ setMimeType $ toResponse bs
   where setMimeType = setHeader "Content-Type" manifestMimeType
         manifestMimeType = "text/cache-manifest"
 

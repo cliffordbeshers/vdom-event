@@ -11,11 +11,9 @@ import GHCJS.DOM.Types (Element(..))
 import GHCJS.Foreign
 #else
 import GHCJSStub.Types
-import GHCJSStub.DOM.Types (Element(..))
-import GHCJSStub.Foreign
+--import GHCJSStub.DOM.Types (Element(..))
+--import GHCJSStub.Foreign
 #endif
-
-import Control.Concurrent.MVar
 
 data JQuery_
 data Event_
@@ -58,7 +56,7 @@ jq_addClass = error "jq_addClass: only available in JavaScript"
 #endif
 
 on :: (Event -> IO ()) -> EventType -> HandlerSettings -> JQuery -> IO (IO ())
-on a et hs jq = undefined
+on = undefined
 
 select :: Text -> IO JQuery
 select = undefined

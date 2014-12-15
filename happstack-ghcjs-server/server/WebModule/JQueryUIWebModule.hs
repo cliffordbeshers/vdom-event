@@ -46,7 +46,7 @@ jQueryUIFileMap = M.fromList $(embedDir "embedded/jquery-ui-1.11.2")
 
 
 -- This value incorporates a test that ensures we have the right path at compile time
-jsFilePath :: FilePath
+jsFilePath, cssFilePath :: FilePath
 [jsFilePath, cssFilePath] =  map v fps
   where v = verifyEmbeddedFP "JQueryUIWebModule:jQueryUIFileMap" jQueryUIFileMap
         fps = ["jquery-ui.min.js", "jquery-ui.min.css"]
