@@ -4,9 +4,9 @@ module WebModule.EmbedURI (embedURI, embedRelativeURI, showURI, putURI, putURILn
 
 import Data.List (intercalate)
 import Data.Maybe (fromJust)
-import Language.Haskell.TH.Lift
-import Language.Haskell.TH
-import "network-uri" Network.URI
+import Language.Haskell.TH (Exp, Q)
+import Language.Haskell.TH.Lift (deriveLift, Lift(lift))
+import "network-uri" Network.URI (parseRelativeReference, parseURI, URI(uriAuthority, uriFragment, uriPath, uriQuery, uriScheme), URIAuth)
 
 $(deriveLift ''URIAuth)
 $(deriveLift ''URI)

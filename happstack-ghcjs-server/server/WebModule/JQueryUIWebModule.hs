@@ -1,21 +1,16 @@
 {-# LANGUAGE TemplateHaskell #-}
 module WebModule.JQueryUIWebModule (jQueryUIModule, JQueryUIBindings(..)) where
 
-import Control.Monad.Trans (liftIO)
-import WebModule.Markable
-import WebModule.ServeEmbedded (serveEmbedded, verifyEmbeddedFP)
-import WebModule.WebModule
-import WebModule.WebModuleM
-import WebModule.ModuleScopeURL
-import Text.Blaze.Html5 (Markup, toMarkup)
-import Happstack.Server as Happstack (ServerPartT, FilterMonad, guessContentTypeM, mimeTypes, notFound, ok, Response, setHeader, ToMessage(toResponse),dirs, dir, uriRest)
-
-import Control.Monad.Trans.Writer
+import Data.ByteString as B (ByteString)
 import Data.FileEmbed (embedDir)
 import Data.Map (Map)
-import qualified Data.Map as M (fromList, lookup, member)
-import Data.ByteString as B (ByteString)
-import System.FilePath (makeRelative)
+import qualified Data.Map as M (fromList)
+import Happstack.Server as Happstack (dir, Response, ServerPartT, uriRest)
+import WebModule.Markable (WM_Body(WMB_Initialization), WM_Header(WMH_CSS, WMH_JavaScript))
+import WebModule.ModuleScopeURL (moduleScopeAppend, moduleScopeURL, ModuleScopeURL, moduleScopeURLtoFilePath)
+import WebModule.ServeEmbedded (serveEmbedded, verifyEmbeddedFP)
+import WebModule.WebModule (WebSite(baseURL, bodies, headers, serverpart))
+import WebModule.WebModuleM (mzeroWebSite, WebSiteM, wimport)
 
 
 data JQueryUIBindings = JQueryUIBindings { sortable :: Int }

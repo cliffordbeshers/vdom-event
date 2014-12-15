@@ -5,19 +5,16 @@
 {-# OPTIONS_GHC -fno-warn-overlapping-patterns #-}
 module WebModule.WebModuleM where
 
-import Control.Applicative
-import Control.Monad as Monad
-import Control.Monad.Trans.Writer
-import WebModule.Markable
-import WebModule.WebModule
-import Happstack.Server as Happstack (ServerPartT, Response, nullDir, ok, ToMessage(..), dirs)
-import Text.Blaze.Html5 (Markup, toMarkup)
-import Text.Blaze.Html5 (Markup, toMarkup)
-import Data.Lens.Strict
-import WebModule.Template
+import Control.Monad as Monad (MonadPlus(mplus, mzero), msum)
+import Control.Monad.Trans.Writer (censor, tell, WriterT(runWriterT))
+import Data.Lens.Strict (Lens, modL)
+import Data.Monoid (Monoid(mappend, mempty))
 import Data.Text as Text (pack)
-import Data.Monoid
-import Text.Blaze.Html.Renderer.Pretty  (renderHtml)
+import Happstack.Server as Happstack (dirs, nullDir, ok, Response, ServerPartT, ToMessage(..))
+import Text.Blaze.Html5 (ToMarkup(toMarkup))
+import WebModule.Markable (WM_Body, WM_Header)
+import WebModule.Template (htmlTemplate')
+import WebModule.WebModule (WebSite(..), wplus)
 
 type WebSiteM = WriterT WebSite
 

@@ -5,21 +5,19 @@
 module WebModule.WebModule where
 
 import Control.Monad as Monad (mplus)
-import Control.Monad.Trans as Monad
+import Data.ByteString as B (ByteString)
+import Data.Lens.Template (nameMakeLens)
 import Data.List (nub)
 import Data.Monoid ((<>))
 import Data.Text as T (Text)
-import Network.URI
-import Data.ByteString as B (ByteString) -- Force Strict
-import Text.Blaze.Html5 as H (Markup, ToValue(..), ToMarkup(..), link, (!), script, docTypeHtml, head, body, style)
-import qualified Text.Blaze.Html5.Attributes as HA (href, rel, src, type_, manifest)
-import Text.Blaze.Html.Renderer.Utf8  (renderHtml)
-import Happstack.Server (ServerPartT, Response)
-import WebModule.Markable
-import WebModule.Favicon
-import WebModule.ModuleScopeURL
+import Happstack.Server (Response, ServerPartT)
+import Network.URI (URI)
+import Text.Blaze.Html5 as H ((!), body, docTypeHtml, head, link, Markup, script, ToMarkup(toMarkup), ToValue(toValue))
+import qualified Text.Blaze.Html5.Attributes as HA (href, manifest, rel, src, type_)
+import WebModule.Favicon (faviconMarkup)
 import WebModule.ManifestURL (manifestURL)
-import Data.Lens.Template (nameMakeLens)
+import WebModule.Markable (WM_Body(..), WM_Header(..))
+import WebModule.ModuleScopeURL (ModuleScopeURL, moduleScopeURLtoURI)
 
 default (T.Text)
 

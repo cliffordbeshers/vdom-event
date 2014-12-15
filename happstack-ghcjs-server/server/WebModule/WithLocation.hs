@@ -1,7 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 module WebModule.WithLocation (withLocation, moduleNameTH) where
-import Language.Haskell.TH
-import Language.Haskell.TH.Lift
+import Language.Haskell.TH (appE, Exp, litE, Loc(loc_filename, loc_module, loc_start), location, Q, stringL)
+import Language.Haskell.TH.Lift (Lift(lift))
 
 -- withLocation' :: String -> IO a -> IO a
 -- withLocation' s f = do { putStrLn s ; f }

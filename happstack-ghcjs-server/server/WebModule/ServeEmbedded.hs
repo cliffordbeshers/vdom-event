@@ -1,12 +1,10 @@
 module WebModule.ServeEmbedded (serveEmbedded, verifyEmbeddedFP) where
 
-import Happstack.Server as Happstack (ServerPartT, FilterMonad, guessContentTypeM, mimeTypes, notFound, ok, Response, setHeader, ToMessage(toResponse),dirs, dir, uriRest)
 import Data.ByteString as B (ByteString)
 import Data.Map (Map)
-import qualified Data.Map as M (fromList, lookup, member)
-import Control.Monad.Trans
-
-import System.FilePath
+import qualified Data.Map as M (lookup, member)
+import Happstack.Server as Happstack (guessContentTypeM, mimeTypes, notFound, ok, Response, ServerPartT, setHeader, ToMessage(toResponse))
+import System.FilePath (makeRelative)
 
 serveEmbedded :: String -> Map FilePath B.ByteString -> FilePath -> ServerPartT IO Response
 serveEmbedded filemapname filemap fpa = do

@@ -6,14 +6,11 @@ module WebModule.ModuleScopeURL (ModuleScopeURL, moduleScopeURL, moduleScopeURLt
                                 , URI
                                 ) where
 
-import Language.Haskell.TH
-import Language.Haskell.TH.Lift
-import System.FilePath (FilePath, (</>))
-import WebModule.WithLocation (moduleNameTH)
-import Data.Typeable
-import Data.Data
 import Data.Maybe (fromJust)
-import Network.URI
+import Language.Haskell.TH (Exp, Loc(loc_module), location, Q)
+import Language.Haskell.TH.Lift (deriveLift, Lift(lift))
+import Network.URI (parseRelativeReference, URI)
+import System.FilePath ((</>))
 import Text.Blaze.Html5 as H (ToValue(..))
 
 data ModuleScopeURL = ModuleScopeURL String FilePath deriving (Eq,Show)
