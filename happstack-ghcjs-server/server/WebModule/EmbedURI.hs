@@ -1,6 +1,12 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE PackageImports #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# OPTIONS -fno-warn-orphans #-}
+
+#if CLIENT
+module WebModule.EmbedURI where
+#endif
+#if SERVER
 module WebModule.EmbedURI (embedURI, embedRelativeURI, showURI, putURI, putURILn) where
 
 import Data.List (intercalate)
@@ -36,3 +42,4 @@ putURI = putStr . showURI
 
 putURILn :: URI -> IO ()
 putURILn = putStrLn . showURI
+#endif

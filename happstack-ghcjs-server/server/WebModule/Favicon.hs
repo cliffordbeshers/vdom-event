@@ -1,7 +1,9 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE OverloadedStrings #-}
 module WebModule.Favicon where
 
+#if SERVER
 import qualified Data.ByteString as B (ByteString)
 import Data.FileEmbed (embedFile)
 import Data.Text (Text, unpack)
@@ -39,3 +41,4 @@ faviconMarkup uri =
       ! HA.rel "icon" 
       ! HA.href (toValue $ show uri)
       ! HA.type_ "image/x-icon"
+#endif

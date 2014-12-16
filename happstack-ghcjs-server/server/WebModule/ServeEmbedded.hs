@@ -1,3 +1,9 @@
+{-# LANGUAGE CPP #-}
+#if CLIENT
+module WebModule.ServeEmbedded() where
+#endif
+
+#if SERVER
 module WebModule.ServeEmbedded (serveEmbedded, verifyEmbeddedFP) where
 
 import Data.ByteString as B (ByteString)
@@ -21,3 +27,4 @@ verifyEmbeddedFP filemapname filemap fp =
   if M.member fp filemap
   then fp
   else error $ "ServeEmbedded:verifyEmbbeddedFP -- " ++ filemapname ++ " does not contain path " ++ fp
+#endif

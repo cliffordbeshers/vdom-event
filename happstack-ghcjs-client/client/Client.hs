@@ -48,7 +48,7 @@ import qualified Data.ByteString.Lazy as BL
 import Common
 import           Data.Default
 -- import Data.Text.Lazy as Text (Text, unpack, pack)
-
+import Sortable
 default(T.Text)
 
 

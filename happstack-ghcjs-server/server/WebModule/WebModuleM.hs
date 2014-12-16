@@ -1,13 +1,38 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# OPTIONS_GHC -fno-warn-overlapping-patterns -fno-warn-orphans #-}
-module WebModule.WebModuleM where
+#if CLIENT
+module WebModule.WebModuleM (WebSiteM) where
+#else
+module WebModule.WebModuleM 
+       ( WebSiteM
+       , wimport
+       , tellServerPart
+       , tellHead
+       , tellBody
+       , mzeroWebSite
+       , mkWebSiteM
+       , runWebSiteM
+       , compileWebSiteM
+       , mkTemplatePart
+       , templateMarkup
+       , defaultHandler
+       , indexDotHtml
+       , rootHandler
+       , htmlHandler
+       ) where
+#endif
 
+
+#if CLIENT
+import Control.Monad.Trans.Identity
+#endif    
+#if SERVER
 import Control.Monad as Monad (MonadPlus(mplus, mzero), msum)
-import Control.Monad.Trans.Writer (censor, tell, WriterT(runWriterT))
-import Data.Lens.Strict (Lens, modL)
+import Control.Monad.Trans.Writer (tell, WriterT(runWriterT))
 import Data.Monoid (Monoid(mappend, mempty))
 import Data.Text as Text (pack)
 import Happstack.Server as Happstack (dirs, nullDir, ok, Response, ServerPartT, ToMessage(..))
@@ -15,15 +40,19 @@ import Text.Blaze.Html5 (Markup, ToMarkup(toMarkup))
 import WebModule.Markable (WM_Body, WM_Header)
 import WebModule.Template (htmlTemplate)
 import WebModule.WebModule (WebSite(..), wplus)
+#endif
 
+#if SERVER
 type WebSiteM = WriterT WebSite
+#else
+type WebSiteM = IdentityT
+#endif
+
+#if SERVER
 
 instance Monoid WebSite where
   mempty = mzeroWebSite
   mappend = wplus
-
-modifyL :: Monad m => Lens WebSite a -> (a -> a) -> WebSiteM m a -> WebSiteM m a
-modifyL lens f = censor (modL lens f)
 
 tellServerPart :: Monad m => ServerPartT IO Response -> WebSiteM m ()
 tellServerPart sp = tell $ mempty { serverpart = sp }
@@ -88,3 +117,4 @@ rootHandler m = msum [ defaultHandler m
                      ]
 htmlHandler :: ToMessage a => FilePath -> a -> ServerPartT IO Response
 htmlHandler fp m = dirs fp $ ok (toResponse m)
+#endif

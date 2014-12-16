@@ -1,10 +1,18 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE TemplateHaskell #-}
+
+#if CLIENT
+module WebModule.ModuleScopeURL where
+#else
 module WebModule.ModuleScopeURL (ModuleScopeURL, moduleScopeURL, moduleScopeURLtoURI
                                 , moduleScopeURLtoFilePath
                                 , moduleScopeAppend
                                 , URI
                                 ) where
+#endif
+
+#if SERVER
 
 import Data.Maybe (fromJust)
 import Language.Haskell.TH (Exp, Loc(loc_module), location, Q)
@@ -41,4 +49,4 @@ moduleNameToPath = id -- map dotToSlash
 
 instance ToValue ModuleScopeURL where
   toValue  = toValue . show . moduleScopeURLtoURI
-
+#endif

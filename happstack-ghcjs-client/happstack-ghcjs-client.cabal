@@ -31,6 +31,8 @@ Executable happstack-ghcjs-client
   cpp-options: -DCLIENT
   if flag (ghcjs)
      Build-Depends: ghcjs-base, ghcjs-dom >=0.1, ghcjs-jquery
+  Extensions:
+    TemplateHaskell
   Build-Depends:
      aeson,
      base >=4.2 && <5,
@@ -41,5 +43,7 @@ Executable happstack-ghcjs-client
      containers,
      data-default,
      mtl,
-     text
+     template-haskell,
+     text,
+     transformers
 

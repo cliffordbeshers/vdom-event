@@ -1,7 +1,13 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE PackageImports #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# OPTIONS_GHC -fwarn-incomplete-patterns -fno-warn-orphans #-}
+#if CLIENT
+module WebModule.WebModule() where
+#endif
+
+#if SERVER
 module WebModule.WebModule where
 
 import Control.Monad as Monad (mplus)
@@ -102,5 +108,4 @@ homePage ws =
   H.docTypeHtml ! HA.manifest (toValue $ manifestURL) $ do
     H.head $ mapM_ toMarkup (nub $ headers ws)
     H.body $ mapM_ toMarkup (nub $ bodies ws)
-
-
+#endif
