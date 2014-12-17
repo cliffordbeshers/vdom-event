@@ -5,7 +5,7 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# OPTIONS_GHC -fno-warn-overlapping-patterns -fno-warn-orphans #-}
 #if CLIENT
-module WebModule.WebModuleM (WebSiteM) where
+module WebModule.WebModuleM (WebSiteM, runWebSiteM) where
 #else
 module WebModule.WebModuleM 
        ( WebSiteM
@@ -79,10 +79,18 @@ mzeroWebSite = WebSite { serverpart = mzero
                        , bodies = []
                        , manifest = []
                        }
+#endif
 
-runWebSiteM :: WriterT w m a -> m (a, w)
+#if SERVER
+runWebSiteM :: WebSiteM m a -> m (a, WebSite)
 runWebSiteM  = runWriterT
+#endif
+#if CLIENT
+runWebSiteM :: WebSiteM m a -> m a
+runWebSiteM  = runIdentityT
+#endif
 
+#if SERVER
 -- This is probably mapWriterT composed with runWriterT or something.
 compileWebSiteM :: Monad m => WebSiteM m a -> m (a, WebSite)
 compileWebSiteM m = do

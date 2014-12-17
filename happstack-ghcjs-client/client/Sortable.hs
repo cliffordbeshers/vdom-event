@@ -1,7 +1,8 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE CPP #-}
-module Sortable (Operation(..), Error(..), update) where
+module Sortable (SortableOperation(..), Error(..), update) where
 
+import Data.Aeson
 import GHC.Generics
 import Data.Default
 import Data.List (sortBy)
@@ -22,7 +23,11 @@ import Text.Blaze.Html.Renderer.Text (renderHtml)
 import qualified Data.Text.Lazy as LT (Text, unpack, pack, toStrict)
 import Data.Text as T (Text, pack)
 
-data Operation = Move Int Int | Permutation [Int] deriving (Eq, Show, Generic)
+data SortableOperation = Move Int Int | Permutation [Int] deriving (Eq, Show, Generic)
+
+instance FromJSON SortableOperation
+instance ToJSON SortableOperation
+
 
 data Error = ErrorMoveOutOfRange | ErrorPermutation deriving (Eq, Show, Generic)
 
@@ -30,8 +35,8 @@ data Error = ErrorMoveOutOfRange | ErrorPermutation deriving (Eq, Show, Generic)
 blaze :: Markup -> IO JQuery
 blaze = select . LT.toStrict . renderHtml 
 
-markup :: IO JQuery
-markup = blaze $ H.ul $ sequence_ $ map (H.li . H.toMarkup)  $ map (\n -> "Item " ++ show n) [1..4]
+sortableMarkup :: IO JQuery
+sortableMarkup = blaze $ H.ul $ sequence_ $ map (H.li . H.toMarkup)  $ map (\n -> "Item " ++ show n) [1..4]
 
 -- initialize :: JQuery -> IO JQuery
 initialize = J.on (\e -> putStrLn "Sortable.hs: update called") sortUpdate def
@@ -40,7 +45,7 @@ sortUpdate :: T.Text
 sortUpdate = T.pack "sortupdate"
 
 
-update :: Operation -> [key] -> Either Error [key]
+update :: SortableOperation -> [key] -> Either Error [key]
 update op ks =
   case op of
     Move i j -> 

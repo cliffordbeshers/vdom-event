@@ -2,6 +2,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE RecordWildCards #-}
 module Main where
 
 -- import GHCJS.Concurrent
@@ -48,15 +49,18 @@ import qualified Data.ByteString.Lazy as BL
 import Common
 import           Data.Default
 -- import Data.Text.Lazy as Text (Text, unpack, pack)
-import Sortable
+import WebModule.WebModuleM 
+import SortableModule
 default(T.Text)
 
 
-
 main = runWebGUI $ \ webView -> do
+  -- This doesn't work on the client side since I substituted IdentityT
+  -- (SortableBindings{..}, _) <- runWebSiteM sortableWebModule
+    SortableBindings{..} <- runWebSiteM sortableWebModule
     Just doc <- webViewGetDomDocument webView
     Just body <- documentGetBody doc
-    let message = MarshalMe 13 "thirteen"
+    let message = Move 1 0
     putStrLn $ T.unpack $ tj $ message
     ajaxJSON ajaxURLT $ message
     htmlElementSetInnerHTML body $ LT.unpack $ renderHtml content
@@ -77,17 +81,4 @@ marshalledByteString = toStrict1 $ A.encode $  MarshalMe 1 "one"
 toStrict1 :: BL.ByteString -> B.ByteString
 toStrict1 = B.concat . BL.toChunks
 
-
-
---ttt :: IO Text
---ttt = (toJSRef_aeson $  MarshalMe 1 "one")
-
-
--- ajax' :: Text -> [(Text,Text)] -> AjaxSettings -> IO AjaxResult
--- ajax' = ajax
-
--- foop :: ToJSON a => a -> IO AjaxResult
--- foop a = do
---   let a' = decodeUtf8 $  encode a
---   ajax "/ajax" [("MarshalMe", a')] def
 

@@ -12,6 +12,7 @@ import WebModule.JQueryWebModule
 import WebModule.JQueryUIWebModule
 import WebModule.BootstrapWebModule
 import WebModule.GHCJSWebModule
+import SortableModule
 
 faviconWebSite :: WebSite
 faviconWebSite = 
@@ -64,6 +65,7 @@ websiteM = do
   JQueryUIBindings{..} <- jQueryUIModule
   BootstrapBindings{..} <- bootstrapModule
   GHCJSBindings{..} <- ghcjsWebModule
+  SortableBindings{..} <- sortableWebModule
   home
 
 main :: IO ()

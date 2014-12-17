@@ -12,6 +12,7 @@ build-type:     Custom
 data-dir: ""
 data-files:
     client/Common.hs
+    client/Sortable.hs
     client/Client.hs
 
 flag ghcjs
