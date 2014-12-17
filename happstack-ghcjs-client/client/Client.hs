@@ -3,6 +3,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 module Main where
 
 -- import GHCJS.Concurrent
@@ -45,26 +46,30 @@ import Data.Text.Encoding as TE (decodeUtf8)
 import qualified Data.ByteString.Lazy as L
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Lazy as BL
+import Text.Blaze.Html5 as H (Markup, toMarkup, ul, li)
 
 import Common
 import           Data.Default
 -- import Data.Text.Lazy as Text (Text, unpack, pack)
 import WebModule.WebModuleM 
-import SortableModule
+import qualified SortableModule as Sortable
 default(T.Text)
 
 
 main = runWebGUI $ \ webView -> do
   -- This doesn't work on the client side since I substituted IdentityT
   -- (SortableBindings{..}, _) <- runWebSiteM sortableWebModule
-    SortableBindings{..} <- runWebSiteM sortableWebModule
+    Sortable.SortableBindings{..} <- runWebSiteM Sortable.sortableWebModule
     Just doc <- webViewGetDomDocument webView
     Just body <- documentGetBody doc
-    let message = Move 1 0
+    let message = Sortable.Move 1 0
     putStrLn $ T.unpack $ tj $ message
     ajaxJSON ajaxURLT $ message
-    htmlElementSetInnerHTML body $ LT.unpack $ renderHtml content
+    let f :: [Markup] -> Markup = markup
+    htmlElementSetInnerHTML body $ LT.unpack $ renderHtml $ f sampleList
 
+sampleList :: [Markup]
+sampleList = map H.toMarkup $ map (\n -> "Item " ++ show n) [1..4 :: Int] 
 
 ajaxJSON :: ToJSON a => T.Text -> a -> IO AjaxResult
 ajaxJSON url a = ajax url [(T.pack messageKey, tj a)] def
