@@ -1,4 +1,5 @@
 {-# LANGUAGE CPP, QuasiQuotes, StandaloneDeriving, EmptyDataDecls #-}
+{-# LANGUAGE DeriveDataTypeable #-}
 {-# OPTIONS -fno-warn-orphans #-}
 
 module AppraisalScribe.JMacro ( avrPost
@@ -21,9 +22,11 @@ module AppraisalScribe.JMacro ( avrPost
 
 import Control.Arrow (second)
 import Data.Char (toLower)
+import Data.Typeable (Typeable)
+import Data.Data (Data)
 import qualified Data.Map as M
 import Data.Monoid
-import Language.Javascript.JMacro
+-- import Language.Javascript.JMacro
 import Data.Text as T
 import Lucid
 import Text.JSON
@@ -32,6 +35,7 @@ import Network.URI
 import AppraisalScribe.ArrowState (ArrowState(..))
 import AppraisalScribe.JSGetSet
 import AppraisalScribe.JQuerySelector
+
 
 -- JSON instance (preserved from jmacro-0.5.8, before the aeson migration.)
 instance ToJExpr JSValue where

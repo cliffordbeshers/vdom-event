@@ -15,7 +15,7 @@ module Main where
 import GHC.Generics
 import ZipTree
 import AdminConsole (content)
-import Text.Blaze.Html.Renderer.Text (renderHtml)
+-- import Text.Blaze.Html.Renderer.Text (renderHtml)
 #ifdef ghcjs_HOST_OS
 import JavaScript.JQuery
 #else
@@ -41,7 +41,7 @@ import GHCJSStub.DOM.HTMLElement (htmlElementSetInnerHTML)
 #endif
 import Data.Aeson as A
 import qualified Data.Text as T (Text, unpack, pack)
-import qualified Data.Text.Lazy as LT (Text, unpack, pack)
+import qualified Data.Text.Lazy as LT (Text, unpack, pack, toStrict)
 import Data.Text.Encoding as TE (decodeUtf8)
 import qualified Data.ByteString.Lazy as L
 import qualified Data.ByteString as B
@@ -68,7 +68,9 @@ main = runWebGUI $ \ webView -> do
     ajaxJSON ajaxURLT $ message
     let f :: [Markup] -> Markup = markup
     -- htmlElementSetInnerHTML body $ LT.unpack $ renderHtml $ f sampleList
-    htmlElementSetInnerHTML body $ lucidExample
+    -- htmlElementSetInnerHTML body $ lucidExample
+    lucidExample
+    return ()
 
 sampleList :: [Markup]
 sampleList = map H.toMarkup $ map (\n -> "Item " ++ show n) [1..4 :: Int] 

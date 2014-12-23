@@ -2,7 +2,7 @@
 module ZipTree where
 
 import Prelude
-import Control.Applicative ((<$>), Applicative((<*>)), ZipList(ZipList, getZipList))
+import Control.Applicative ((<$>), Applicative(..), ZipList(ZipList, getZipList))
 import Data.List (genericTake)
 import Data.Monoid (Monoid(..))
 import Data.Tree (drawTree, Forest, Tree(Node))
@@ -63,11 +63,46 @@ pruneBy (p:ps) (f:fs) = (pruneTreeBy p f) : (pruneBy ps fs)
         pruneTreeBy (Node p ps) (Node t ts) = Node t (pruneBy ps ts)
 
 
-applyF :: Forest (a -> b) -> Forest a -> Forest b        
+applyF :: Forest (a -> b) -> Forest a -> Forest b
 applyF ff fa = zipWith applyT ff fa
 
 applyT :: Tree (a -> b) -> Tree a -> Tree b        
 applyT (Node f fs) (Node a as) = Node (f a) (applyF fs as)
 
+newtype ZipForest a = ZipForest { unZipForest :: Forest a }
+
+instance Functor ZipForest where
+  fmap f = ZipForest . fmap (fmap f) . unZipForest
+
+instance Applicative ZipForest where
+  pure = ZipForest . infiniteForest
+  ZipForest f <*> ZipForest a = ZipForest $ applyF f a
 
 test = putStrLn $ drawTree . fmap show $ applyT (Node (*2) (repeat (Node (*5) []))) (Node 20 [Node 30 [], Node 50 []])
+
+
+
+listToForest :: [a] -> Forest a
+listToForest [] = []
+listToForest (x:xs) = [Node x (listToForest xs)]
+
+-- -- ns :: (Mona => [HtmlT m () -> HtmlT m ()]
+-- ns :: Term arg result => Forest (arg -> result)
+-- ns = listToForest [ div_, ul_, li_ ]
+
+-- -- cs :: Term arg result => [arg -> result]
+-- cs :: Forest [Attribute]
+-- cs = listToForest [ [ class_ "hello"], [ class_ "hello"], [ class_ "hello"] ]
+
+
+-- withF :: With a => Forest (a -> [Attribute] -> a)
+-- withF = infiniteForest with
+
+-- helloF :: Forest (Html ())
+-- helloF = infiniteForest (toHtml "hello")
+
+-- -- test :: Forest (Html ())
+-- test = ns <*> helloF
+-- -- data HTree n l = HForest a [HTree
+
+-- jis = [Node (Just 1) [Node Nothing []], Node (Just 3) [Node Nothing []]]

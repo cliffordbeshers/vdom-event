@@ -4,7 +4,7 @@
 {-# LANGUAGE QuasiQuotes #-}
 module AppraisalScribe.AjaxFileUpload (ajaxFileUploadInit, ajaxFileUploadJS, ajaxFileUploadTag) where
 
-import Language.Javascript.JMacro
+import AppraisalScribe.JMacro
 import Lucid
 import Data.Text as Text (Text, pack, unpack)
 

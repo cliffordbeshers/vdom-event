@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings, QuasiQuotes #-}
 {-# LANGUAGE ExtendedDefaultRules #-}
+{-# LANGUAGE FlexibleInstances #-}
 module AppraisalScribe.ActionMenu where
 
 import Language.Javascript.JMacro
@@ -7,8 +8,15 @@ import Language.Javascript.JMacro
 import Lucid
 
 import AppraisalScribe.JMacro ()
-import Text.JSON.Generic
+import Data.Aeson as Aeson (ToJSON(..))
 import Data.Text as Text (Text, pack)
+
+instance ToJSON JStat where
+  toJSON = toJSON . show . renderJs
+
+instance ToJSON JExpr where
+  toJSON = toJSON . show . renderJs
+  
 
 actionMenuJS :: JStat
 actionMenuJS =
