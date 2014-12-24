@@ -61,10 +61,11 @@ home' =
 websiteM :: Monad m => WebSiteM m ()
 websiteM = do
   mkWebSiteM faviconWebSite
+  -- GHCJS is now rolling the .js files in.  Pain.
+  GHCJSBindings{..} <- ghcjsWebModule
   JQueryBindings{..} <- jQueryModule
   JQueryUIBindings{..} <- jQueryUIModule
   BootstrapBindings{..} <- bootstrapModule
-  GHCJSBindings{..} <- ghcjsWebModule
   SortableBindings{..} <- sortableWebModule
   home
 

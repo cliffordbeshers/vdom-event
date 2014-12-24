@@ -65,7 +65,7 @@ main = runWebGUI $ \ webView -> do
     Just body <- documentGetBody doc
     let message = Sortable.Move 1 0
     putStrLn $ T.unpack $ tj $ message
-    ajaxJSON ajaxURLT $ message
+    -- ajaxJSON ajaxURLT $ message
     let f :: [Markup] -> Markup = markup
     -- htmlElementSetInnerHTML body $ LT.unpack $ renderHtml $ f sampleList
     -- htmlElementSetInnerHTML body $ lucidExample

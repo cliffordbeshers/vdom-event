@@ -30,7 +30,10 @@ jQueryUIModule = return jQueryUIBindings
 #else
 jQueryUIModule = wimport ws jQueryUIBindings
   where ws = mzeroWebSite { serverpart = jQueryUISP
-                          , headers = [WMH_JavaScript (baseurl +++ jsFilePath), WMH_CSS (baseurl +++ cssFilePath)] 
+                          , headers = [ WMH_CSS (baseurl +++ cssFilePath)
+                                      , WMH_CSS (baseurl +++ themeFilePath)
+                                      , WMH_JavaScript (baseurl +++ jsFilePath)
+                                      ] 
                           , bodies = [WMB_Initialization "console.log('jQueryUIWebModule initialization');"]
                           , baseURL = [baseurl]
                           }
@@ -57,8 +60,8 @@ jQueryUIFileMap = M.fromList $(embedDir "embedded/jquery-ui-1.11.2")
 
 
 -- This value incorporates a test that ensures we have the right path at compile time
-jsFilePath, cssFilePath :: FilePath
-[jsFilePath, cssFilePath] =  map v fps
+jsFilePath, cssFilePath, themeFilePath:: FilePath
+[jsFilePath, cssFilePath, themeFilePath] =  map v fps
   where v = verifyEmbeddedFP "JQueryUIWebModule:jQueryUIFileMap" jQueryUIFileMap
-        fps = ["jquery-ui.min.js", "jquery-ui.min.css"]
+        fps = ["jquery-ui.js", "jquery-ui.css", "jquery-ui.theme.css"]
 #endif

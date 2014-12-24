@@ -8,6 +8,7 @@ import Data.Text as Text (Text, pack)
 import Data.Text.Lazy (toStrict)
 import JavaScript.JQuery as JQuery (appendJQuery, click, select, setHtml, setText)
 import qualified JavaScript.JQueryExtra as JQuery (hide, show)
+import qualified JavaScript.JQueryUI as JQueryUI (sortable)
 import Control.Monad
 import Data.Default
 import Data.IORef
@@ -25,6 +26,7 @@ lucidExample = do
   myShowHide <- select "<div>show/hide</div>"
   myCount <- select "<div>1</div>"
   myTable <- select $ renderLucid (table 1)
+  mySList <- select $ renderLucid (slist 5)
   counter <- newIORef (1::Int)
   let getCount = atomicModifyIORef counter (\c -> let c' = c+1 in (c', c'))
   let action _ = void $ do
@@ -33,14 +35,15 @@ lucidExample = do
         setHtml (renderLucid (table c)) myTable
   click action  def myClick
   toggleShow myShowHide myTable
-  select "body" >>= appendJQuery myClick >>= appendJQuery myShowHide >>= appendJQuery myCount >>= appendJQuery myTable
+  -- JQueryUI.sortable mySList
+  select "body" >>= appendJQuery mySList >>= appendJQuery myClick >>= appendJQuery myShowHide >>= appendJQuery myCount >>= appendJQuery myTable
 
 -- button = button_ "Reload"
 
 tshow = Text.pack . show
 
---table :: Int -> Html ()
---table n = t . div_ . ul_ . sequence_ . map (li_ . toHtml) . map tshow $ [1..n]
+slist :: Int -> Html ()
+slist n = div_ . ul_ . sequence_ . map (li_ . toHtml) . map tshow $ [1..n]
 
 table :: Int -> Html ()
 table n = t n (toHtml $ tshow n)
