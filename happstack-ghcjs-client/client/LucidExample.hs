@@ -1,3 +1,4 @@
+{-# LANGUAGE Rank2Types #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ExtendedDefaultRules #-}
 module LucidExample where
@@ -26,7 +27,8 @@ lucidExample = do
   myShowHide <- select "<div>show/hide</div>"
   myCount <- select "<div>1</div>"
   myTable <- select $ renderLucid (table 1)
-  mySList <- select $ renderLucid (slist 5)
+  mySList' <- select $ renderLucid (slist 5)
+  mySList <- select "<div></div>" >>= appendJQuery mySList'
   counter <- newIORef (1::Int)
   let getCount = atomicModifyIORef counter (\c -> let c' = c+1 in (c', c'))
   let action _ = void $ do
@@ -35,15 +37,28 @@ lucidExample = do
         setHtml (renderLucid (table c)) myTable
   click action  def myClick
   toggleShow myShowHide myTable
-  -- JQueryUI.sortable mySList
+  JQueryUI.sortable mySList'
   select "body" >>= appendJQuery mySList >>= appendJQuery myClick >>= appendJQuery myShowHide >>= appendJQuery myCount >>= appendJQuery myTable
 
 -- button = button_ "Reload"
 
 tshow = Text.pack . show
 
+-- xs = [(ul_,[]),(li_,["ui-state-default"]), (span_, ["ui-icon","ui-icon-arrowthick-2-n-s"])]
+
+type TagList = Term arg result => [arg -> result]
+
+tags :: TagList
+tags = [div_, ul_, li_, span_]
+
+classes :: [[Text]]
+classes = [[], [],["ui-state-default"], ["ui-icon","ui-icon-arrowthick-2-n-s"]]
+
+--slist' :: [Text] -> Html ()
+--slist' xs = map foldlzipWith ($)
+
 slist :: Int -> Html ()
-slist n = div_ . ul_ . sequence_ . map (li_ . toHtml) . map tshow $ [1..n]
+slist n = ul_ . sequence_ . map (li_ . toHtml) . map tshow $ [1..n]
 
 table :: Int -> Html ()
 table n = t n (toHtml $ tshow n)
