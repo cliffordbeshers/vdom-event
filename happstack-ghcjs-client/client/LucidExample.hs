@@ -27,7 +27,7 @@ lucidExample = do
   myShowHide <- select "<div>show/hide</div>"
   myCount <- select "<div>1</div>"
   myTable <- select $ renderLucid (table 1)
-  mySList' <- select $ renderLucid (slist 5)
+  mySList' <- select $ renderLucid (slistB 5)
   mySList <- select "<div></div>" >>= appendJQuery mySList'
   counter <- newIORef (1::Int)
   let getCount = atomicModifyIORef counter (\c -> let c' = c+1 in (c', c'))
@@ -59,6 +59,11 @@ classes = [[], [],["ui-state-default"], ["ui-icon","ui-icon-arrowthick-2-n-s"]]
 
 slist :: Int -> Html ()
 slist n = ul_ . sequence_ . map (li_ . toHtml) . map tshow $ [1..n]
+
+slistB :: Int -> Html ()
+slistB n = (ul_ `with` [class_ $ listGroup !! 0]) . sequence_ . map ((li_ `with` [class_ (listGroup !! 1)]) . toHtml) . map tshow $ [1..n]
+  where listGroup = [ "list-group", "list-group-item" ]
+
 
 table :: Int -> Html ()
 table n = t n (toHtml $ tshow n)
