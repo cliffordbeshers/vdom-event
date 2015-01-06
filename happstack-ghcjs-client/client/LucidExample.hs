@@ -5,7 +5,8 @@ module LucidExample where
 
 import Control.Applicative
 import Data.List
-import Data.Text as Text (Text, pack, intercalate)
+import Data.Monoid ((<>))
+import Data.Text as Text (Text, pack, intercalate, concat)
 import Data.Text.Lazy (toStrict)
 import JavaScript.JQuery as JQuery (appendJQuery, click, select, setHtml, setText)
 import qualified JavaScript.JQueryExtra as JQuery (hide, show)
@@ -61,12 +62,12 @@ slist :: Int -> Html ()
 slist n = ul_ . sequence_ . map (li_ . toHtml) . map tshow $ [1..n]
 
 slistB :: Int -> Html ()
-slistB n = (ul_ `with` [class_ $ classes !! 0]) . sequence_ . map ((li_ `with` [class_ (classes !! 1)]) . toHtml) . map tshow $ [1..n]
+slistB n = (ul_ `with` [class_ $ classes !! 0]) . sequence_ . map ((li_ `with` [class_ (classes !! 1)]) ) . map ((dragArrow >>) . toHtml . ("Item " <>) . tshow) $ [1..n]
   where classes = map (Text.intercalate " ") $ zipWith (\a b -> nub . sort $ a ++ b) listGroup uiState
         listGroup = [ ["list-group"], ["list-group-item"] ]
         uiState = [ [], ["ui-state-default", "btn", "btn-default"] ]
-
-
+        dragArrow :: Html ()
+        dragArrow = span_ [class_ $ Text.intercalate " " ["ui-icon","ui-icon-arrowthick-2-n-s"]] (toHtml "")
 
 table :: Int -> Html ()
 table n = t n (toHtml $ tshow n)
