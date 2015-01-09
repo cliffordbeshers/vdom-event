@@ -23,6 +23,7 @@ Executable happstack-ghcjs-server
      cpp-options: -DSERVER
   if flag (local-development)
      Hs-Source-Dirs: server, ../happstack-ghcjs-client/client, ../happstack-ghcjs-client
+     cpp-options: -DSERVE_DYNAMIC
   else
      Hs-Source-Dirs: server, /usr/share/happstack-ghcjs
   Main-Is: Server.hs
@@ -46,6 +47,7 @@ Executable happstack-ghcjs-server
      file-embed,
      happstack-server,
      hslogger,
+     lucid,
      mtl,
      network,
      network-uri,
@@ -54,5 +56,6 @@ Executable happstack-ghcjs-server
      th-lift,
      time,
      transformers,
+     unix,
      web-routes,
      web-routes-th

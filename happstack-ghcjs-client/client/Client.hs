@@ -62,6 +62,7 @@ main = runWebGUI $ \ webView -> do
   -- (SortableBindings{..}, _) <- runWebSiteM sortableWebModule
     Sortable.SortableBindings{..} <- runWebSiteM Sortable.sortableWebModule
     Just doc <- webViewGetDomDocument webView
+    body' <- documentGetBody doc
     Just body <- documentGetBody doc
     let message = Sortable.Move 1 0
     putStrLn $ T.unpack $ tj $ message

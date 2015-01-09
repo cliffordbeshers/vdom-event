@@ -1,11 +1,12 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings, ExtendedDefaultRules #-}
 module WebModule.Template (htmlTemplate) where
 
-import Data.Text (Text)
+import Data.Text as Text (Text)
 import Text.Blaze.Html5 ((!), Markup, toMarkup, toValue)
 import qualified Text.Blaze.Html5 as H (body, docTypeHtml, head, meta, title)
 import qualified Text.Blaze.Html5.Attributes as HA (content, httpEquiv, manifest)
 import WebModule.ManifestURL (manifestURL)
+import Lucid
 
 default (Text)
 
@@ -26,5 +27,4 @@ htmlTemplate mfest title imports bodies =
         H.meta ! HA.httpEquiv "Content-Type" ! HA.content "text/html; charset=UTF-8"
         sequence_ imports
         H.title (toMarkup title)
-      H.body $ sequence_ bodies
-    
+      H.body $ do sequence_ bodies

@@ -1,4 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE CPP #-}
 module WebModule.GHCJSWebModule (ghcjsWebModule, GHCJSBindings(..)) where
 
 import WebModule.Markable
@@ -43,7 +44,13 @@ ghcjsWebModule = wimport ws ghcjsBindings
                           }
 
 ghcjsSP :: ServerPartT IO Response
-ghcjsSP = dir basepath $ uriRest (serveEmbedded "ghcjs" ghcjsFileMap)
+ghcjsSP = dir basepath $ uriRest (serve' ghcjsFileMap)
+#ifdef SERVE_DYNAMIC
+  where serve' = serveDynamic "../happstack-ghcjs-client/dist/build/happstack-ghcjs-client/happstack-ghcjs-client.jsexe"
+#else
+  where serve' = serveEmbedded "ghcjs" 
+#endif
+
 
 jsFilePath :: FilePath
 [jsFilePath] =  map v fps

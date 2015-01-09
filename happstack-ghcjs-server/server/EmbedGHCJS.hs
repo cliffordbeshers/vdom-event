@@ -1,11 +1,12 @@
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE CPP #-}
 module EmbedGHCJS (ghcjsWebModule, GHCJSBindings) where
 
-import Markable
-import ServeEmbedded
-import WebModule
-import WebModuleM
-import ModuleScopeURL
+import WebModule.Markable
+import WebModule.ServeEmbedded (serveDynamic, serveEmbedded, verifyEmbeddedFP)
+import WebModule.WebModule
+import WebModule.WebModuleM
+import WebModule.ModuleScopeURL
 
 import Happstack.Server
 import Control.Monad.Trans as Trans (liftIO)
@@ -43,8 +44,13 @@ ghcjsWebModule = wimport ws GHCJSBindings
                           , baseURL = [baseurl]
                           }
 
+#ifdef DYNAMICLOADING
+ghcjsSP :: ServerPartT IO Response
+ghcjsSP = dir basepath $ uriRest (serveDynamic "ghcjs" ghcjsFileMap)
+#else
 ghcjsSP :: ServerPartT IO Response
 ghcjsSP = dir basepath $ uriRest (serveEmbedded "ghcjs" ghcjsFileMap)
+#endif
 
 jsFilePath :: FilePath
 [jsFilePath] =  map v fps
