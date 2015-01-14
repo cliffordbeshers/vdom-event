@@ -4,7 +4,7 @@ import Debian.Relation (BinPkgName(BinPkgName))
 
 main :: IO ()
 main =
-    newAtoms >>= evalDebT (debianization seereasonDefaultAtoms customize >> writeDebianization)
+    newAtoms >>= evalDebT (debianize (seereasonDefaultAtoms >> customize) >> writeDebianization)
     where
       customize =
           do utilsPackageNameBase ~= Just "happstack-ghcjs-client"
