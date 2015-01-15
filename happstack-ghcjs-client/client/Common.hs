@@ -30,5 +30,12 @@ instance ToJSON MarshalMe
 messageKey :: String
 messageKey = datatypeName $ from (MarshalMe 1 "2")
 
-foo = Right mm == (eitherDecode $ encode mm)
-  where mm = MarshalMe 1 "s"
+
+-- class MessageKey a where
+--   messageKey :: a -> String
+
+-- instance MessageKey MarshalMe where
+--   messageKey = datatypeName . from 
+
+-- foo = Right mm == (eitherDecode $ encode mm)
+--   where mm = MarshalMe 1 "s"
