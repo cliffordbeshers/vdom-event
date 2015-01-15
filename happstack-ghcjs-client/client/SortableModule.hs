@@ -43,7 +43,6 @@ import Control.Monad.Trans
 
 data SortableBindings = SortableBindings { move :: Int -> Int -> IO AjaxResult
                                          , markup :: [Markup] -> Markup
-
                                          }
 
 data SortableOperation = Move Int Int | Permutation [Int] deriving (Eq, Show, Generic)
@@ -54,13 +53,14 @@ instance ToJSON SortableOperation
 
 data Error = ErrorMoveOutOfRange | ErrorPermutation deriving (Eq, Show, Generic)
 
+messageKeyTmp = T.pack $ datatypeName (from (MarshalMe 1 "1"))
+
 ajaxJSON :: ToJSON a => T.Text -> a -> IO AjaxResult
-ajaxJSON url a = ajax url [(T.pack messageKey, tj a)] def
+ajaxJSON url a = ajax url [(messageKeyTmp, tj a)] def
   where tj :: ToJSON a => a -> T.Text
         tj = TE.decodeUtf8 . toStrict1 . Aeson.encode
         toStrict1 :: BL.ByteString -> B.ByteString
         toStrict1 = B.concat . BL.toChunks
-
 
 sortableBindings = SortableBindings { move = mf , markup = sortableMarkup }
   where mf i j = ajaxJSON ajaxURLT $ Move i j

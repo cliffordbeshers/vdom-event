@@ -75,3 +75,6 @@ main = do
   print ("Serving on localhost",p)
   (_, ws) <- compileWebSiteM websiteM
   simpleHTTP (nullConf { port = p }) $ serverpart ws
+-- TODO
+--   simpleHTTP'' (nullConf { port = p }) $ serverpart ws
+  
