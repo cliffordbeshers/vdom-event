@@ -1,0 +1,16 @@
+* GHCJS hello world working with jquery/bootstrap server
+
+* manifest as web module
+
+needs association of url's of js, css, etc and content. for this I think the WebImport MimeType
+(baseFilePath,relativeFilePath, bytestring) needs to be reinstated.
+
+** assembly of the manifest serverpart will have to be done during the compilation phase.
+
+zip (map relativePaths assets) (map checksum assets), where assets are anything needed offline, which I think means any javascript/css referenced in the application template and any files
+
+On the client side, could generate test function that downloads all the resources and compares the checksums, although presumably the browser does that as well.
+That would be a #ifdef in compileWebModule or whatever it is called.
+
+* ajax as webmodule a, client and server side.
+

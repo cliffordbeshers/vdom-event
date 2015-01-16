@@ -1,0 +1,14 @@
+import a javascript library =>
+   need a shared url (relative path) to say where the javascript will be served from.
+   client
+       invoke the symbols
+       include a header in the application html
+        OR embed the javascript right in place <-- error prone?  Got to be
+   server
+       know about the import in the client
+        OR just be ready to serve all javascript?  <-- seems bogus
+       embed the javascript
+       create a handler for the javascript at a known url
+       include a header in the application html
+        OR embed the javascript right in place <-- error prone?  Got to be
+   
