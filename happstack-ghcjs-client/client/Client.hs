@@ -52,7 +52,7 @@ import Common
 import           Data.Default
 -- import Data.Text.Lazy as Text (Text, unpack, pack)
 import WebModule.WebModuleM 
-import qualified SortableModule as Sortable
+import qualified WebModule.SortableModule as Sortable
 import LucidExample
 default(T.Text)
 
@@ -67,7 +67,7 @@ main = runWebGUI $ \ webView -> do
     let message = Sortable.Move 1 0
     putStrLn $ T.unpack $ tj $ message
     -- ajaxJSON ajaxURLT $ message
-    let f :: [Markup] -> Markup = markup
+    -- let f :: [Markup] -> Markup = markup
     -- htmlElementSetInnerHTML body $ LT.unpack $ renderHtml $ f sampleList
     -- htmlElementSetInnerHTML body $ lucidExample
     lucidExample

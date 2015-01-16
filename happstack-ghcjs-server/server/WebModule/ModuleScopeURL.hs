@@ -2,38 +2,47 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE TemplateHaskell #-}
 
-#if CLIENT
-module WebModule.ModuleScopeURL where
-#else
 module WebModule.ModuleScopeURL (ModuleScopeURL, moduleScopeURL, moduleScopeURLtoURI
                                 , moduleScopeURLtoFilePath
                                 , moduleScopeAppend
                                 , URI
                                 ) where
-#endif
-
-#if SERVER
 
 import Data.Maybe (fromJust)
 import Language.Haskell.TH (Exp, Loc(loc_module), location, Q)
+#if SERVER
 import Language.Haskell.TH.Lift (deriveLift, Lift(lift))
 import Network.URI (parseRelativeReference, URI)
+#endif
 import System.FilePath ((</>))
 import Text.Blaze.Html5 as H (ToValue(..))
 
 data ModuleScopeURL = ModuleScopeURL String FilePath deriving (Eq,Show)
 
-$(deriveLift ''ModuleScopeURL)
+#if CLIENT
+data URI = URI { uri :: FilePath } deriving (Show)
 
+parseRelativeReference :: FilePath -> Maybe URI
+parseRelativeReference = Just . URI
+#endif
+
+#if SERVER
+$(deriveLift ''ModuleScopeURL)
+#endif
 -- should probably be a functor, but it's a fixed type.
 moduleScopeAppend :: ModuleScopeURL -> FilePath -> ModuleScopeURL
 moduleScopeAppend (ModuleScopeURL s fp1) fp2 = ModuleScopeURL s (fp1 </> fp2)
 
+#if CLIENT
+moduleScopeURL :: String -> FilePath -> ModuleScopeURL
+moduleScopeURL m fp = ModuleScopeURL m fp
+#else
 moduleScopeURL :: FilePath -> Q Exp -- ModuleScopeURL
 moduleScopeURL fp = do
   loc <- location
   lift $ ModuleScopeURL (loc_module loc) fp
-  
+#endif  
+
 moduleScopeURLtoURI :: ModuleScopeURL -> URI
 moduleScopeURLtoURI (ModuleScopeURL s fp) =
   fromJust . parseRelativeReference $ moduleNameToPath s </> fp
@@ -49,4 +58,4 @@ moduleNameToPath = id -- map dotToSlash
 
 instance ToValue ModuleScopeURL where
   toValue  = toValue . show . moduleScopeURLtoURI
-#endif
+

@@ -12,7 +12,7 @@ import WebModule.JQueryWebModule
 import WebModule.JQueryUIWebModule
 import WebModule.BootstrapWebModule
 import WebModule.GHCJSWebModule
-import SortableModule
+import WebModule.SortableModule
 
 faviconWebSite :: WebSite
 faviconWebSite = 
