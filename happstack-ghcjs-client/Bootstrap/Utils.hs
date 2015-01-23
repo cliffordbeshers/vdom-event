@@ -1,35 +1,33 @@
-{-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
-module Clckwrks.AVR3.Bootstrap.Utils 
+module Bootstrap.Utils 
        ( aref
-       , classes
-       , classesT
-       , role
-       , toggle
-       , target
+       , aria_controls_
+       , classes_
+       , role_
+       , toggle_
        ) where
 
-import MyPrelude
-import Clckwrks.AVR3.Bootstrap.Blaze as H (Attribute, AttributeValue, class_, customAttribute, dataAttribute, div, ToValue(toValue))
-import Clckwrks.AVR3.IdentSupply (Ident)
-import Data.List (intercalate)
-import qualified Data.Text as T (Text, intercalate, pack)
+import Lucid
+import Data.Monoid ((<>))
+import Data.Text as Text (Text, intercalate)
+import Data.Set as Set
 
-default (String)
+default (Text)
 
-aref :: Ident -> H.AttributeValue
-aref = H.toValue . ("#" ++)
+aref :: Text -> Text
+aref = ("#" <>)
 
-zbox b xs = H.div $ "zbox"
+-- zbox b xs = div_ $ "zbox"
 
-role = H.customAttribute "role"
-toggle = H.dataAttribute "toggle"
-target = H.dataAttribute "target"
+aria_controls_ :: Text -> Attribute
+aria_controls_ = term "aria-controls"
 
-classes :: [String] -> H.Attribute
-classes = H.class_ . H.toValue . intercalate " "
+role_ :: Text -> Attribute
+role_ = term "role"
+toggle_ :: Text -> Attribute
+toggle_ = data_ "toggle"
 
-classesT :: [T.Text] -> H.Attribute
-classesT = H.class_ . H.toValue . T.intercalate (T.pack " ")
+classes_ :: [Text] -> Attribute
+classes_ = class_ . Text.intercalate " " . Set.toList . Set.fromList
 
 

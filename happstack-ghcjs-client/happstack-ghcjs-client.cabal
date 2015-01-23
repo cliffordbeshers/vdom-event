@@ -48,5 +48,6 @@ Executable happstack-ghcjs-client
      mtl,
      template-haskell,
      text,
-     transformers
+     transformers,
+     value-supply
 

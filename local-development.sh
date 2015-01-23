@@ -8,13 +8,13 @@ set -x
 (cd happstack-ghcjs-client/client ; ln -sf ../../happstack-ghcjs-server/server/WebModule .)
 
 ( cd happstack-ghcjs-client
-#  rm -rf dist
+  rm -rf dist
   runhaskell Setup.hs --ghcjs configure --ghcjs-option="-odir dist/build/tmp" --ghcjs-option="-hidir dist/build/tmp" && \
   runhaskell Setup.hs build
 ) &&
 
 ( cd happstack-ghcjs-server
-#  rm -rf dist
+  rm -rf dist
   runhaskell Setup.hs configure -f local-development && \
   runhaskell Setup.hs build --ghc-option="-odir dist/build/tmp" --ghc-option="-hidir dist/build/tmp" && \
   dist/build/happstack-ghcjs-server/happstack-ghcjs-server
