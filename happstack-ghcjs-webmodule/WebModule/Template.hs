@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings, ExtendedDefaultRules #-}
-module WebModule.Template (htmlTemplate) where
+module WebModule.Template (htmlTemplate, htmlTemplateLucid) where
 
-import Data.Text as Text (Text)
+import Data.Text as Text (Text, pack)
 import Text.Blaze.Html5 ((!), Markup, toMarkup, toValue)
 import qualified Text.Blaze.Html5 as H (body, docTypeHtml, head, meta, title)
 import qualified Text.Blaze.Html5.Attributes as HA (content, httpEquiv, manifest)
@@ -28,3 +28,29 @@ htmlTemplate mfest title imports bodies =
         sequence_ imports
         H.title (toMarkup title)
       H.body $ do sequence_ bodies
+
+textshow :: Show a => a -> Text
+textshow = Text.pack . show
+
+htmlTemplateLucid :: Monad m =>
+                 Bool ->          -- Include the manifest attribute
+                 Text ->          -- ^ title , cannot contain markup.
+                 [HtmlT m a] ->   -- ^ extra tags to include in \<head\>
+                 [HtmlT m b] ->   -- ^ contents to put inside \<body\> 
+                 HtmlT m ()
+htmlTemplateLucid = htmlTemplate'
+
+htmlTemplate' :: Monad m =>
+                 Bool ->          -- Include the manifest attribute
+                 Text ->          -- ^ title , cannot contain markup.
+                 [HtmlT m a] ->   -- ^ extra tags to include in \<head\>
+                 [HtmlT m b] ->   -- ^ contents to put inside \<body\> 
+                 HtmlT m ()
+htmlTemplate' useManifest title imports bodies =
+  let manifest = if useManifest then [manifest_ (textshow manifestURL)] else [] in
+  doctypehtml_ `with` manifest $ do
+      head_ $ do
+        meta_  [httpEquiv_ "Content-Type", content_ "text/html; charset=UTF-8" ]
+        sequence_ imports
+        title_ $ toHtml title
+        body_ $ do sequence_ bodies
