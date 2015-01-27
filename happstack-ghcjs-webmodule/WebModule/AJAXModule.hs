@@ -5,30 +5,25 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE CPP #-}
-module WebModule.AJAXModule (ajaxModuleGen, AJAXBindings(..)) where
+module WebModule.AJAXModule (ajaxModuleGen, AJAXBindings(..), AJAXType(..)) where
 
-import Data.Aeson as Aeson (FromJSON, decode)
 #if SERVER
 import Happstack.Server
 #endif
 -- import Common
 -- import Sortable
-import WebModule.Logger as Logger (log, log')
+import WebModule.Logger as Logger (log')
 import WebModule.WebModule
 import WebModule.WebModuleM
 import WebModule.ModuleScopeURL
-import WebModule.GName
 import Control.Monad.Trans
 import System.FilePath ((</>))
 import Data.ByteString as BS (ByteString)
-import Data.ByteString.Lazy as BSL (ByteString, toStrict)
+import Data.ByteString.Lazy as BSL (ByteString)
 import Data.Text as Text (Text, pack)
 import GHC.Generics
 
 default (Text.Text)
-
-textshow :: Show a => a -> Text
-textshow = Text.pack . show
 
 baseurl:: ModuleScopeURL
 #if CLIENT
@@ -38,8 +33,8 @@ baseurl = moduleScopeURL "WebModule.AJAXModule" ""
 baseurl = $(moduleScopeURL "")
 #endif
 
-basepath :: FilePath
-basepath = moduleScopeURLtoFilePath baseurl
+--basepath :: FilePath
+--basepath = moduleScopeURLtoFilePath baseurl
 
 
 data Foo = Foo deriving (Show, Generic, Eq)
@@ -52,7 +47,7 @@ data AJAXType a = AJAXType { datatypeName' :: String
                            }
 
 ajaxBindingsGen :: AJAXType a -> AJAXBindings a
-ajaxBindingsGen ajt = AJAXBindings
+ajaxBindingsGen _ajt = AJAXBindings
 
 -- require jQuery
 -- ajaxModuleGen :: (Happstack m, Show a, m ~ IO) => AJAXType a -> WebSiteM m (AJAXBindings a)
@@ -75,8 +70,8 @@ ajaxModuleGen ajt = wimport ws (ajaxBindingsGen ajt)
 ajaxURL :: String
 ajaxURL = "/ajax"
 
-ajaxURLT :: Text.Text
-ajaxURLT = Text.pack ajaxURL
+_ajaxURLT :: Text.Text
+_ajaxURLT = Text.pack ajaxURL
 
 #if SERVER
 ajaxHandler :: (Happstack m, Show a) => String -> (BSL.ByteString -> Maybe a) -> ServerPartT m Response

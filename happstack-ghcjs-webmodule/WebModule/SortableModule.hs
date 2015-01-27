@@ -2,23 +2,23 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE CPP #-}
+{-# OPTIONS_GHC -Wall #-}
 
 module WebModule.SortableModule (sortableWebModule, SortableBindings(..)
-                                , SortableOperation(..), Error(..), update) where
+                                , SortableOperation(..), Error(..), update,
+                                sortableMarkup) where
 
-import Data.Aeson as Aeson (decode)
--- import Common
+-- import Data.Aeson as Aeson (decode)
 import WebModule.ModuleScopeURL
 import WebModule.WebModule
 import WebModule.WebModuleM
-import WebModule.AJAXModule
+-- import WebModule.AJAXModule
 import Control.Monad.Trans
 import System.FilePath ((</>))
 import Data.Aeson
 import GHC.Generics
 import Data.Default
 import Data.List (sortBy)
-import Data.Typeable (Proxy(..))
 import WebModule.GName
 #ifdef CLIENT
 import JavaScript.JQuery as J
@@ -38,7 +38,7 @@ import Happstack.Server
 
 import Text.Blaze.Html5 as H (Markup, toMarkup, ul, li)
 import Text.Blaze.Html.Renderer.Text (renderHtml)
-import qualified Data.Text.Lazy as LT (Text, unpack, pack, toStrict)
+import qualified Data.Text.Lazy as LT (toStrict)
 import Data.Text as T (Text, pack)
 
 
@@ -101,10 +101,10 @@ blaze :: Markup -> IO JQuery
 blaze = select . LT.toStrict . renderHtml 
 
 sortableMarkup :: IO JQuery
-sortableMarkup = blaze $ H.ul $ sequence_ $ map (H.li . H.toMarkup)  $ map (\n -> "Item " ++ show n) [1..4]
+sortableMarkup = blaze $ H.ul $ sequence_ $ map (H.li . H.toMarkup)  $ map (\n -> "Item " ++ show n) [1..4 :: Int]
 
--- initialize :: JQuery -> IO JQuery
-initialize = J.on (\e -> putStrLn "Sortable.hs: update called") sortUpdate def
+_initialize :: JQuery -> IO (IO ()) -- JQuery
+_initialize = J.on (\_ -> putStrLn "Sortable.hs: update called") sortUpdate def
 
 sortUpdate :: T.Text
 sortUpdate = T.pack "sortupdate"
