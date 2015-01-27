@@ -25,7 +25,7 @@ import JavaScript.JQuery as J
 import WebModule.JQueryWebModule as JQuery
 import WebModule.JQueryUIWebModule as JQuery
 #else
-import GHCJSStub.JQuery as J
+import WebModule.GHCJSStub.JQuery as J
 #endif
 #ifdef SERVER
 import Happstack.Server

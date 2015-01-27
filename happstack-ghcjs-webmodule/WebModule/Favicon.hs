@@ -23,7 +23,7 @@ faviconURLMS :: ModuleScopeURL
 faviconURLMS = $(moduleScopeURL $ unpack "/favicon.ico")
 
 favicon :: B.ByteString
-favicon = $(embedFile "server/favicon.ico")
+favicon = $(embedFile "embedded/WebModule/Favicon/favicon.ico")
 
 faviconHandler :: B.ByteString -> ServerPartT IO Response
 faviconHandler bs = dirs "/favicon.ico" $ ok $ setMimeType $ toResponse bs

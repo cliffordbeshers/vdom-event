@@ -56,7 +56,7 @@ jQueryUISP = dir basepath $ uriRest (serveEmbedded "jQueryUI" jQueryUIFileMap)
 -- FIXME: the mimetype should be determined statically.
 
 jQueryUIFileMap :: Map FilePath B.ByteString
-jQueryUIFileMap = M.fromList $(embedDir "embedded/jquery-ui-1.11.2")
+jQueryUIFileMap = M.fromList $(embedDir "embedded/WebModule/JQueryUIWebModule/jquery-ui-1.11.2")
 
 
 -- This value incorporates a test that ensures we have the right path at compile time

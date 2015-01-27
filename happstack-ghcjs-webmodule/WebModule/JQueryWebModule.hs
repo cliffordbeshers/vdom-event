@@ -5,7 +5,7 @@ module WebModule.JQueryWebModule (jQueryModule, JQueryBindings(..)) where
 #if CLIENT
 import qualified JavaScript.JQuery as JQuery (on, Event, EventType, HandlerSettings, JQuery)
 #else
-import qualified GHCJSStub.JQuery as JQuery (on, Event, EventType, HandlerSettings, JQuery)
+import qualified WebModule.GHCJSStub.JQuery as JQuery (on, Event, EventType, HandlerSettings, JQuery)
 #endif
 
 #if CLIENT
@@ -63,7 +63,7 @@ jQuerySP = dir basepath $ uriRest (serveEmbedded "jQuery" jQueryFileMap)
 -- FIXME: the mimetype should be determined statically.
 
 jQueryFileMap :: Map FilePath B.ByteString
-jQueryFileMap = M.fromList $(embedDir "embedded/jquery")
+jQueryFileMap = M.fromList $(embedDir "embedded/WebModule/JQueryWebModule/jquery")
 
 
 -- This value incorporates a test that ensures we have the right path at compile time
