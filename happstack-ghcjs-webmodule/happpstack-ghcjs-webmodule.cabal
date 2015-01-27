@@ -44,7 +44,6 @@ Library
                    WebModule.Template
                    WebModule.WebModule
                    WebModule.WebModuleM
-                   WebModule.WithLocation
 
   Build-Depends:
      aeson,
