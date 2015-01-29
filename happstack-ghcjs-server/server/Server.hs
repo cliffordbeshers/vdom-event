@@ -1,5 +1,6 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE CPP #-}
 module Main where
 
 import Control.Monad (MonadPlus(..))
@@ -13,6 +14,7 @@ import WebModule.JQueryUIWebModule
 import WebModule.BootstrapWebModule
 import WebModule.GHCJSWebModule
 import WebModule.SortableModule
+import WebModule.ServeEmbedded (EmbeddedDirectory, embedDirectoryTH)
 
 faviconWebSite :: WebSite
 faviconWebSite = 
@@ -55,6 +57,15 @@ home' =
           }
 
 
+-- Hard-coded path because template haskell staging, didn't want it in another file.
+ghcjsFiles :: Either FilePath EmbeddedDirectory
+#ifdef SERVE_DYNAMIC
+ghcjsFiles = Left "../happstack-ghcjs-client/dist/build/happstack-ghcjs-client/happstack-ghcjs-client.jsexe"
+#else
+ghcjsFiles = Right $(embedDirectoryTH "/usr/bin/happstack-ghcjs-client.jsexe")
+-- _ = True == verifyGHCJSFileMap ghcjsFiles
+#endif
+
 --website :: WebSite
 --website = home `wsum` faviconWebSite
 
@@ -62,7 +73,7 @@ websiteM :: Monad m => WebSiteM m ()
 websiteM = do
   mkWebSiteM faviconWebSite
   -- GHCJS is now rolling the .js files in.  Pain.
-  GHCJSBindings{..} <- ghcjsWebModule
+  GHCJSBindings{..} <- ghcjsWebModule ghcjsFiles
   JQueryBindings{..} <- jQueryModule
   JQueryUIBindings{..} <- jQueryUIModule
   BootstrapBindings{..} <- bootstrapModule

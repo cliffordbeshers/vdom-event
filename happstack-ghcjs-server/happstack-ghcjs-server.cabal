@@ -43,6 +43,7 @@ Executable happstack-ghcjs-server
      data-lens,
      data-lens-template,
      directory,
+     directory-tree,
      filepath,
      file-embed,
      happstack-server,
