@@ -57,6 +57,4 @@ Executable happstack-ghcjs-server
      th-lift,
      time,
      transformers,
-     unix,
-     web-routes,
-     web-routes-th
+     unix
