@@ -3,14 +3,10 @@
 module WebModule.JQueryUIWebModule (jQueryUIModule, JQueryUIBindings(..)) where
 
 #if SERVER
-import Data.ByteString as B (ByteString)
-import Data.FileEmbed (embedDir)
-import Data.Map (Map)
-import qualified Data.Map as M (fromList)
 import Happstack.Server as Happstack (dir, Response, ServerPartT, uriRest)
 import WebModule.Markable (WM_Body(WMB_Initialization), WM_Header(WMH_CSS, WMH_JavaScript))
 import WebModule.ModuleScopeURL (moduleScopeAppend, moduleScopeURL, ModuleScopeURL, moduleScopeURLtoFilePath)
-import WebModule.ServeEmbedded (serveEmbedded, verifyEmbeddedFP)
+import WebModule.ServeEmbedded (embedDirectoryTH, serveEmbedded, verifyEmbeddedFP, EmbeddedDirectory)
 import WebModule.WebModule (WebSite(baseURL, bodies, headers, serverpart))
 import WebModule.WebModuleM (mzeroWebSite, wimport)
 #endif
@@ -51,17 +47,17 @@ basepath = moduleScopeURLtoFilePath baseurl
 
 
 jQueryUISP :: ServerPartT IO Response
-jQueryUISP = dir basepath $ uriRest (serveEmbedded "jQueryUI" jQueryUIFileMap)
+jQueryUISP = dir basepath $ uriRest (serveEmbedded jQueryUIFileMap)
 
 -- FIXME: the mimetype should be determined statically.
 
-jQueryUIFileMap :: Map FilePath B.ByteString
-jQueryUIFileMap = M.fromList $(embedDir "embedded/WebModule/JQueryUIWebModule/jquery-ui-1.11.2")
+jQueryUIFileMap :: EmbeddedDirectory
+jQueryUIFileMap = $(embedDirectoryTH "embedded/WebModule/JQueryUIWebModule/jquery-ui-1.11.2")
 
 
 -- This value incorporates a test that ensures we have the right path at compile time
 jsFilePath, cssFilePath, themeFilePath:: FilePath
 [jsFilePath, cssFilePath, themeFilePath] =  map v fps
-  where v = verifyEmbeddedFP "JQueryUIWebModule:jQueryUIFileMap" jQueryUIFileMap
+  where v = verifyEmbeddedFP jQueryUIFileMap
         fps = ["jquery-ui.js", "jquery-ui.css", "jquery-ui.theme.css"]
 #endif

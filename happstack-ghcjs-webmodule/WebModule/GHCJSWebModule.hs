@@ -10,11 +10,6 @@ import WebModule.ModuleScopeURL
 
 import Happstack.Server
 
-import Data.FileEmbed (embedDir)
-import Data.Map as Map (Map, fromList)
-import Data.ByteString as B (ByteString)
-
-
 -- There's really nothing to run, since this will be main.
 data GHCJSBindings = GHCJSBindings { start :: Int }
 
@@ -27,34 +22,28 @@ basepath = moduleScopeURLtoFilePath baseurl
 (+++) :: ModuleScopeURL -> FilePath -> ModuleScopeURL
 (+++) = moduleScopeAppend
 
--- Hard-coded path because template haskell staging, didn't want it in another file.
-ghcjsFileMap :: Map FilePath B.ByteString
--- ghcjsFileMap = Map.fromList $(embedDir "/usr/bin/happstack-ghcjs-client.jsexe")
--- ghcjsFileMap = Map.fromList $(embedDir "../happstack-ghcjs-client/dist/build/happstack-ghcjs-client/happstack-ghcjs-client.jsexe")
-ghcjsFileMap = Map.fromList []
-
 ghcjsBindings :: GHCJSBindings
 ghcjsBindings = GHCJSBindings { start = 1 }
 
-ghcjsWebModule :: Monad m => WebSiteM m GHCJSBindings
-ghcjsWebModule = wimport ws ghcjsBindings
-  where ws = mzeroWebSite { serverpart = ghcjsSP
+-- Not sure I like this, but it should work.
+-- Left indicates dynamic reload of a directory with ghcjs executable
+-- Right indicates compile-time, immutable embedding
+ghcjsWebModule :: Monad m => Either FilePath EmbeddedDirectory -> WebSiteM m GHCJSBindings
+ghcjsWebModule fileMap = wimport ws ghcjsBindings
+  where ws = mzeroWebSite { serverpart = ghcjsSP fileMap
                           , headers = [WMH_JavaScript (baseurl +++ jsFilePath)]
                           , bodies = [WMB_Initialization "console.log('GHCJSWebModule initialization');"]
                           , baseURL = [baseurl]
                           }
+        jsFilePath :: FilePath
+        jsFilePath = "all.js"
 
-ghcjsSP :: ServerPartT IO Response
-ghcjsSP = dir basepath $ uriRest (serve' ghcjsFileMap)
-#ifdef SERVE_DYNAMIC
-  where serve' = serveDynamic "../happstack-ghcjs-client/dist/build/happstack-ghcjs-client/happstack-ghcjs-client.jsexe"
-#else
-  where serve' = serveEmbedded "ghcjs" 
-#endif
+-- TODO add the verification of form/paths/file contents back in and make sure it runs at compile
+-- time.
+
+ghcjsSP :: Either FilePath EmbeddedDirectory -> ServerPartT IO Response
+ghcjsSP (Left fp) = dir basepath $ uriRest (serveDynamic fp)
+ghcjsSP (Right ed) = dir basepath $ uriRest (serveEmbedded ed)
 
 
-jsFilePath :: FilePath
-[jsFilePath] =  map v fps
-  where v = verifyEmbeddedFP "GHCJSWebModule:ghcjsFileMap" ghcjsFileMap
-        fps = ["all.js"]
         

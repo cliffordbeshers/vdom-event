@@ -16,14 +16,10 @@ import WebModule.WebModuleM (WebSiteM, wimport, mzeroWebSite)
 
 #if SERVER
 import WebModule.Markable
-import WebModule.ServeEmbedded (serveEmbedded, verifyEmbeddedFP)
+import WebModule.ServeEmbedded (embedDirectoryTH, serveEmbedded, verifyEmbeddedFP, EmbeddedDirectory)
 import WebModule.WebModule
 import WebModule.ModuleScopeURL
 import Happstack.Server as Happstack (ServerPartT, Response,  dir, uriRest)
-import Data.FileEmbed (embedDir)
-import Data.Map (Map)
-import qualified Data.Map as M (fromList)
-import Data.ByteString as B (ByteString)
 #endif
 
 
@@ -58,17 +54,17 @@ basepath = moduleScopeURLtoFilePath baseurl
 (+++) = moduleScopeAppend
 
 jQuerySP :: ServerPartT IO Response
-jQuerySP = dir basepath $ uriRest (serveEmbedded "jQuery" jQueryFileMap)
+jQuerySP = dir basepath $ uriRest (serveEmbedded jQueryFileMap)
 
 -- FIXME: the mimetype should be determined statically.
 
-jQueryFileMap :: Map FilePath B.ByteString
-jQueryFileMap = M.fromList $(embedDir "embedded/WebModule/JQueryWebModule/jquery")
+jQueryFileMap :: EmbeddedDirectory
+jQueryFileMap = $(embedDirectoryTH "embedded/WebModule/JQueryWebModule/jquery")
 
 
 -- This value incorporates a test that ensures we have the right path at compile time
 jsFilePath :: FilePath
 [jsFilePath] =  map v fps
-  where v = verifyEmbeddedFP "JQueryWebModule:jQueryFileMap" jQueryFileMap
+  where v = verifyEmbeddedFP jQueryFileMap
         fps = ["jquery-1.11.0.min.js"]
 #endif

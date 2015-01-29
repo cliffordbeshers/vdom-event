@@ -26,5 +26,6 @@ gname _ = datatypeName (undefined :: Rep a x)
 
 -- Make sure the given example works.
 data Foo = Foo deriving Generic
-s = gname (Proxy :: Proxy Foo)
+
+_test = gname (Proxy :: Proxy Foo)
 

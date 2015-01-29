@@ -5,14 +5,10 @@
 
 module WebModule.BootstrapWebModule (bootstrapModule, BootstrapBindings(..)) where
 
-import Data.ByteString as B (ByteString)
-import Data.FileEmbed (embedDir)
-import Data.Map (Map)
-import qualified Data.Map as M (fromList)
 import Happstack.Server as Happstack (dir, Response, ServerPartT, uriRest)
 import WebModule.Markable (WM_Body(WMB_Initialization), WM_Header(WMH_CSS, WMH_JavaScript))
 import WebModule.ModuleScopeURL (moduleScopeAppend, moduleScopeURL, ModuleScopeURL, moduleScopeURLtoFilePath)
-import WebModule.ServeEmbedded (serveEmbedded, verifyEmbeddedFP)
+import WebModule.ServeEmbedded (embedDirectoryTH, serveEmbedded, verifyEmbeddedFP, EmbeddedDirectory)
 import WebModule.WebModule (WebSite(baseURL, bodies, headers, serverpart))
 import WebModule.WebModuleM (mzeroWebSite, WebSiteM, wimport)
 
@@ -58,16 +54,16 @@ bootstrapImports = [ js jsFilePath, css cssFilePath, css themeFilePath]
 
 -- FIXME: the mimetype should be determined statically.
 
-bootstrapFileMap :: Map FilePath B.ByteString
-bootstrapFileMap = M.fromList $(embedDir "embedded/WebModule/BootstrapWebModule/bootstrap")
+bootstrapFileMap :: EmbeddedDirectory
+bootstrapFileMap = $(embedDirectoryTH "embedded/WebModule/BootstrapWebModule/bootstrap")
 
 bootstrapSP :: ServerPartT IO Response
-bootstrapSP = dir basepath $ uriRest (serveEmbedded "Bootstrap" bootstrapFileMap)
+bootstrapSP = dir basepath $ uriRest (serveEmbedded bootstrapFileMap)
 
 -- This value incorporates a test that ensures we have the right path at compile time
 jsFilePath, cssFilePath, themeFilePath :: FilePath
 [jsFilePath, cssFilePath, themeFilePath] =  map v fps
-  where v = verifyEmbeddedFP "BootstrapWebModule:bootstrapFileMap" bootstrapFileMap
+  where v = verifyEmbeddedFP bootstrapFileMap
         fps = ["js/bootstrap.min.js", "css/bootstrap.min.css", "css/bootstrap-theme.min.css" ]
 
 

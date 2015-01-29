@@ -1,47 +1,95 @@
+{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE CPP #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 #if CLIENT
 module WebModule.ServeEmbedded() where
 #endif
 
 #if SERVER
-module WebModule.ServeEmbedded (serveDynamic, serveEmbedded, verifyEmbeddedFP) where
+module WebModule.ServeEmbedded ( embedDirectory
+                               , embedDirectoryTH
+                               , serveDynamic
+                               , serveEmbedded
+                               , verifyEmbeddedFP
+                               , EmbeddedDirectory -- opaque
+                               ) where
 
 import Control.Monad.Trans as Monad (liftIO)
 import Data.ByteString as B (ByteString, readFile)
-import Data.Map (Map)
-import qualified Data.Map as M (lookup, member)
+import Data.ByteString.Char8 as B8 (pack, unpack)
+import Data.Map as Map (fromList)
+import qualified Data.Map as M (lookup)
 import Happstack.Server as Happstack (guessContentTypeM, mimeTypes, notFound, ok, Response, ServerPartT, setHeader, ToMessage(toResponse))
-import System.FilePath (makeRelative, (</>))
+import System.FilePath (makeRelative)
+import System.Directory.Tree
 import System.Posix
+import Language.Haskell.TH
 
-serveEmbedded :: String -> Map FilePath B.ByteString -> FilePath -> ServerPartT IO Response
-serveEmbedded filemapname filemap fpa = do
+import Language.Haskell.TH.Lift
+
+type FileMap = [(FilePath, B.ByteString)]
+
+data EmbeddedDirectory = EmbeddedDirectory { embeddedPath :: FilePath
+                                           , embeddedMap :: FileMap
+                                           } deriving (Eq, Read, Show)
+
+$(deriveLift ''EmbeddedDirectory)
+
+embedDirectoryTH :: FilePath -> Q Exp -- EmbeddedDirectory
+embedDirectoryTH fp = do
+  ed <- runIO $ embedDirectory fp
+  lift ed
+
+embedDirectory :: FilePath -> IO EmbeddedDirectory
+embedDirectory sourceDir = do
+  fs <- findf sourceDir
+  return EmbeddedDirectory { embeddedPath = sourceDir, embeddedMap = fs }
+  
+findf :: FilePath -> IO FileMap
+findf = fmap convert . readDirectoryWith B.readFile
+  where convert = map file . filter byFile . flattenDir . zipPaths
+        -- Directory trees have weird types.  zipPaths breaks the functor model.
+        -- convert2 = fold . map listify . zipPaths
+        -- listify = (:[])
+        byFile (File _ _) = True
+        byFile _ = False
+
+
+serveEmbedded :: EmbeddedDirectory -> FilePath -> ServerPartT IO Response
+serveEmbedded edir fpa =
   let fp = "/" `makeRelative` fpa
-  -- liftIO . putStrLn $ "serveEmbedded:Map.lookup \""++ filemapname ++ "\" " ++ fp ++ "= " ++ (show $ M.lookup fp filemap)
-  case M.lookup fp filemap of
-    Just bs -> do mt <- guessContentTypeM mimeTypes fp
-                  liftIO (getWorkingDirectory >>= (\cwd -> putStrLn $ "ServeEmbedded.hs embedded cwd = " ++ cwd))
-                  liftIO $ putStrLn $ "ServeEmbedded.hs fpa = " ++ fpa
-                  ok $ setHeader "content-type" mt $ toResponse bs
-    Nothing -> notFound . toResponse $ "filepath " ++ fp ++ " not found in filemap " ++ filemapname
+      filemap = Map.fromList (embeddedMap edir) in
+  do    
+    case M.lookup fp filemap of
+      Just bs -> do mt <- guessContentTypeM mimeTypes fp
+                    liftIO (getWorkingDirectory >>= (\cwd -> putStrLn $ "ServeEmbedded.hs embedded cwd = " ++ cwd))
+                    liftIO $ putStrLn $ "ServeEmbedded.hs fpa = " ++ fpa
+                    ok $ setHeader "content-type" mt $ toResponse bs
+      Nothing -> notFound . toResponse $ "filepath " ++ fp ++ " not found in EmbeddedDirectory create from " ++ (embeddedPath edir)
 
-serveDynamic :: String -> Map FilePath B.ByteString -> FilePath -> ServerPartT IO Response
-serveDynamic filemapname filemap fpa = do
-  let keyfp = "/" `makeRelative` fpa
-  let dynfp = filemapname </> keyfp
-  -- liftIO . putStrLn $ "serveEmbedded:Map.lookup \""++ filemapname ++ "\" " ++ keyfp ++ "= " ++ (show $ M.lookup keyfp filemap)
-  case M.lookup keyfp filemap of
-    Just bs -> do mt <- guessContentTypeM mimeTypes keyfp
-                  liftIO (getWorkingDirectory >>= (\cwd -> putStrLn $ "ServeEmbedded.hs dynamic cwd = " ++ cwd))
-                  liftIO $ putStrLn $ "ServeEmbedded.hs dynfp = " ++ dynfp
-                  bs' <- liftIO $ B.readFile dynfp
-                  ok $ setHeader "content-type" mt $ toResponse bs'
-    Nothing -> notFound . toResponse $ "filepath " ++ fpa ++ " not found in filemap " ++ filemapname
+serveDynamic :: FilePath -> FilePath -> ServerPartT IO Response
+serveDynamic sourceDir fpa = do
+  ed <- liftIO $ embedDirectory sourceDir
+  serveEmbedded ed fpa
 
-
-verifyEmbeddedFP :: String -> Map FilePath B.ByteString -> FilePath -> FilePath
-verifyEmbeddedFP filemapname filemap fp =
-  if M.member fp filemap
+verifyEmbeddedFP :: EmbeddedDirectory -> FilePath -> FilePath
+verifyEmbeddedFP ed fp =
+  if elem fp (fst . unzip $ embeddedMap ed)
   then fp
-  else error $ "ServeEmbedded:verifyEmbbeddedFP -- " ++ filemapname ++ " does not contain path " ++ fp
+  else error $ "ServeEmbedded:verifyEmbbeddedFP -- " ++ (embeddedPath ed) ++ " does not contain path " ++ fp
 #endif
+
+instance Lift ByteString where
+  lift = bsToExp
+
+-- from Data.FileEmbed
+-- why is there no public instance?
+bsToExp :: ByteString -> Q Exp
+bsToExp bs = do
+    helper <- [| stringToBs |]
+    let chars = B8.unpack bs
+    return $! AppE helper $! LitE $! StringL chars
+
+stringToBs :: String -> B.ByteString
+stringToBs = B8.pack
+  
