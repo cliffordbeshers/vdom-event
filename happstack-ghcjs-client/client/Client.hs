@@ -16,13 +16,13 @@ import GHC.Generics
 import ZipTree
 import AdminConsole (content)
 -- import Text.Blaze.Html.Renderer.Text (renderHtml)
-#ifdef ghcjs_HOST_OS
+#if CLIENT
 import JavaScript.JQuery
 #else
 import GHCJSStub.JQuery
 #endif
 import Data.Text.Encoding (decodeUtf8)
-#ifdef ghcjs_HOST_OS
+#if CLIENT
 import GHCJS.Types
 import GHCJS.Types
 import GHCJS.Foreign
