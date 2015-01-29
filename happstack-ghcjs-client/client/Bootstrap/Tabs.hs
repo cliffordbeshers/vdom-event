@@ -6,11 +6,13 @@ module Bootstrap.Tabs where
 -- http://getbootstrap.com/javascript/#tabs
 
 import Control.Monad (foldM)
+import Control.Monad.Trans (MonadIO, liftIO)
 import Data.Text as Text (Text)
 import Lucid
 import Bootstrap.Operations
 import Bootstrap.Utils (aria_controls_, classes_, role_)
 import Data.Supply (modifySupply, newNumSupply, split, split2, split3, Supply, supplyValue)
+import Bootstrap.ValueSupply
 
 -- main = do
 --   s0 <- newNumSupply
@@ -45,7 +47,8 @@ bigTable t = table_ (mapM_ row t)
 
 exampleTabs :: MonadIO m => HtmlT m ()
 exampleTabs = do
-   ids <- fmap split $ newPrefixSupply
+   ids <- fmap split $ liftIO $ newPrefixSupply "exampleTabs"
+   div_ "hello"
    
 
 tabdata :: [(Text, Text)]
