@@ -54,6 +54,7 @@ import           Data.Default
 import WebModule.WebModuleM 
 import qualified WebModule.SortableModule as Sortable
 import LucidExample
+import WidgetPalette.Index
 default(T.Text)
 
 
@@ -71,6 +72,7 @@ main = runWebGUI $ \ webView -> do
     -- htmlElementSetInnerHTML body $ LT.unpack $ renderHtml $ f sampleList
     -- htmlElementSetInnerHTML body $ lucidExample
     lucidExample
+    widgetPaletteIndex
     return ()
 
 sampleList :: [Markup]
