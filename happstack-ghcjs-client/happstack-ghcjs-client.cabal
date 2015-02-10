@@ -30,11 +30,13 @@ Executable happstack-ghcjs-client
   Hs-Source-Dirs:  client
   if flag (local-happstack-ghcjs-webmodule)
     Hs-Source-Dirs: ../happstack-ghcjs-webmodule
+  else
+    Build-Depends: happstack-ghcjs-webmodule
 
   Main-Is: Client.hs
   if impl(ghcjs)
      cpp-options: -DCLIENT
-  else 
+  else
      cpp-options: -DSERVER
   Buildable: True
   cpp-options: -DCLIENT
