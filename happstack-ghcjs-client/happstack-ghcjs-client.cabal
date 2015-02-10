@@ -53,7 +53,6 @@ Executable happstack-ghcjs-client
      data-default,
      data-lens-template,
      filepath,
---     lens,
      lucid,
      mtl,
      network-uri,
