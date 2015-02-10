@@ -49,6 +49,8 @@ Library
   if impl(ghcjs)
     Exposed-modules:
       ClientStub.Happstack.Server
+  else
+    Exposed-modules:
       WebModule.GHCJSStub.JQuery
       WebModule.GHCJSStub.Types
   Build-Depends:
