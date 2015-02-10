@@ -9,21 +9,26 @@ module WebModule.SortableModule (sortableWebModule, SortableBindings(..)
                                 sortableMarkup) where
 
 -- import Data.Aeson as Aeson (decode)
+#if SERVER
 import WebModule.ModuleScopeURL
 import WebModule.WebModule
+#endif
 import WebModule.WebModuleM
 -- import WebModule.AJAXModule
-import Control.Monad.Trans
-import System.FilePath ((</>))
-import Data.Aeson
 import GHC.Generics
 import Data.Default
 import Data.List (sortBy)
+
+#if SERVER
+import Control.Monad.Trans
+import System.FilePath ((</>))
 import WebModule.GName
+#endif
+import Data.Aeson
 #ifdef CLIENT
 import JavaScript.JQuery as J
-import WebModule.JQueryWebModule as JQuery
-import WebModule.JQueryUIWebModule as JQuery
+-- import WebModule.JQueryWebModule as JQuery
+-- import WebModule.JQueryUIWebModule as JQuery
 #else
 import WebModule.GHCJSStub.JQuery as J
 #endif
@@ -56,12 +61,9 @@ sortableWebModule = wimport ws SortableBindings
                           }
 #endif
 
+#if SERVER
 baseurl:: ModuleScopeURL
-#if CLIENT
-baseurl = moduleScopeURL "WebModule.SortableModule" ""
-#else
 baseurl = $(moduleScopeURL "")
-#endif
 
 basepath :: FilePath
 basepath = moduleScopeURLtoFilePath baseurl
@@ -70,7 +72,6 @@ messageKey :: String
 messageKey = gname (Proxy :: Proxy SortableOperation)
 
 
-#if SERVER
 sortableHandler :: ServerPartT IO Response
 sortableHandler = dirs basepath $ h
   where h = do

@@ -26,12 +26,7 @@ import GHC.Generics
 default (Text.Text)
 
 baseurl:: ModuleScopeURL
-#if CLIENT
--- TODO port th-lift to ghcjs
-baseurl = moduleScopeURL "WebModule.AJAXModule" ""
-#else
 baseurl = $(moduleScopeURL "")
-#endif
 
 --basepath :: FilePath
 --basepath = moduleScopeURLtoFilePath baseurl

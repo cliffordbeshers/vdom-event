@@ -1,22 +1,21 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE CPP #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
-#if CLIENT
-module WebModule.ServeEmbedded() where
+
+module WebModule.ServeEmbedded (EmbeddedDirectory -- opaque
+#if SERVER
+  , embedDirectory
+  , embedDirectoryTH
+  , serveDynamic
+  , serveEmbedded
+  , verifyEmbeddedFP
 #endif
+  ) where
 
 #if SERVER
-module WebModule.ServeEmbedded ( embedDirectory
-                               , embedDirectoryTH
-                               , serveDynamic
-                               , serveEmbedded
-                               , verifyEmbeddedFP
-                               , EmbeddedDirectory -- opaque
-                               ) where
-
 import Control.Monad.Trans as Monad (liftIO)
-import Data.ByteString as B (ByteString, readFile)
 import Data.ByteString.Char8 as B8 (pack, unpack)
+import Data.ByteString as B (ByteString, readFile)
 import Data.Map as Map (fromList)
 import qualified Data.Map as M (lookup)
 import Happstack.Server as Happstack (guessContentTypeM, mimeTypes, notFound, ok, Response, ServerPartT, setHeader, ToMessage(toResponse))
@@ -26,13 +25,20 @@ import System.Posix
 import Language.Haskell.TH
 
 import Language.Haskell.TH.Lift
+#endif
 
+#if SERVER
 type FileMap = [(FilePath, B.ByteString)]
+#endif
 
-data EmbeddedDirectory = EmbeddedDirectory { embeddedPath :: FilePath
-                                           , embeddedMap :: FileMap
-                                           } deriving (Eq, Read, Show)
+data EmbeddedDirectory = EmbeddedDirectory {
+#if SERVER
+  embeddedPath :: FilePath
+  , embeddedMap :: FileMap
+#endif
+  } deriving (Eq, Read, Show)
 
+#if SERVER
 $(deriveLift ''EmbeddedDirectory)
 
 embedDirectoryTH :: FilePath -> Q Exp -- EmbeddedDirectory

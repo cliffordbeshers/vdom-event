@@ -3,10 +3,10 @@
 module WebModule.GHCJSWebModule (ghcjsWebModule, GHCJSBindings(..)) where
 
 import WebModule.Markable
-import WebModule.ServeEmbedded
+import WebModule.ModuleScopeURL
 import WebModule.WebModule
 import WebModule.WebModuleM
-import WebModule.ModuleScopeURL
+import WebModule.ServeEmbedded
 
 #if SERVER
 import Happstack.Server
