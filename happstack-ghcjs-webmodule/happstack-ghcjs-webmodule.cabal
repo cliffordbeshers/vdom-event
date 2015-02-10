@@ -23,36 +23,28 @@ Library
     cpp-options: -DSERVER
   Hs-Source-Dirs: .
   GHC-options: -threaded -O2 -Wall
-  if !impl(ghcjs)
-    GHC-options: -Wwarn -fno-warn-name-shadowing -fno-warn-type-defaults
   Extensions:
     CPP,
     PackageImports,
     TemplateHaskell
-  Exposed-modules: WebModule.AJAXModule
-                   WebModule.BootstrapWebModule
-                   WebModule.EmbedURI
-                   WebModule.Favicon
-                   WebModule.GHCJSWebModule
-                   WebModule.GName
-                   WebModule.JQueryUIWebModule
-                   WebModule.JQueryWebModule
-                   WebModule.Logger
-                   WebModule.ManifestURL
-                   WebModule.Markable
-                   WebModule.ModuleScopeURL
-                   WebModule.ServeEmbedded
-                   WebModule.SortableModule
-                   WebModule.Template
-                   WebModule.WebModule
-                   WebModule.WebModuleM
-  if impl(ghcjs)
-    Exposed-modules:
-      ClientStub.Happstack.Server
-  else
-    Exposed-modules:
-      WebModule.GHCJSStub.JQuery
-      WebModule.GHCJSStub.Types
+  Exposed-modules:
+    WebModule.AJAXModule
+    WebModule.BootstrapWebModule
+    WebModule.EmbedURI
+    WebModule.Favicon
+    WebModule.GHCJSWebModule
+    WebModule.GName
+    WebModule.JQueryUIWebModule
+    WebModule.JQueryWebModule
+    WebModule.Logger
+    WebModule.ManifestURL
+    WebModule.Markable
+    WebModule.ModuleScopeURL
+    WebModule.ServeEmbedded
+    WebModule.SortableModule
+    WebModule.Template
+    WebModule.WebModule
+    WebModule.WebModuleM
   Build-Depends:
     aeson,
     base >=4.2 && <5,
@@ -74,7 +66,10 @@ Library
     Build-Depends:
       ghcjs-base,
       ghcjs-jquery
+    Exposed-modules:
+      ClientStub.Happstack.Server
   else
+    GHC-options: -Wwarn -fno-warn-name-shadowing -fno-warn-type-defaults
     Build-Depends:
       containers,
       directory-tree,
@@ -82,3 +77,6 @@ Library
       happstack-server,
       template-haskell,
       unix
+    Exposed-modules:
+      WebModule.GHCJSStub.JQuery
+      WebModule.GHCJSStub.Types
