@@ -21,8 +21,16 @@ flag ghcjs
 
 -- This is compiled with ghcjs
 
+flag local-happstack-ghcjs-webmodule
+  Description: Build with local source files of the happstack-ghcjs-webmodule library.
+  Default: False
+  Manual: True
+
 Executable happstack-ghcjs-client
   Hs-Source-Dirs:  client
+  if flag (local-happstack-ghcjs-webmodule)
+    Hs-Source-Dirs: ../happstack-ghcjs-webmodule
+
   Main-Is: Client.hs
   if impl(ghcjs)
      cpp-options: -DCLIENT
@@ -43,11 +51,15 @@ Executable happstack-ghcjs-client
      bytestring >= 0.10,
      containers,
      data-default,
+     data-lens-template,
      filepath,
+--     lens,
      lucid,
      mtl,
+     network-uri,
      template-haskell,
      text,
+     th-lift,
      transformers,
      value-supply
 

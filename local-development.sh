@@ -9,7 +9,7 @@ set -x
 
 ( cd happstack-ghcjs-client
   rm -rf dist
-  runhaskell Setup.hs --ghcjs configure --ghcjs-option="-odir dist/build/tmp" --ghcjs-option="-hidir dist/build/tmp" && \
+  runhaskell Setup.hs --ghcjs configure -flocal-happstack-ghcjs-webmodule --ghcjs-option="-odir dist/build/tmp" --ghcjs-option="-hidir dist/build/tmp" && \
   runhaskell Setup.hs build
 ) &&
 

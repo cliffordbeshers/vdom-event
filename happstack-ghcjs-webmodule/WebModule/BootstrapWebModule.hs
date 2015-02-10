@@ -6,9 +6,12 @@
 
 module WebModule.BootstrapWebModule (bootstrapModule, BootstrapBindings(..)) where
 
-#if SERVER
+#if CLIENT
 import ClientStub.Happstack.Server as Happstack (Response, ServerPartT)
+#else
 import Happstack.Server as Happstack (dir, Response, ServerPartT, uriRest)
+#endif
+#if SERVER
 import WebModule.Markable (WM_Body(WMB_Initialization), WM_Header(WMH_CSS, WMH_JavaScript))
 import WebModule.ModuleScopeURL (moduleScopeAppend, moduleScopeURL, ModuleScopeURL, moduleScopeURLtoFilePath)
 import WebModule.ServeEmbedded (embedDirectoryTH, serveEmbedded, verifyEmbeddedFP, EmbeddedDirectory)
