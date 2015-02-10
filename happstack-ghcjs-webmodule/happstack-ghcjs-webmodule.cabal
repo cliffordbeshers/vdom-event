@@ -47,7 +47,10 @@ Library
                    WebModule.WebModule
                    WebModule.WebModuleM
   if impl(ghcjs)
-    Exposed-modules: ClientStub.Happstack.Server
+    Exposed-modules:
+      ClientStub.Happstack.Server
+      WebModule.GHCJSStub.JQuery
+      WebModule.GHCJSStub.Types
   Build-Depends:
     aeson,
     base >=4.2 && <5,
