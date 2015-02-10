@@ -1,19 +1,14 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE PackageImports #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# OPTIONS -fno-warn-orphans #-}
 
-#if CLIENT
-module WebModule.EmbedURI where
-#endif
-#if SERVER
 module WebModule.EmbedURI (embedURI, embedRelativeURI, showURI, putURI, putURILn) where
 
 import Data.List (intercalate)
 import Data.Maybe (fromJust)
 import Language.Haskell.TH (Exp, Q)
 import Language.Haskell.TH.Lift (deriveLift, Lift(lift))
-import "network-uri" Network.URI (parseRelativeReference, parseURI, URI(uriAuthority, uriFragment, uriPath, uriQuery, uriScheme), URIAuth)
+import Network.URI (parseRelativeReference, parseURI, URI(uriAuthority, uriFragment, uriPath, uriQuery, uriScheme), URIAuth)
 
 $(deriveLift ''URIAuth)
 $(deriveLift ''URI)
@@ -42,4 +37,3 @@ putURI = putStr . showURI
 
 putURILn :: URI -> IO ()
 putURILn = putStrLn . showURI
-#endif

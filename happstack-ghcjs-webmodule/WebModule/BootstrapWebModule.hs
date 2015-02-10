@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -5,12 +6,14 @@
 
 module WebModule.BootstrapWebModule (bootstrapModule, BootstrapBindings(..)) where
 
+#if SERVER
 import Happstack.Server as Happstack (dir, Response, ServerPartT, uriRest)
 import WebModule.Markable (WM_Body(WMB_Initialization), WM_Header(WMH_CSS, WMH_JavaScript))
 import WebModule.ModuleScopeURL (moduleScopeAppend, moduleScopeURL, ModuleScopeURL, moduleScopeURLtoFilePath)
 import WebModule.ServeEmbedded (embedDirectoryTH, serveEmbedded, verifyEmbeddedFP, EmbeddedDirectory)
 import WebModule.WebModule (WebSite(baseURL, bodies, headers, serverpart))
 import WebModule.WebModuleM (mzeroWebSite, WebSiteM, wimport)
+#endif
 
 -- default(JSNumber, JSString, String)
 
@@ -25,20 +28,13 @@ import WebModule.WebModuleM (mzeroWebSite, WebSiteM, wimport)
 
 data BootstrapBindings = BootstrapBindings { blue :: Int }
 
-baseurl:: ModuleScopeURL
-baseurl = $(moduleScopeURL "")
-
-basepath :: FilePath
-basepath = moduleScopeURLtoFilePath baseurl
-
 bootstrapBindings :: BootstrapBindings
 bootstrapBindings = BootstrapBindings { blue = 0 }
 
-(+++) :: ModuleScopeURL -> FilePath -> ModuleScopeURL
-(+++) = moduleScopeAppend
-        
-
 bootstrapModule :: Monad m => WebSiteM m BootstrapBindings
+#if CLIENT
+bootstrapModule = return bootstrapBindings
+#else
 bootstrapModule = wimport ws bootstrapBindings
   where ws :: WebSite
         ws = mzeroWebSite { serverpart = bootstrapSP
@@ -46,6 +42,18 @@ bootstrapModule = wimport ws bootstrapBindings
                           , bodies = [WMB_Initialization "console.log('BootstrapWebModule initialization');"]
                           , baseURL = [baseurl]
                           }
+#endif
+
+#if SERVER
+baseurl:: ModuleScopeURL
+baseurl = $(moduleScopeURL "")
+
+basepath :: FilePath
+basepath = moduleScopeURLtoFilePath baseurl
+
+(+++) :: ModuleScopeURL -> FilePath -> ModuleScopeURL
+(+++) = moduleScopeAppend
+        
 
 bootstrapImports :: [WM_Header]
 bootstrapImports = [ js jsFilePath, css cssFilePath, css themeFilePath]
@@ -66,4 +74,4 @@ jsFilePath, cssFilePath, themeFilePath :: FilePath
   where v = verifyEmbeddedFP bootstrapFileMap
         fps = ["js/bootstrap.min.js", "css/bootstrap.min.css", "css/bootstrap-theme.min.css" ]
 
-
+#endif

@@ -8,7 +8,9 @@ import WebModule.WebModule
 import WebModule.WebModuleM
 import WebModule.ModuleScopeURL
 
+#if SERVER
 import Happstack.Server
+#endif
 
 -- There's really nothing to run, since this will be main.
 data GHCJSBindings = GHCJSBindings { start :: Int }
@@ -29,6 +31,9 @@ ghcjsBindings = GHCJSBindings { start = 1 }
 -- Left indicates dynamic reload of a directory with ghcjs executable
 -- Right indicates compile-time, immutable embedding
 ghcjsWebModule :: Monad m => Either FilePath EmbeddedDirectory -> WebSiteM m GHCJSBindings
+#if CLIENT
+ghcjsWebModule _fileMap = return ghcjsBindings
+#else
 ghcjsWebModule fileMap = wimport ws ghcjsBindings
   where ws = mzeroWebSite { serverpart = ghcjsSP fileMap
                           , headers = [WMH_JavaScript (baseurl +++ jsFilePath)]
@@ -37,13 +42,15 @@ ghcjsWebModule fileMap = wimport ws ghcjsBindings
                           }
         jsFilePath :: FilePath
         jsFilePath = "all.js"
-
+#endif
 -- TODO add the verification of form/paths/file contents back in and make sure it runs at compile
 -- time.
 
+#if SERVER
 ghcjsSP :: Either FilePath EmbeddedDirectory -> ServerPartT IO Response
 ghcjsSP (Left fp) = dir basepath $ uriRest (serveDynamic fp)
 ghcjsSP (Right ed) = dir basepath $ uriRest (serveEmbedded ed)
+#endif
 
 
         

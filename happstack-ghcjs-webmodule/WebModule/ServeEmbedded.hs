@@ -77,7 +77,6 @@ verifyEmbeddedFP ed fp =
   if elem fp (fst . unzip $ embeddedMap ed)
   then fp
   else error $ "ServeEmbedded:verifyEmbbeddedFP -- " ++ (embeddedPath ed) ++ " does not contain path " ++ fp
-#endif
 
 instance Lift ByteString where
   lift = bsToExp
@@ -92,4 +91,5 @@ bsToExp bs = do
 
 stringToBs :: String -> B.ByteString
 stringToBs = B8.pack
+#endif
   

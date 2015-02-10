@@ -1,8 +1,30 @@
-module GHCStub.Happstack.Server where
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE KindSignatures #-}
+module ClientStub.Happstack.Server where
 -- Client side definitions for Happstack.Server
 
-type ServerPartT a b = ()
+import Control.Applicative (Applicative(..), Alternative(..))
+import Control.Monad (MonadPlus(..))
+
+newtype ServerPartT (m :: * -> *) a = ServerPartT { unServerPartT :: m a } deriving Functor
 
 type Response = ()
 
+instance (Applicative m) => Applicative (ServerPartT m) where
+  pure = ServerPartT . pure
+  ServerPartT f <*> ServerPartT b = ServerPartT (f <*> b)
 
+instance (Applicative m) => Alternative (ServerPartT m) where
+  empty = undefined
+  a <|> b = undefined
+
+instance Monad m => Monad (ServerPartT m) where
+  return = ServerPartT . return
+  m >>= f = undefined
+
+instance MonadPlus m => MonadPlus (ServerPartT m) where
+  mzero = ServerPartT mzero
+  mplus _ _ = mzero
+  

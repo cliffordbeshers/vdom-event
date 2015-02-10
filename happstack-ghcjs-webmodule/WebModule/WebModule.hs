@@ -3,19 +3,26 @@
 {-# LANGUAGE PackageImports #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# OPTIONS_GHC -fwarn-incomplete-patterns -fno-warn-orphans #-}
-#if CLIENT
-module WebModule.WebModule() where
-#endif
-
-#if SERVER
-module WebModule.WebModule where
+module WebModule.WebModule ( WebSite(..)
+                           , serverpartLens
+                           , baseURLLens
+                           , headersLens
+                           , bodiesLens
+                           , manifestLens
+                           , wplus
+                           , homePage
+                           ) where
 
 import Control.Monad as Monad (mplus)
 import Data.Lens.Template (nameMakeLens)
 import Data.List (nub)
 import Data.Monoid ((<>))
 import Data.Text as T (Text)
+#if CLIENT
+import ClientStub.Happstack.Server (Response, ServerPartT)
+#else
 import Happstack.Server (Response, ServerPartT)
+#endif
 import Network.URI (URI)
 import Text.Blaze.Html5 as H ((!), body, docTypeHtml, head, link, Markup, script, ToMarkup(toMarkup), ToValue(toValue))
 import qualified Text.Blaze.Html5.Attributes as HA (href, manifest, rel, src, type_)
@@ -28,6 +35,7 @@ default (T.Text)
 
 instance ToValue URI where
   toValue = toValue . show
+
 
 --type WS = WebModule
 --data WSE = WSE URI B.ByteString | WSN URI | WS_FALLBACK URI URI
@@ -108,4 +116,3 @@ homePage ws =
   H.docTypeHtml ! HA.manifest (toValue $ manifestURL) $ do
     H.head $ mapM_ toMarkup (nub $ headers ws)
     H.body $ mapM_ toMarkup (nub $ bodies ws)
-#endif
