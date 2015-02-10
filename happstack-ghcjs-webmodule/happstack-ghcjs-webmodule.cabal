@@ -17,9 +17,14 @@ flag local-development
   Manual: True
 
 Library
-  cpp-options: -DCLIENT
+  if impl(ghcjs)
+    cpp-options: -DCLIENT
+  else
+    cpp-options: -DSERVER
   Hs-Source-Dirs: .
   GHC-options: -threaded -O2 -Wall
+  if !impl(ghcjs)
+    GHC-options: -Wwarn -fno-warn-name-shadowing -fno-warn-type-defaults
   Extensions:
     CPP,
     PackageImports,
@@ -41,21 +46,34 @@ Library
                    WebModule.Template
                    WebModule.WebModule
                    WebModule.WebModuleM
-                   ClientStub.Happstack.Server
-  Build-Depends: ghcjs-base,
-                 base >=4.2 && <5,
-                 ghcjs-jquery
-  Build-Depends: aeson,
-                 blaze-html,
-                 bytestring,
-                 data-default,
-                 data-lens,
-                 data-lens-template,
-                 filepath,
-                 lucid,
-                 mtl,
-                 network-uri,
-                 template-haskell,
-                 text,
-                 th-lift,
-                 transformers
+  if impl(ghcjs)
+    Exposed-modules: ClientStub.Happstack.Server
+  Build-Depends:
+    aeson,
+    base >=4.2 && <5,
+    blaze-html,
+    bytestring,
+    data-default,
+    data-lens,
+    data-lens-template,
+    filepath,
+    lucid,
+    mtl,
+    network-uri,
+    template-haskell,
+    text,
+    th-lift,
+    transformers
+
+  if impl(ghcjs)
+    Build-Depends:
+      ghcjs-base,
+      ghcjs-jquery
+  else
+    Build-Depends:
+      containers,
+      directory-tree,
+      file-embed,
+      happstack-server,
+      template-haskell,
+      unix
