@@ -19,13 +19,14 @@ flag local-development
 Executable happstack-ghcjs-server
   if impl(ghcjs)
      cpp-options: -DCLIENT
-  else 
+  else
      cpp-options: -DSERVER
   if flag (local-development)
      Hs-Source-Dirs: server, ../happstack-ghcjs-client/client, ../happstack-ghcjs-client
      cpp-options: -DSERVE_DYNAMIC
   else
      Hs-Source-Dirs: server, /usr/share/happstack-ghcjs
+     Build-Depends: happstack-ghcjs-webmodule
   Main-Is: Server.hs
   GHC-options: -threaded -O2 -Wall -Wwarn -fno-warn-name-shadowing -fno-warn-type-defaults
   Extensions:

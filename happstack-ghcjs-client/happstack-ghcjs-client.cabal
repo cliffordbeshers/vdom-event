@@ -63,4 +63,3 @@ Executable happstack-ghcjs-client
      th-lift,
      transformers,
      value-supply
-
