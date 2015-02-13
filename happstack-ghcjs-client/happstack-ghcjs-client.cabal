@@ -33,7 +33,7 @@ Executable happstack-ghcjs-client
   else
     Build-Depends: happstack-ghcjs-webmodule
 
-  Main-Is: Client.hs
+  Main-Is: ClientServer.hs
   if impl(ghcjs)
      cpp-options: -DCLIENT
   else

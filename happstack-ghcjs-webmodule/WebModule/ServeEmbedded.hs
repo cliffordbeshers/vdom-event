@@ -19,7 +19,7 @@ import Data.ByteString as B (ByteString, readFile)
 import Data.Map as Map (fromList)
 import qualified Data.Map as M (lookup)
 import Happstack.Server as Happstack (guessContentTypeM, mimeTypes, notFound, ok, Response, ServerPartT, setHeader, ToMessage(toResponse))
-import System.FilePath (makeRelative)
+import System.FilePath (makeRelative, (</>))
 import System.Directory.Tree
 import System.Posix
 import Language.Haskell.TH
@@ -44,7 +44,12 @@ $(deriveLift ''EmbeddedDirectory)
 embedDirectoryTH :: FilePath -> Q Exp -- EmbeddedDirectory
 embedDirectoryTH fp = do
   ed <- runIO $ embedDirectory fp
+  runIO $ printEmbeddedTree ed
   lift ed
+
+printEmbeddedTree :: EmbeddedDirectory -> IO ()
+printEmbeddedTree ed = print (embeddedPath ed, map fst (embeddedMap ed))
+
 
 embedDirectory :: FilePath -> IO EmbeddedDirectory
 embedDirectory sourceDir = do
@@ -53,13 +58,17 @@ embedDirectory sourceDir = do
   
 findf :: FilePath -> IO FileMap
 findf = fmap convert . readDirectoryWith B.readFile
-  where convert = map file . filter byFile . flattenDir . zipPaths
+  where convert = map file . filter byFile . flattenDir . zipPaths . reanchor ""
         -- Directory trees have weird types.  zipPaths breaks the functor model.
         -- convert2 = fold . map listify . zipPaths
         -- listify = (:[])
-        byFile (File _ _) = True
-        byFile _ = False
 
+reanchor :: FilePath -> AnchoredDirTree a -> AnchoredDirTree a
+reanchor a t = t { anchor = a }
+
+byFile :: DirTree a -> Bool
+byFile (File _ _) = True
+byFile _ = False
 
 serveEmbedded :: EmbeddedDirectory -> FilePath -> ServerPartT IO Response
 serveEmbedded edir fpa =

@@ -66,5 +66,5 @@ jQueryFileMap = $(embedDirectoryTH "embedded/WebModule/JQueryWebModule/jquery")
 jsFilePath :: FilePath
 [jsFilePath] =  map v fps
   where v = verifyEmbeddedFP jQueryFileMap
-        fps = ["jquery-1.11.0.min.js"]
+        fps = ["jquery/jquery-1.11.0.min.js"]
 #endif

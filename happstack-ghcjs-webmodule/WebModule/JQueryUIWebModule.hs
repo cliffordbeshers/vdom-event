@@ -11,6 +11,7 @@ import WebModule.WebModule (WebSite(baseURL, bodies, headers, serverpart))
 import WebModule.WebModuleM (mzeroWebSite, wimport)
 #endif
 import WebModule.WebModuleM (WebSiteM)
+import System.FilePath ((</>))
 
 
 data JQueryUIBindings = JQueryUIBindings { sortable :: Int }
@@ -59,5 +60,5 @@ jQueryUIFileMap = $(embedDirectoryTH "embedded/WebModule/JQueryUIWebModule/jquer
 jsFilePath, cssFilePath, themeFilePath:: FilePath
 [jsFilePath, cssFilePath, themeFilePath] =  map v fps
   where v = verifyEmbeddedFP jQueryUIFileMap
-        fps = ["jquery-ui.js", "jquery-ui.css", "jquery-ui.theme.css"]
+        fps = map ("jquery-ui-1.11.2" </>) ["jquery-ui.js", "jquery-ui.css", "jquery-ui.theme.css"]
 #endif

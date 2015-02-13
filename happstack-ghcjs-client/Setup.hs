@@ -1,4 +1,5 @@
 module Main where
+
 import Distribution.Simple (defaultMainWithHooks, simpleUserHooks, UserHooks(postBuild))
 import Distribution.Simple.LocalBuildInfo (buildDir)
 import System.FilePath ((</>), (<.>))

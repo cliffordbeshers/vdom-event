@@ -22,6 +22,7 @@ import WebModule.WebModuleM
 #else
 import WebModule.WebModuleM (mzeroWebSite, WebSiteM, wimport)
 #endif
+import System.FilePath ((</>))
 
 -- default(JSNumber, JSString, String)
 
@@ -80,6 +81,7 @@ bootstrapSP = dir basepath $ uriRest (serveEmbedded bootstrapFileMap)
 jsFilePath, cssFilePath, themeFilePath :: FilePath
 [jsFilePath, cssFilePath, themeFilePath] =  map v fps
   where v = verifyEmbeddedFP bootstrapFileMap
-        fps = ["js/bootstrap.min.js", "css/bootstrap.min.css", "css/bootstrap-theme.min.css" ]
+        fps = map ("bootstrap" </>)
+              ["js/bootstrap.min.js", "css/bootstrap.min.css", "css/bootstrap-theme.min.css" ]
 
 #endif

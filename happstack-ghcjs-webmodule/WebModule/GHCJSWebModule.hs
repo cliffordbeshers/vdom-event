@@ -41,7 +41,8 @@ ghcjsWebModule fileMap = wimport ws ghcjsBindings
                           , baseURL = [baseurl]
                           }
         jsFilePath :: FilePath
-        jsFilePath = "all.js"
+        -- WRONG THIS IS A HACK ADDING THE PARENT.
+        jsFilePath = "happstack-ghcjs-client.jsexe/all.js"
 #endif
 -- TODO add the verification of form/paths/file contents back in and make sure it runs at compile
 -- time.
@@ -51,6 +52,4 @@ ghcjsSP :: Either FilePath EmbeddedDirectory -> ServerPartT IO Response
 ghcjsSP (Left fp) = dir basepath $ uriRest (serveDynamic fp)
 ghcjsSP (Right ed) = dir basepath $ uriRest (serveEmbedded ed)
 #endif
-
-
         
