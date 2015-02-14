@@ -1,20 +1,19 @@
-import Control.Category ((.))
+import Control.Monad.State (get)
+import Control.Lens hiding ((%=))
 import Debian.Debianize
 import Distribution.Compiler
-import Data.Lens.Lazy hiding ((~=), (%=))
 import Debian.Relation
-import Prelude hiding ((.))
 
 main :: IO ()
 main = newFlags >>= newCabalInfo >>= evalCabalT (debianize (debianDefaults >> customize) >> liftCabal writeDebianization)
 
 customize :: CabalT IO ()
 customize = do
-  hc <- access (compilerFlavor . flags . debInfo)
+  hc <- get >>= return . view (debInfo . flags . compilerFlavor)
   case hc of
-    GHC -> (sourceFormat . debInfo) ~= Just Native3
+    GHC -> (debInfo . sourceFormat) ~= Just Native3
     GHCJS ->
         do let (Right rels) = parseRelations "ghcjs, libghc-cabal-ghcjs-dev, haskell-devscripts (>= 0.8.21.3)"
-           (sourcePackageName . debInfo) ~= Just (SrcPkgName "ghcjs-happstack-ghcjs-webmodule")
-           (sourceFormat . debInfo) ~= Just Native3
-           (buildDepends . control . debInfo) %= (++ rels)
+           (debInfo . sourcePackageName) ~= Just (SrcPkgName "ghcjs-happstack-ghcjs-webmodule")
+           (debInfo . sourceFormat) ~= Just Native3
+           (debInfo . control . buildDepends) %= (++ rels)

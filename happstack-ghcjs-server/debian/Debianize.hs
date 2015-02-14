@@ -1,15 +1,14 @@
 -- requires autobuilder-seereason
-import Control.Category ((.))
+import Control.Lens hiding ((%=))
 import Debian.Debianize
 import Debian.AutoBuilder.Details.CabalInfo (seereasonDefaults)
 import Debian.Relation (BinPkgName(..), Relation(Rel))
-import Prelude hiding ((.))
 
 main :: IO ()
 main =
     newFlags >>= newCabalInfo >>= evalCabalT (debianize (seereasonDefaults >> customize) >> liftCabal writeDebianization)
     where
       customize =
-          do (utilsPackageNameBase . debInfo) ~= Just "happstack-ghcjs-server"
-             (sourceFormat . debInfo) ~= Just Native3
-             (buildDepends . control . debInfo) %= (++ [[Rel (BinPkgName "happstack-ghcjs-client") Nothing Nothing]])
+          do (debInfo . utilsPackageNameBase) ~= Just "happstack-ghcjs-server"
+             (debInfo . sourceFormat) ~= Just Native3
+             (debInfo . control . buildDepends) %= (++ [[Rel (BinPkgName "happstack-ghcjs-client") Nothing Nothing]])
