@@ -7,6 +7,7 @@ import WebModule.ModuleScopeURL
 import WebModule.WebModule
 import WebModule.WebModuleM
 import WebModule.ServeEmbedded
+import System.FilePath
 
 #if SERVER
 import Happstack.Server
@@ -30,7 +31,7 @@ ghcjsBindings = GHCJSBindings { start = 1 }
 -- Not sure I like this, but it should work.
 -- Left indicates dynamic reload of a directory with ghcjs executable
 -- Right indicates compile-time, immutable embedding
-ghcjsWebModule :: Monad m => Either FilePath EmbeddedDirectory -> WebSiteM m GHCJSBindings
+ghcjsWebModule :: Monad m => Either (FilePath,FilePath) EmbeddedDirectory -> WebSiteM m GHCJSBindings
 #if CLIENT
 ghcjsWebModule _fileMap = return ghcjsBindings
 #else
@@ -41,15 +42,17 @@ ghcjsWebModule fileMap = wimport ws ghcjsBindings
                           , baseURL = [baseurl]
                           }
         jsFilePath :: FilePath
-        -- WRONG THIS IS A HACK ADDING THE PARENT.
-        jsFilePath = "happstack-ghcjs-client.jsexe/all.js"
+        jsFilePath = rootname fileMap </> "all.js"
+        -- TODO This is still wrong, I should not have to recompute the rootname
+        rootname (Left (_,r)) = r
+        rootname (Right e) = last . splitDirectories . embeddedPath $ e
 #endif
 -- TODO add the verification of form/paths/file contents back in and make sure it runs at compile
 -- time.
 
 #if SERVER
-ghcjsSP :: Either FilePath EmbeddedDirectory -> ServerPartT IO Response
-ghcjsSP (Left fp) = dir basepath $ uriRest (serveDynamic fp)
+ghcjsSP :: Either (FilePath,FilePath) EmbeddedDirectory -> ServerPartT IO Response
+ghcjsSP (Left fpp) = dir basepath $ uriRest (serveDynamic fpp)
 ghcjsSP (Right ed) = dir basepath $ uriRest (serveEmbedded ed)
 #endif
         

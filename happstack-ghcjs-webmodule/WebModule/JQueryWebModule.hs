@@ -59,7 +59,7 @@ jQuerySP = dir basepath $ uriRest (serveEmbedded jQueryFileMap)
 -- FIXME: the mimetype should be determined statically.
 
 jQueryFileMap :: EmbeddedDirectory
-jQueryFileMap = $(embedDirectoryTH "embedded/WebModule/JQueryWebModule/jquery")
+jQueryFileMap = $(embedDirectoryTH "embedded/WebModule/JQueryWebModule" "jquery")
 
 
 -- This value incorporates a test that ensures we have the right path at compile time

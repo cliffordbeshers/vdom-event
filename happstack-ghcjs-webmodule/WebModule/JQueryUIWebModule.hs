@@ -53,7 +53,7 @@ jQueryUISP = dir basepath $ uriRest (serveEmbedded jQueryUIFileMap)
 -- FIXME: the mimetype should be determined statically.
 
 jQueryUIFileMap :: EmbeddedDirectory
-jQueryUIFileMap = $(embedDirectoryTH "embedded/WebModule/JQueryUIWebModule/jquery-ui-1.11.2")
+jQueryUIFileMap = $(embedDirectoryTH "embedded/WebModule/JQueryUIWebModule" "jquery-ui-1.11.2")
 
 
 -- This value incorporates a test that ensures we have the right path at compile time

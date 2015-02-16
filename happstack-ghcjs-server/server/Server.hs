@@ -58,11 +58,11 @@ home' =
 
 
 -- Hard-coded path because template haskell staging, didn't want it in another file.
-ghcjsFiles :: Either FilePath EmbeddedDirectory
+ghcjsFiles :: Either (FilePath,FilePath) EmbeddedDirectory
 #ifdef SERVE_DYNAMIC
-ghcjsFiles = Left "../happstack-ghcjs-client/dist/build/happstack-ghcjs-client/happstack-ghcjs-client.jsexe"
+ghcjsFiles = Left ("../happstack-ghcjs-client/dist/build/happstack-ghcjs-client", "happstack-ghcjs-client.jsexe")
 #else
-ghcjsFiles = Right $(embedDirectoryTH "/usr/bin/happstack-ghcjs-client.jsexe")
+ghcjsFiles = Right $(embedDirectoryTH "/usr/bin" "happstack-ghcjs-client.jsexe")
 -- _ = True == verifyGHCJSFileMap ghcjsFiles
 #endif
 

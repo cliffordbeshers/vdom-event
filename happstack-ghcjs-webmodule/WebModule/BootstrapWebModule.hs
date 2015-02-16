@@ -72,7 +72,7 @@ bootstrapImports = [ js jsFilePath, css cssFilePath, css themeFilePath]
 -- FIXME: the mimetype should be determined statically.
 
 bootstrapFileMap :: EmbeddedDirectory
-bootstrapFileMap = $(embedDirectoryTH "embedded/WebModule/BootstrapWebModule/bootstrap")
+bootstrapFileMap = $(embedDirectoryTH "embedded/WebModule/BootstrapWebModule" "bootstrap")
 
 bootstrapSP :: ServerPartT IO Response
 bootstrapSP = dir basepath $ uriRest (serveEmbedded bootstrapFileMap)

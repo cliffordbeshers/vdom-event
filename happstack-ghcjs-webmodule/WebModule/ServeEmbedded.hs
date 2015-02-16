@@ -2,13 +2,14 @@
 {-# LANGUAGE CPP #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-module WebModule.ServeEmbedded (EmbeddedDirectory -- opaque
-#if SERVER
+module WebModule.ServeEmbedded (EmbeddedDirectory(..)
+#ifndef CLIENT
   , embedDirectory
   , embedDirectoryTH
   , serveDynamic
   , serveEmbedded
   , verifyEmbeddedFP
+  , findf
 #endif
   ) where
 
@@ -27,38 +28,38 @@ import Language.Haskell.TH
 import Language.Haskell.TH.Lift
 #endif
 
-#if SERVER
+#ifndef CLIENT
 type FileMap = [(FilePath, B.ByteString)]
 #endif
 
 data EmbeddedDirectory = EmbeddedDirectory {
-#if SERVER
+#ifndef CLIENT
   embeddedPath :: FilePath
   , embeddedMap :: FileMap
 #endif
   } deriving (Eq, Read, Show)
 
-#if SERVER
+#ifndef CLIENT
 $(deriveLift ''EmbeddedDirectory)
 
-embedDirectoryTH :: FilePath -> Q Exp -- EmbeddedDirectory
-embedDirectoryTH fp = do
-  ed <- runIO $ embedDirectory fp
+embedDirectoryTH :: FilePath -> FilePath -> Q Exp -- EmbeddedDirectory
+embedDirectoryTH fp d = do
+  ed <- runIO $ embedDirectory fp d
   runIO $ printEmbeddedTree ed
   lift ed
 
 printEmbeddedTree :: EmbeddedDirectory -> IO ()
 printEmbeddedTree ed = print (embeddedPath ed, map fst (embeddedMap ed))
 
-
-embedDirectory :: FilePath -> IO EmbeddedDirectory
-embedDirectory sourceDir = do
-  fs <- findf sourceDir
-  return EmbeddedDirectory { embeddedPath = sourceDir, embeddedMap = fs }
+embedDirectory :: FilePath -> FilePath -> IO EmbeddedDirectory
+embedDirectory sdir edir = do
+  fs <- findf sdir edir
+  return EmbeddedDirectory { embeddedPath = sdir, embeddedMap = fs }
   
-findf :: FilePath -> IO FileMap
-findf = fmap convert . readDirectoryWith B.readFile
+findf :: FilePath -> FilePath -> IO FileMap
+findf cwd sourceDir = fmap convert . readDirectoryWith B.readFile $ (cwd </> sourceDir)
   where convert = map file . filter byFile . flattenDir . zipPaths . reanchor ""
+        prefixKeys s = map (\(a,b) -> (s ++ a, b))
         -- Directory trees have weird types.  zipPaths breaks the functor model.
         -- convert2 = fold . map listify . zipPaths
         -- listify = (:[])
@@ -72,7 +73,9 @@ byFile _ = False
 
 serveEmbedded :: EmbeddedDirectory -> FilePath -> ServerPartT IO Response
 serveEmbedded edir fpa =
-  let fp = "/" `makeRelative` fpa
+  -- fpa is filepath absolute, it should be a filepath found in the embedded directory
+  -- but it has a leading /, which we need to remove
+  let fp = "/" `makeRelative` fpa -- drop the leading /
       filemap = Map.fromList (embeddedMap edir) in
   do    
     case M.lookup fp filemap of
@@ -82,10 +85,12 @@ serveEmbedded edir fpa =
                     ok $ setHeader "content-type" mt $ toResponse bs
       Nothing -> notFound . toResponse $ "filepath " ++ fp ++ " not found in EmbeddedDirectory create from " ++ (embeddedPath edir)
 
-serveDynamic :: FilePath -> FilePath -> ServerPartT IO Response
-serveDynamic sourceDir fpa = do
-  ed <- liftIO $ embedDirectory sourceDir
-  serveEmbedded ed fpa
+serveDynamic :: (FilePath, FilePath) -> FilePath -> ServerPartT IO Response
+serveDynamic (parent,edir) uri = do
+  -- edir is the directory to embed, parent is the path to edir.
+  liftIO $ print $ "serveDynamic:" ++ parent ++ " " ++ edir
+  ed <- liftIO $ embedDirectory parent edir
+  serveEmbedded ed uri
 
 verifyEmbeddedFP :: EmbeddedDirectory -> FilePath -> FilePath
 verifyEmbeddedFP ed fp =
