@@ -3,8 +3,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 module WebModule.Favicon where
 
-import qualified Data.ByteString as B (ByteString)
 #if SERVER
+import qualified Data.ByteString as B (ByteString)
 import Data.FileEmbed (embedFile)
 #endif
 import Data.Text (Text, unpack)

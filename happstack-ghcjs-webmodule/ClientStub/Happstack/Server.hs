@@ -18,11 +18,11 @@ instance (Applicative m) => Applicative (ServerPartT m) where
 
 instance (Applicative m) => Alternative (ServerPartT m) where
   empty = undefined
-  a <|> b = undefined
+  _a <|> _b = undefined
 
 instance Monad m => Monad (ServerPartT m) where
   return = ServerPartT . return
-  m >>= f = undefined
+  _m >>= _f = undefined
 
 instance MonadPlus m => MonadPlus (ServerPartT m) where
   mzero = ServerPartT mzero

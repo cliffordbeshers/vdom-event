@@ -59,7 +59,6 @@ embedDirectory sdir edir = do
 findf :: FilePath -> FilePath -> IO FileMap
 findf cwd sourceDir = fmap convert . readDirectoryWith B.readFile $ (cwd </> sourceDir)
   where convert = map file . filter byFile . flattenDir . zipPaths . reanchor ""
-        prefixKeys s = map (\(a,b) -> (s ++ a, b))
         -- Directory trees have weird types.  zipPaths breaks the functor model.
         -- convert2 = fold . map listify . zipPaths
         -- listify = (:[])

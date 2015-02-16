@@ -11,8 +11,8 @@ module WebModule.SortableModule (sortableWebModule, SortableBindings(..)
 -- import Data.Aeson as Aeson (decode)
 #if SERVER
 import WebModule.ModuleScopeURL
-import WebModule.WebModule
 #endif
+import WebModule.WebModule
 import WebModule.WebModuleM
 -- import WebModule.AJAXModule
 import GHC.Generics
