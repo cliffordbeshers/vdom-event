@@ -6,6 +6,9 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 module Main where
 
+-- TODO "happstack-ghcjs-server" Main.ReplaceServerHSWithClientServerFromClient
+-- TODO "happstack-ghcjs-server" WebModule.WebModule.RepresentPageStateMonad
+
 -- import GHCJS.Concurrent
 -- import GHCJS.Types
 -- import GHCJS.Foreign

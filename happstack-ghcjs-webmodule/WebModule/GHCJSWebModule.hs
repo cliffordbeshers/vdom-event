@@ -43,12 +43,12 @@ ghcjsWebModule fileMap = wimport ws ghcjsBindings
                           }
         jsFilePath :: FilePath
         jsFilePath = rootname fileMap </> "all.js"
-        -- TODO This is still wrong, I should not have to recompute the rootname
+        -- TODO ServeEmbedded.ProvideRootName
         rootname (Left (_,r)) = r
         rootname (Right e) = last . splitDirectories . embeddedPath $ e
 #endif
--- TODO add the verification of form/paths/file contents back in and make sure it runs at compile
--- time.
+
+-- TODO WebModule.ServeEmbedded.StaticallyVerifyPaths
 
 #if SERVER
 ghcjsSP :: Either (FilePath,FilePath) EmbeddedDirectory -> ServerPartT IO Response

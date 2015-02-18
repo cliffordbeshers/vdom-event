@@ -3,6 +3,12 @@
 {-# LANGUAGE CPP #-}
 module Main where
 
+-- TODO "happstack-ghcjs-server" Main.ReplaceServerHSWithClientServerFromClient
+-- This file should not exist.  The cabal file should point to a unified ClientServer.hs
+-- in -client so that the application is always compiled from one code tree.
+
+-- TODO "happstack-ghcjs-server" WebModule.WebModule.RepresentPageStateMonad
+
 import Control.Monad (MonadPlus(..))
 import Happstack.Server
 import WebModule.Favicon

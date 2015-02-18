@@ -13,6 +13,19 @@ module WebModule.ServeEmbedded (EmbeddedDirectory(..)
 #endif
   ) where
 
+-- TODO WebModule.ServeEmbedded.ProvideRootName
+-- in GHCJSWebModule, we have to recompute the rootname, we should provide the original
+-- specification from which the embedded directory was produced.
+
+-- TODO WebModule.ServeEmbedded.StaticallyVerifyPaths
+-- Modify embeddedDirectoryTH to be completely reliable, this has two parts:
+--  1) make arguments to serveEmbeddedTH that represent minimum criteria to be met by the loaded directory,
+--  1.5) ideally perhaps running embbededDirectorySetup in ghci which would load and checksum all the files,
+--     then cut and paste that into the source code and use System.Directory.Tree fmap checksum and equality,
+--     so that we embed only exactly the files that we checked in.
+--  2) Whatever the conditions, fail at compile time if they are not met.
+
+
 #if SERVER
 import Control.Monad.Trans as Monad (liftIO)
 import Data.ByteString.Char8 as B8 (pack, unpack)

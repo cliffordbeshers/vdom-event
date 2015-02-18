@@ -8,6 +8,8 @@ module WebModule.SortableModule (sortableWebModule, SortableBindings(..)
                                 , SortableOperation(..), Error(..), update,
                                 sortableMarkup) where
 
+-- TODO WebModule.AJAXModule.GetAJAXConnectedToSortable
+
 -- import Data.Aeson as Aeson (decode)
 #if SERVER
 import WebModule.ModuleScopeURL

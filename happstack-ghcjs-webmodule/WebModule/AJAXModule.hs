@@ -7,6 +7,15 @@
 {-# LANGUAGE CPP #-}
 module WebModule.AJAXModule (ajaxModuleGen, AJAXBindings(..), AJAXType(..)) where
 
+-- TODO WebModule.AJAXModule.GetAJAXConnectedToSortable
+-- 1) I have never connected this code to actual UI
+-- There are namespace issues that fall into the web routes problem
+-- ignore those
+-- get this connected and writing files
+-- 2) create the file handle in main, as we would an acid-state
+--    handle, and thread it through a ReaderT/ WebSiteM
+
+
 #if SERVER
 import Happstack.Server
 #endif

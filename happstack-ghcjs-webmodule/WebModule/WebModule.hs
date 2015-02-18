@@ -71,6 +71,20 @@ instance ToValue URI where
 --       ! HA.href (toValue $ show uri)
 --       ! HA.type_ "image/x-icon"
 
+-- TODO "happstack-ghcjs-server" WebModule.WebModule.GuardServerPartsWithBaseURL
+-- baseURL is explicitly encoded for several reasons, mostly web-routes related,
+-- i.e., scoping etc., but it is also there for browsing purposes, so that pages
+-- representing the data structures can be generated automatically.
+
+-- TODO "happstack-ghcjs-server" WebModule.WebModule.RepresentPageStateMonad
+-- as per discussion with Jeremy about ReactHaskell, applications of this sort
+-- are really not URI based, they need an internal state from which the DOM tree
+-- can be reproduced.  This will be useful for history, back button, sharing, etc.
+-- 1) Test the basic mechanism
+-- 2) make sure security is encoded somehow
+-- 3) ideally it would support fragments, e.g., I could share part of a document.
+
+
 data WebSite = WebSite { serverpart :: ServerPartT IO Response 
                        , baseURL :: [ModuleScopeURL]
                        , headers :: [WM_Header]
