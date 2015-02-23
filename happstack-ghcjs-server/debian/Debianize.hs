@@ -1,7 +1,7 @@
 -- requires autobuilder-seereason
 import Control.Lens hiding ((%=))
 import Debian.Debianize
-import Debian.AutoBuilder.Details.CabalInfo (seereasonDefaults)
+import Debian.AutoBuilder.Details.Versions (seereasonDefaults)
 import Debian.Relation (BinPkgName(..), Relation(Rel))
 
 main :: IO ()
