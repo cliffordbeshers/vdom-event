@@ -13,7 +13,7 @@ customize = do
   case hc of
     GHC -> (debInfo . sourceFormat) ~= Just Native3
     GHCJS ->
-        do let (Right rels) = parseRelations "ghcjs, libghc-cabal-ghcjs-dev, haskell-devscripts (>= 0.8.21.3)"
+        do let (Right rels) = parseRelations "ghcjs, libghc-cabal-122-dev, haskell-devscripts (>= 0.8.21.3)"
            (debInfo . sourcePackageName) ~= Just (SrcPkgName "ghcjs-happstack-ghcjs-webmodule")
            (debInfo . sourceFormat) ~= Just Native3
            (debInfo . control . buildDepends) %= (++ rels)
