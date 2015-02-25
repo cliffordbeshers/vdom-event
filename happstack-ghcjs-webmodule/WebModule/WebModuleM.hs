@@ -4,18 +4,17 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# OPTIONS_GHC -fno-warn-overlapping-patterns -fno-warn-orphans #-}
-#if CLIENT
-module WebModule.WebModuleM (WebSiteM, runWebSiteM) where
-#else
 module WebModule.WebModuleM 
-       ( WebSiteM
+       (
+         WebSiteM
        , wimport
+       , mkWebSiteM
+       , runWebSiteM
+#if SERVER
        , tellServerPart
        , tellHead
        , tellBody
        , mzeroWebSite
-       , mkWebSiteM
-       , runWebSiteM
        , compileWebSiteM
        , mkTemplatePart
        , templateMarkup
@@ -23,36 +22,32 @@ module WebModule.WebModuleM
        , indexDotHtml
        , rootHandler
        , htmlHandler
-       ) where
 #endif
+       ) where
 
 
-#if CLIENT
-import Control.Monad.Trans.Identity
-#endif    
-#if SERVER
+import Data.Monoid (Monoid(mappend, mempty))
+
 import Control.Monad as Monad (MonadPlus(mplus, mzero), msum)
 import Control.Monad.Trans.Writer (tell, WriterT(runWriterT))
-import Data.Monoid (Monoid(mappend, mempty))
 import Data.Text as Text (pack)
+#if SERVER
 import Happstack.Server as Happstack (dirs, nullDir, ok, Response, ServerPartT, ToMessage(..))
 import Text.Blaze.Html5 (Markup, ToMarkup(toMarkup))
+#endif
 import WebModule.Markable (WM_Body, WM_Header)
 import WebModule.Template (htmlTemplate)
 import WebModule.WebModule (WebSite(..), wplus)
-#endif
 
-#if SERVER
+
 type WebSiteM = WriterT WebSite
-#else
-type WebSiteM = IdentityT
-#endif
 
-#if SERVER
 
 instance Monoid WebSite where
   mempty = mzeroWebSite
   mappend = wplus
+
+#if SERVER
 
 tellServerPart :: Monad m => ServerPartT IO Response -> WebSiteM m ()
 tellServerPart sp = tell $ mempty { serverpart = sp }
@@ -62,6 +57,7 @@ tellHead xs = tell $ mempty { headers = xs }
 
 tellBody :: Monad m => [WM_Body] -> WebSiteM m ()
 tellBody xs = tell $ mempty { bodies = xs }
+#endif
   
 wimport :: Monad m => WebSite -> a -> WebSiteM m a
 wimport s bindings = do
@@ -79,16 +75,9 @@ mzeroWebSite = WebSite { serverpart = mzero
                        , bodies = []
                        , manifest = []
                        }
-#endif
 
-#if SERVER
 runWebSiteM :: WebSiteM m a -> m (a, WebSite)
 runWebSiteM  = runWriterT
-#endif
-#if CLIENT
-runWebSiteM :: WebSiteM m a -> m a
-runWebSiteM  = runIdentityT
-#endif
 
 #if SERVER
 -- This is probably mapWriterT composed with runWriterT or something.

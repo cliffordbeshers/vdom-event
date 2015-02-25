@@ -1,6 +1,13 @@
+{-# LANGUAGE CPP #-}
 {-# OPTIONS_GHC -Wall #-}
-module Bootstrap.ValueSupply (newPrefixSupply, prefixSupply) where
+module Bootstrap.ValueSupply (
+#if CLIENT
+  newPrefixSupply,
+  prefixSupply
+#endif
+  ) where
 
+#if CLIENT
 import Data.Foldable
 import Data.Supply (modifySupply, newNumSupply, split, split2, split3, Supply, supplyValue)
 
@@ -27,3 +34,4 @@ newPrefixSupply :: String -> IO (Supply String)
 newPrefixSupply prefix = do
   s0 <- newNumSupply  :: IO (Supply Int)
   return $ prefixSupply prefix s0
+#endif

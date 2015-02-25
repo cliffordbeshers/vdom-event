@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE Rank2Types #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ExtendedDefaultRules #-}
@@ -8,9 +9,13 @@ import Data.List
 import Data.Monoid ((<>))
 import Data.Text as Text (Text, pack, intercalate, concat)
 import Data.Text.Lazy (toStrict)
+#if CLIENT
 import JavaScript.JQuery as JQuery (appendJQuery, click, select, setHtml, setText)
 import qualified JavaScript.JQueryExtra as JQuery (hide, show)
 import qualified JavaScript.JQueryUI as JQueryUI (sortable)
+#else
+import JavaScript.JQueryServer as JQuery
+#endif
 import Control.Monad
 import Data.Default
 import Data.IORef
@@ -19,6 +24,9 @@ import Lucid
 import Data.Tree
 import ZipTree
 
+
+
+#if CLIENT
 renderLucid :: Html () -> Text
 renderLucid = toStrict . renderText
 
@@ -83,3 +91,4 @@ toggleShow a b = do
         if status then JQuery.hide b 
           else JQuery.show b
   click action def a
+#endif

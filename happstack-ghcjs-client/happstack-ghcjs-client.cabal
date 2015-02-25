@@ -13,7 +13,9 @@ data-dir: ""
 data-files:
     client/Common.hs
     client/Sortable.hs
-    client/Client.hs
+    client/ClientServer.hs
+    client/WebModule/SortableModule.hs
+    client/WebModule/AJAXModule.hs
 
 flag ghcjs
     description: Tell cabal we are using ghcjs (work around until hackage supports impl(ghcjs))
@@ -55,11 +57,11 @@ Executable happstack-ghcjs-client
      data-default,
      data-lens-template,
      filepath,
-     lucid,
+     lucid >0.9.1,
      mtl,
      network-uri,
      template-haskell,
      text,
      th-lift,
-     transformers,
+--     transformers,
      value-supply

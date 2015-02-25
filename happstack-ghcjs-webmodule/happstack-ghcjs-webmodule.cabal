@@ -28,7 +28,7 @@ Library
     PackageImports,
     TemplateHaskell
   Exposed-modules:
-    WebModule.AJAXModule
+--    WebModule.AJAXModule
     WebModule.BootstrapWebModule
     WebModule.EmbedURI
     WebModule.Favicon
@@ -41,7 +41,7 @@ Library
     WebModule.Markable
     WebModule.ModuleScopeURL
     WebModule.ServeEmbedded
-    WebModule.SortableModule
+--    WebModule.SortableModule
     WebModule.Template
     WebModule.WebModule
     WebModule.WebModuleM
@@ -50,6 +50,7 @@ Library
     base >=4.2 && <5,
     blaze-html,
     bytestring,
+    containers,
     data-default,
     data-lens,
     data-lens-template,
@@ -60,7 +61,9 @@ Library
     template-haskell,
     text,
     th-lift,
-    transformers
+    transformers,
+    unix
+
 
   if impl(ghcjs)
     Build-Depends:
@@ -71,12 +74,10 @@ Library
   else
     GHC-options: -Wwarn -fno-warn-name-shadowing -fno-warn-type-defaults
     Build-Depends:
-      containers,
       directory-tree,
       file-embed,
       happstack-server,
-      template-haskell,
-      unix
+      template-haskell
     Exposed-modules:
       WebModule.GHCJSStub.JQuery
       WebModule.GHCJSStub.Types

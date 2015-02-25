@@ -3,9 +3,9 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module WebModule.ServeEmbedded (EmbeddedDirectory(..)
+  , embedDirectoryTH
 #ifndef CLIENT
   , embedDirectory
-  , embedDirectoryTH
   , serveDynamic
   , serveEmbedded
   , verifyEmbeddedFP
@@ -25,34 +25,29 @@ module WebModule.ServeEmbedded (EmbeddedDirectory(..)
 --     so that we embed only exactly the files that we checked in.
 --  2) Whatever the conditions, fail at compile time if they are not met.
 
-
-#if SERVER
 import Control.Monad.Trans as Monad (liftIO)
 import Data.ByteString.Char8 as B8 (pack, unpack)
 import Data.ByteString as B (ByteString, readFile)
 import Data.Map as Map (fromList)
 import qualified Data.Map as M (lookup)
-import Happstack.Server as Happstack (guessContentTypeM, mimeTypes, notFound, ok, Response, ServerPartT, setHeader, ToMessage(toResponse))
 import System.FilePath (makeRelative, (</>))
-import System.Directory.Tree
 import System.Posix
 import Language.Haskell.TH
 
 import Language.Haskell.TH.Lift
+
+#if SERVER
+import System.Directory.Tree (AnchoredDirTree(..), DirTree(..), flattenDir, readDirectoryWith, zipPaths)
+import Happstack.Server as Happstack (guessContentTypeM, mimeTypes, notFound, ok, Response, ServerPartT, setHeader, ToMessage(toResponse))
 #endif
 
-#ifndef CLIENT
 type FileMap = [(FilePath, B.ByteString)]
-#endif
 
 data EmbeddedDirectory = EmbeddedDirectory {
-#ifndef CLIENT
   embeddedPath :: FilePath
   , embeddedMap :: FileMap
-#endif
   } deriving (Eq, Read, Show)
 
-#ifndef CLIENT
 $(deriveLift ''EmbeddedDirectory)
 
 embedDirectoryTH :: FilePath -> FilePath -> Q Exp -- EmbeddedDirectory
@@ -69,6 +64,10 @@ embedDirectory sdir edir = do
   fs <- findf sdir edir
   return EmbeddedDirectory { embeddedPath = sdir, embeddedMap = fs }
   
+#if CLIENT
+findf :: FilePath -> FilePath -> IO FileMap
+findf _ _ = return []
+#else
 findf :: FilePath -> FilePath -> IO FileMap
 findf cwd sourceDir = fmap convert . readDirectoryWith B.readFile $ (cwd </> sourceDir)
   where convert = map file . filter byFile . flattenDir . zipPaths . reanchor ""
@@ -103,6 +102,7 @@ serveDynamic (parent,edir) uri = do
   liftIO $ print $ "serveDynamic:" ++ parent ++ " " ++ edir
   ed <- liftIO $ embedDirectory parent edir
   serveEmbedded ed uri
+#endif
 
 verifyEmbeddedFP :: EmbeddedDirectory -> FilePath -> FilePath
 verifyEmbeddedFP ed fp =
@@ -123,5 +123,4 @@ bsToExp bs = do
 
 stringToBs :: String -> B.ByteString
 stringToBs = B8.pack
-#endif
   

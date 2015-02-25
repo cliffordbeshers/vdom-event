@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE Rank2Types #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -5,6 +6,7 @@ module Bootstrap.Tabs where
 
 -- http://getbootstrap.com/javascript/#tabs
 
+#if CLIENT
 import Control.Monad (foldM)
 import Control.Monad.Trans (MonadIO, liftIO)
 import Data.Text as Text (Text)
@@ -12,7 +14,7 @@ import Lucid
 import Bootstrap.Operations
 import Bootstrap.Utils (aria_controls_, classes_, role_)
 import Data.Supply (modifySupply, newNumSupply, split, split2, split3, Supply, supplyValue)
-import Bootstrap.ValueSupply
+import Bootstrap.ValueSupply ( newPrefixSupply)
 
 -- main = do
 --   s0 <- newNumSupply
@@ -121,3 +123,4 @@ h = div_ "html"
 
 --z :: Html () -> Html ()
 --z = (fst . head $ panes) `with` (snd . head $ panes)
+#endif
