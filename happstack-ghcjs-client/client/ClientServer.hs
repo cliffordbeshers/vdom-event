@@ -48,10 +48,14 @@ import Data.Aeson as A
 import qualified Data.Text as T (Text, unpack, pack)
 import qualified Data.Text.Lazy as LT (Text, unpack, pack, toStrict)
 import Data.Text.Encoding as TE (decodeUtf8)
-import qualified Data.ByteString.Lazy as L
-import qualified Data.ByteString as B
-import qualified Data.ByteString.Lazy as BL
+import qualified Data.ByteString as BS (ByteString)
+import qualified Data.ByteString.Lazy as BSL (fromStrict, toStrict)
 import Text.Blaze.Html5 as H (Markup, toMarkup, ul, li)
+
+import WebModule.GName
+import GHC.Generics
+import Data.Typeable as Typeable (Proxy(..))
+
 
 import Common
 import           Data.Default
@@ -73,6 +77,7 @@ import WebModule.JQueryUIWebModule
 import WebModule.BootstrapWebModule
 import WebModule.GHCJSWebModule
 import WebModule.ServeEmbedded (EmbeddedDirectory, embedDirectoryTH)
+import WebModule.AJAXModule as AJAX
 
 #if SERVER
 import Happstack.Server
@@ -132,6 +137,10 @@ ghcjsFiles = Right $(embedDirectoryTH "/usr/bin" "happstack-ghcjs-client.jsexe")
 -- _ = True == verifyGHCJSFileMap ghcjsFiles
 #endif
 
+mm :: AJAXType MarshalMe
+mm = AJAXType tname (BSL.toStrict . encode) decode
+  where tname = gname (Proxy :: Proxy MarshalMe)
+
 clientServerWebSite ::  WebSiteM IO (RETURN)
 clientServerWebSite =  do
   tell faviconWebSite
@@ -141,6 +150,7 @@ clientServerWebSite =  do
   JQueryUIBindings{..} <- jQueryUIModule
   BootstrapBindings{..} <- bootstrapModule
   Sortable.SortableBindings{..} <- Sortable.sortableWebModule
+  AJAX.AJAXBindings{..} <- AJAX.ajaxModuleGen mm
 #if CLIENT
   return (\webView -> lucidExample >> return ())
 #else
@@ -151,6 +161,7 @@ clientServerWebSite =  do
 sampleList :: [Markup]
 sampleList = map H.toMarkup $ map (\n -> "Item " ++ show n) [1..4 :: Int] 
 
+#if 0
 #if CLIENT
 ajaxJSON :: ToJSON a => T.Text -> a -> IO AjaxResult
 ajaxJSON url a = ajax url [(T.pack messageKey, tj a)] def
@@ -162,10 +173,8 @@ tj = TE.decodeUtf8 . toStrict1 . A.encode
 marshalledText :: T.Text
 marshalledText = TE.decodeUtf8 marshalledByteString
 
-marshalledByteString :: B.ByteString
+marshalledByteString :: BS.ByteString
 marshalledByteString = toStrict1 $ A.encode $  MarshalMe 1 "one"
-
-toStrict1 :: BL.ByteString -> B.ByteString
-toStrict1 = B.concat . BL.toChunks
+#endif
 
 

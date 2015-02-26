@@ -60,7 +60,7 @@ ajaxBindingsGen _ajt = AJAXBindings
 ajaxModuleGen :: (Monad m) => AJAXType a -> WebSiteM m (AJAXBindings a)
 ajaxModuleGen ajt = return (ajaxBindingsGen ajt)
 #else
-ajaxModuleGen :: (Show a, Happstack m, m ~ IO) => AJAXType a -> WebSiteM m (AJAXBindings a)
+-- ajaxModuleGen :: (Show a, Happstack m) => AJAXType a -> WebSiteM m (AJAXBindings a)
 ajaxModuleGen ajt = wimport ws (ajaxBindingsGen ajt)
   where ws :: WebSite
         -- TODO this should be jQuery, with a new base URL.
@@ -78,8 +78,8 @@ _ajaxURLT :: Text.Text
 _ajaxURLT = Text.pack ajaxURL
 
 #if SERVER
-ajaxHandler :: (Happstack m, Show a) => String -> (BSL.ByteString -> Maybe a) -> ServerPartT m Response
-ajaxHandler messageKey dcd' = lift $ dirs ajaxURL $ h
+ajaxHandler :: (Show a, MonadIO m, Functor m) => String -> (BSL.ByteString -> Maybe a) -> ServerPartT m Response
+ajaxHandler messageKey dcd' = dirs ajaxURL $ h
   where h = do
           rq <- askRq 
           Logger.log' $ show rq
