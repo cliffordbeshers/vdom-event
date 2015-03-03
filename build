@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# Documentation on how to configure and run for development.
+# The server package expects the client to be in ../happstack-ghcjs-client
+
+set -x
+
+ # runhaskell Setup $*
+function cabalcmd ()
+{
+    runhaskell Setup $*
+}
+
+
+# At this time, we do not attempt to build -webmodule.  Use the autobuilder and install the packages.
+case $1 in
+    clean)
+	for d in happstack-ghcjs-client happstack-ghcjs-server ; do
+	    ( cd $d ; cabalcmd clean ; rm -rf dist )
+	done
+	;;
+    configure)
+	( cd happstack-ghcjs-client ; cabalcmd configure --ghcjs -flocal-development )
+	( cd happstack-ghcjs-server ; cabalcmd configure --ghc -flocal-development )
+	;;
+    build)
+	( cd happstack-ghcjs-client ; cabalcmd build) && \
+	( cd happstack-ghcjs-server ; cabalcmd build && dist/build/happstack-ghcjs-server/happstack-ghcjs-server ) # cabalcmd run)
+	;;
+esac
+	
