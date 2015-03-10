@@ -8,7 +8,8 @@ set -x
  # runhaskell Setup $*
 function cabalcmd ()
 {
-    runhaskell Setup $*
+    cabal $*
+    # runhaskell Setup $*
 }
 
 
