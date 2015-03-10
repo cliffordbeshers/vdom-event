@@ -151,7 +151,7 @@ clientServerWebSite =  do
   JQueryUIBindings{..} <- jQueryUIModule
   BootstrapBindings{..} <- bootstrapModule
   Sortable.SortableBindings{..} <- Sortable.sortableWebModule
-  AJAX.AJAXBindings{..} <- AJAX.ajaxModuleGen mm
+  AJAX.AJAXBindings{..} <- AJAX.ajaxModuleGen mm ((putStrLn "Hello" >> return "hello from moduleGen") :: IO String)
 #if CLIENT
   return (\webView -> lucidExample >> return ())
 #else

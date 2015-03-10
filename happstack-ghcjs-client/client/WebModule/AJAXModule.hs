@@ -31,6 +31,9 @@ import Data.ByteString as BS (ByteString)
 import Data.ByteString.Lazy as BSL (ByteString)
 import Data.Text as Text (Text, pack)
 import GHC.Generics
+#if CLIENT
+import qualified JavaScript.JQuery as JQuery (on, Event, EventType, HandlerSettings, JQuery, AjaxSettings, AjaxResult, ajax)
+#endif
 
 default (Text.Text)
 
@@ -43,7 +46,11 @@ baseurl = $(moduleScopeURL "")
 
 data Foo = Foo deriving (Show, Generic, Eq)
 
-data AJAXBindings a = AJAXBindings
+data AJAXBindings a = AJAXBindings {
+#if CLIENT
+  ajax :: Text -> [(Text,Text)] -> JQuery.AjaxSettings -> IO JQuery.AjaxResult
+#endif
+  }
 
 data AJAXType a = AJAXType { datatypeName' :: String
                            , encodeJSON' :: a -> BS.ByteString
@@ -51,20 +58,35 @@ data AJAXType a = AJAXType { datatypeName' :: String
                            }
 
 ajaxBindingsGen :: AJAXType a -> AJAXBindings a
-ajaxBindingsGen _ajt = AJAXBindings
+ajaxBindingsGen _ajt = AJAXBindings {
+#if CLIENT
+  ajax = JQuery.ajax
+#endif
+  }
 
 -- require jQuery
 -- ajaxModuleGen :: (Happstack m, Show a, m ~ IO) => AJAXType a -> WebSiteM m (AJAXBindings a)
 
 #if CLIENT
-ajaxModuleGen :: (Monad m) => AJAXType a -> WebSiteM m (AJAXBindings a)
-ajaxModuleGen ajt = return (ajaxBindingsGen ajt)
+#define SERVERONLY(x) Nothing
 #else
--- ajaxModuleGen :: (Show a, Happstack m) => AJAXType a -> WebSiteM m (AJAXBindings a)
-ajaxModuleGen ajt = wimport ws (ajaxBindingsGen ajt)
+#define SERVERONLY(x) (Just (x))
+#endif
+#if CLIENT
+#define CLIENTONLY(x) (Just (x))
+#else
+#define CLIENTONLY(x) Nothing
+#endif
+
+#if CLIENT
+ajaxModuleGen :: (Show a, Show b, Monad m) => AJAXType a -> m b -> WebSiteM m (AJAXBindings a)
+ajaxModuleGen ajt _ = return (ajaxBindingsGen ajt)
+#else
+ajaxModuleGen :: (Show a, ToMessage b, Monad m, m ~ IO) => AJAXType a -> m b -> WebSiteM m (AJAXBindings a)
+ajaxModuleGen ajt m = wimport ws (ajaxBindingsGen ajt)
   where ws :: WebSite
         -- TODO this should be jQuery, with a new base URL.
-        ws = mzeroWebSite { serverpart = ajaxHandler (datatypeName' ajt) (decodeJSON' ajt)
+        ws = mzeroWebSite { serverpart = ajaxHandler (datatypeName' ajt) (decodeJSON' ajt) m
                           , headers = []
                           , bodies = []
                           , baseURL = [baseurl]
@@ -78,17 +100,17 @@ _ajaxURLT :: Text.Text
 _ajaxURLT = Text.pack ajaxURL
 
 #if SERVER
-ajaxHandler :: (Show a, MonadIO m, Functor m) => String -> (BSL.ByteString -> Maybe a) -> ServerPartT m Response
-ajaxHandler messageKey dcd' = dirs ajaxURL $ h
-  where h = do
+ajaxHandler :: (ToMessage b, Show a, Monad m, MonadIO m, Functor m, m ~ IO) => String -> (BSL.ByteString -> Maybe a) -> IO b -> ServerPartT IO Response
+ajaxHandler messageKey dcd' m = dirs ajaxURL $ do
           rq <- askRq 
-          Logger.log' $ show rq
+          liftIO $ Logger.log' $ show rq
           let rqpath = foldr (</>) "" $ rqPaths rq
-          Logger.log' $ rqpath
+          liftIO $ Logger.log' $ rqpath
           decodeBody (defaultBodyPolicy "/tmp/" 4096 4096 4096)
           msgValue <- lookBS $ messageKey
           let msg = dcd' msgValue
-          ok $ toResponse $ "life model decoy " ++ show msg
+          x <- liftIO m
+          ok (toResponse x)
 #endif
 
 -- ajaxHandlersave :: forall (t :: * -> (* -> *) -> * -> *) d f a m. (Datatype d, Generic a, Rep a ~ t d f, Happstack m, MonadIO m, Show a, FromJSON a) => (BSL.ByteString -> Maybe a) -> ServerPartT m Response
@@ -102,4 +124,6 @@ ajaxHandler messageKey dcd' = dirs ajaxURL $ h
 --           msgValue <- lookBS $ gname (Proxy :: Proxy a)
 --           let msg :: Maybe a = decode msgValue
 --           ok $ toResponse "life model decoy"
+
+
 
