@@ -64,6 +64,8 @@ compileGUI wsm r = do
 main = do
   gui <- compileGUI ws (Message "Hello, world!")
   runGui gui
+--  simpleHTTP' _foo nullConf _bar
+
 
 ws :: (Show r, Monad m) => WebSiteM r m GUI
 ws = do
@@ -71,8 +73,28 @@ ws = do
   tell WebSite
   return (\x -> print x) --  >> print message)
 
-serverpart :: (Show a, Functor m, MonadIO m) => (ByteString -> m a) -> ServerPartT m Response
-serverpart ma = do
+--serverpart
+--  :: (Happstack m) =>
+--     (ByteString -> t (ServerPartT m) a) -> t m Response
+serverpart
+  :: (MonadTrans t,
+      Happstack (t m),
+      ToMessage a,
+      Monad m
+     ) =>
+     (ByteString -> m a) -> t m Response
+serverpart ma = dirs "hello/world" $ do
   bs <- lookBS "message"
   a <- lift (ma bs)
-  ok $ toResponse $ show a
+  ok $ toResponse  a
+
+
+
+-- unpackErrorT :: (Monad m, Show e) => UnWebT (ErrorT e m) a -> UnWebT m a
+-- unpackErrorT et = do
+--   eitherV <- runErrorT et
+--   return $ case eitherV of
+--     Left err -> Just (Left $ toResponse $ 
+--                       "Catastrophic failure " ++ show err
+--                       , filterFun $ \r -> r{rsCode = 500})
+--     Right x -> x
