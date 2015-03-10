@@ -126,6 +126,7 @@ runClientWebSiteM mws = do
    do
     Just doc <- webViewGetDomDocument webView
     body' <- documentGetBody doc
+    -- TODO client/ClientServer.hs -- documentGetBody sometimes runs too early, add wait loop
     Just body <- documentGetBody doc
     ws webView
 #endif
