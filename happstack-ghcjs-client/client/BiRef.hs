@@ -1,9 +1,11 @@
 import Control.Applicative
 import Control.Monad.Identity
 import Control.Monad.Reader
+import Control.Monad.Writer
 import Data.Bimap
 import System.IO.Unsafe
 import ControlMonadSupplyExcept
+import Lucid
 
 
 type Ident = Int
@@ -11,14 +13,17 @@ data Config = Config
 
 data Widget = Widget { ident :: Ident } deriving Show
 
+data J = Op1 Widget | Op2 Widget Widget
+
+
 -- Global Monad
-type GM m = ReaderT Config (SupplyT Ident m)
+type GM m = ReaderT Config (SupplyT Ident (HtmlT (WriterT [J] m)))
 
 gm :: Monad m => GM m a -> m a
 gm m = runGM m Config
 
-runGM :: Monad m => GM m a -> Config -> m a
-runGM m c = evalSupplyT (runReaderT m c) [0..]
+runGM :: Monad m => GM m a -> Config -> m (a, [J])
+runGM m c = runWriterT (evalHtmlT (evalSupplyT (runReaderT m c) [0..]))
 
 
 a :: Monad m => GM m Widget
@@ -32,7 +37,6 @@ b = do
   return $ Widget { ident = i }
 
 type DOM = [Widget]
-
 
 type Ref = (Ident, Ident)
 ref = (,)
