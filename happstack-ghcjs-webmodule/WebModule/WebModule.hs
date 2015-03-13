@@ -85,7 +85,7 @@ instance ToValue URI where
 -- 3) ideally it would support fragments, e.g., I could share part of a document.
 
 
-data WebSite = WebSite { serverpart :: ServerPartT IO Response 
+data WebSite = WebSite { serverpart :: ServerPartT IO Response
                        , baseURL :: [ModuleScopeURL]
                        , headers :: [WM_Header]
                        , bodies :: [WM_Body]

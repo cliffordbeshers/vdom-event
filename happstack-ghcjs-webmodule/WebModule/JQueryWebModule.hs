@@ -3,7 +3,7 @@
 module WebModule.JQueryWebModule (jQueryModule, JQueryBindings(..)) where
 
 #if CLIENT
-import qualified JavaScript.JQuery as JQuery (on, Event, EventType, HandlerSettings, JQuery)
+import qualified JavaScript.JQuery as JQuery (on, Event, EventType, HandlerSettings, JQuery, AjaxSettings, AjaxResult, ajax)
 #else
 import qualified WebModule.GHCJSStub.JQuery as JQuery (on, Event, EventType, HandlerSettings, JQuery)
 #endif
@@ -14,6 +14,7 @@ import WebModule.WebModuleM (WebSiteM)
 import WebModule.WebModuleM (WebSiteM, wimport, mzeroWebSite)
 #endif
 
+import Data.Text as Text (Text)
 #if SERVER
 import WebModule.Markable
 import WebModule.ServeEmbedded (embedDirectoryTH, serveEmbedded, verifyEmbeddedFP, EmbeddedDirectory)
@@ -23,11 +24,20 @@ import Happstack.Server as Happstack (ServerPartT, Response,  dir, uriRest)
 #endif
 
 
-data JQueryBindings = JQueryBindings { on :: (JQuery.Event -> IO ()) -> JQuery.EventType -> JQuery.HandlerSettings -> JQuery.JQuery -> IO (IO ()) }
+data JQueryBindings = JQueryBindings {
+#if CLIENT
+  on :: (JQuery.Event -> IO ()) -> JQuery.EventType -> JQuery.HandlerSettings -> JQuery.JQuery -> IO (IO ()),
+  ajax :: Text -> [(Text,Text)] -> JQuery.AjaxSettings -> IO JQuery.AjaxResult
+#endif
+  }
 
 -- Do Not Export
 jQueryBindings :: JQueryBindings
-jQueryBindings = JQueryBindings { on = JQuery.on }
+#if CLIENT
+jQueryBindings = JQueryBindings { on = JQuery.on, ajax = JQuery.ajax }
+#else
+jQueryBindings = JQueryBindings
+#endif
 
 #if CLIENT
 jQueryModule :: Monad m => WebSiteM m JQueryBindings

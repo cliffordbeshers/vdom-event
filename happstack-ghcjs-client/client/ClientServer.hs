@@ -63,7 +63,9 @@ import           Data.Default
 import WebModule.WebModule
 import WebModule.WebModuleM 
 import WebModule.SortableModule as Sortable
+#if CLIENT
 import LucidExample
+#endif
 import WidgetPalette.Index
 import Control.Monad.Trans (MonadIO, liftIO)
 import Control.Monad.Writer (tell)

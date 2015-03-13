@@ -10,7 +10,7 @@ import Data.Monoid ((<>))
 import Data.Text as Text (Text, pack, intercalate, concat)
 import Data.Text.Lazy (toStrict)
 #if CLIENT
-import JavaScript.JQuery as JQuery (appendJQuery, click, select, setHtml, setText)
+import JavaScript.JQuery as JQuery (JQuery, appendJQuery, click, select, setHtml, setText)
 import qualified JavaScript.JQueryExtra as JQuery (hide, show)
 import qualified JavaScript.JQueryUI as JQueryUI (sortable)
 #else
@@ -24,18 +24,77 @@ import Lucid
 import Data.Tree
 import ZipTree
 
-
-
 #if CLIENT
 renderLucid :: Html () -> Text
 renderLucid = toStrict . renderText
 
--- lucidExample :: IO JQuery -- renderLucid $ div_ $ do button ; table
+-- TODO state monad replacing url state
+--   what encoding to use?
+
+-- Technology demonstration menu
+
+-- Term arg result => arg -> result
+title :: Monad m => Text -> HtmlT m () -> HtmlT m ()
+title s m =
+  div_ $ do
+    h2_ $ toHtml s
+    m
+
+submenu :: Monad m => HtmlT m () -> HtmlT m ()
+submenu = div_
+
+instance ToHtml () where
+  toHtml () = toHtml ("" :: String)
+  toHtmlRaw () = toHtml ("" :: String)
+
+
+-- techDemos :: Monad m => HtmlT m ()
+techDemos = do
+  title "State Monad replacing URL" $ submenu $ do
+    title "Back button functions with State Monad" $ return ()
+    title "Shareable url" $ return ()
+  title "All the bootstrap things" $ submenu $ do
+    title "grid examples" $ return ()
+    title "Labeling text edit widgets" $ return ()
+  title "Wysiwyg" $ submenu $ do
+    title "Stock example" $ return ()
+    title "Minimal example" $ return ()
+    title "Minimal with readonly sections" $ return ()
+  title "Popups and dialogs and zoomins" $ submenu $ do
+    title "popups" $ return ()
+    title "dialogs" $ return ()
+    title "zoomins" $ return ()
+  title "Edit history" $ submenu $ do
+    title "Expandable history list" $ return ()
+    title "Showing what is locally saved versus globally" $ return ()
+    title "Last communication with users, server" $ return ()
+  title "Admin stuff" $ submenu $ do
+    title "Sudo" $ return ()
+    title "Last communication with users, server" $ return ()
+  title "Complicated interactions" $ submenu $ do
+    title "Permuation Lists" $ submenu $ do
+      title "Basic widget" $ return ()
+      title "Should the items be read only?" $ return ()
+      title "How to delete?" $ return ()
+  title "Server communications" $ submenu $ do
+    title "Global, show server status" $ return ()
+    title "Show anything unsaved" $ return ()
+    title "Show conflicts, links to zoom in." $ return ()
+    title "Show valid" $ return ()
+  title "Lucid Example" $ lucidExample2
+
+lucidExample2 :: Html ()
+lucidExample2 = do
+  div_ $ "Hello"
+
+
+lucidExample :: IO JQuery -- renderLucid $ div_ $ do button ; table
 lucidExample = do
   myClick <- select "<div>click here</div>"
   myShowHide <- select "<div>show/hide</div>"
   myCount <- select "<div>1</div>"
   myTable <- select $ renderLucid (table 1)
+  techDemos' <- select $ renderLucid techDemos
   mySList' <- select $ renderLucid (slistB 5)
   mySList <- select "<div></div>" >>= appendJQuery mySList'
   counter <- newIORef (1::Int)
@@ -47,7 +106,7 @@ lucidExample = do
   click action  def myClick
   toggleShow myShowHide myTable
   JQueryUI.sortable mySList'
-  select "body" >>= appendJQuery mySList >>= appendJQuery myClick >>= appendJQuery myShowHide >>= appendJQuery myCount >>= appendJQuery myTable
+  select "body" >>= appendJQuery techDemos' >>= appendJQuery mySList >>= appendJQuery myClick >>= appendJQuery myShowHide >>= appendJQuery myCount >>= appendJQuery myTable 
 
 -- button = button_ "Reload"
 
