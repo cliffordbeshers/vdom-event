@@ -10,7 +10,7 @@ import Data.Monoid ((<>))
 import Data.Text as Text (Text, pack, intercalate, concat)
 import Data.Text.Lazy (toStrict)
 #if CLIENT
-import JavaScript.JQuery as JQuery (JQuery, appendJQuery, click, select, setHtml, setText)
+import JavaScript.JQuery as JQuery (JQuery, appendJQuery, click, select, setHtml, setText, getHtml)
 import qualified JavaScript.JQueryExtra as JQuery (hide, show)
 import qualified JavaScript.JQueryUI as JQueryUI (sortable)
 #else
@@ -23,6 +23,9 @@ import Data.IORef
 import Lucid
 import Data.Tree
 import ZipTree
+import Outline
+
+default (Text)
 
 #if CLIENT
 renderLucid :: Html () -> Text
@@ -34,11 +37,6 @@ renderLucid = toStrict . renderText
 -- Technology demonstration menu
 
 -- Term arg result => arg -> result
-title :: Monad m => Text -> HtmlT m () -> HtmlT m ()
-title s m =
-  div_ $ do
-    h2_ $ toHtml s
-    m
 
 submenu :: Monad m => HtmlT m () -> HtmlT m ()
 submenu = div_
@@ -49,64 +47,135 @@ instance ToHtml () where
 
 
 -- techDemos :: Monad m => HtmlT m ()
-techDemos = do
-  title "State Monad replacing URL" $ submenu $ do
-    title "Back button functions with State Monad" $ return ()
-    title "Shareable url" $ return ()
-  title "All the bootstrap things" $ submenu $ do
-    title "grid examples" $ return ()
-    title "Labeling text edit widgets" $ return ()
-  title "Wysiwyg" $ submenu $ do
-    title "Stock example" $ return ()
-    title "Minimal example" $ return ()
-    title "Minimal with readonly sections" $ return ()
-  title "Popups and dialogs and zoomins" $ submenu $ do
-    title "popups" $ return ()
-    title "dialogs" $ return ()
-    title "zoomins" $ return ()
-  title "Edit history" $ submenu $ do
-    title "Expandable history list" $ return ()
-    title "Showing what is locally saved versus globally" $ return ()
-    title "Last communication with users, server" $ return ()
-  title "Admin stuff" $ submenu $ do
-    title "Sudo" $ return ()
-    title "Last communication with users, server" $ return ()
-  title "Complicated interactions" $ submenu $ do
-    title "Permuation Lists" $ submenu $ do
-      title "Basic widget" $ return ()
-      title "Should the items be read only?" $ return ()
-      title "How to delete?" $ return ()
-  title "Server communications" $ submenu $ do
-    title "Global, show server status" $ return ()
-    title "Show anything unsaved" $ return ()
-    title "Show conflicts, links to zoom in." $ return ()
-    title "Show valid" $ return ()
-  title "Lucid Example" $ lucidExample2
+techDemos :: Forest Text
+techDemos = let title = Node in [
+  title "State Monad replacing URL"
+    [ title "Back button functions with State Monad" [] 
+    , title "Shareable url" []
+    ]
+  ,title "All the bootstrap things"
+    [ title "grid examples" []
+    , title "Labeling text edit widgets" []
+    ]
+  ,title "Wysiwyg"
+    [ title "Stock example" []
+    , title "Minimal example" []
+    , title "Minimal with readonly sections" []
+    ]
+  ,title "Popups and dialogs and zoomins"
+    [ title "popups" []
+    , title "dialogs" []
+    , title "zoomins" []
+    ]
+  ,title "Edit history"
+    [ title "Expandable history list" []
+    , title "Showing what is locally saved versus globally" []
+    , title "Last communication with users, server" []
+    ]
+  ,title "Admin stuff"
+    [ title "Sudo" []
+    , title "Last communication with users, server" []
+    ]
+  ,title "Complicated interactions"
+    [ title "Permuation Lists"
+      [ title "Basic widget" []
+      , title "Should the items be read only?" []
+      , title "How to delete?" []
+      ]
+    ]
+  ,title "Server communications"
+    [ title "Global, show server status" []
+    , title "Show anything unsaved" []
+    , title "Show conflicts, links to zoom in." []
+    , title "Show valid" []
+    ]
+  ,title "Good old bugs"
+    [ title "You must leave space at the end of the document/page or interactions are weird" []
+    , title "How do you get anchors to show up somewhere other than the top of the page?" []
+    , title "Show conflicts, links to zoom in." []
+    , title "Show validated fields." []
+    ]
+  ]
 
-lucidExample2 :: Html ()
-lucidExample2 = do
-  div_ $ "Hello"
+buttonMarkup :: Monad m => Ident -> HtmlT m ()
+buttonMarkup b = div_ [id_ b] $ "Hide/Show Button"
+
+targetMarkup :: Monad m => Ident -> HtmlT m ()
+targetMarkup t = div_ [id_ t] $ "Hide/Show Target"
+
+hideshow2 :: Outline ()
+hideshow2 = do
+  b <- new
+  buttonMarkup b
+  t <- new
+  targetMarkup t
+  bind $ ToggleShow b t
+
+byId :: Text -> Text
+byId = ("#" <>)
+
+evalOp :: Op -> IO ()
+evalOp op =
+  case op of
+    ToggleShow a b -> do
+      a' <- select (byId a)
+      b' <- select (byId b)
+      toggleShow a' b'
+      return ()
+
+load :: Outline a -> IO JQuery
+load o = do
+  let (t, ops) = renderOutline o
+  n <- select t -- use Jquery to turn the html into a node.
+  -- could/should these next two lines be inverted?
+  j <- select "body" >>= appendJQuery n -- attach to the dom
+  mapM_ evalOp ops -- run initializiations.
+  return j
+
+loadText :: Text -> IO JQuery
+loadText t = do
+  t' <- select t
+  b <- select "body"
+  appendJQuery t' b
+  return t'
+
+-- counterOutline :: Outline ()
+  -- myClick <- loadText "<div>click here</div>"
+  -- myCount <- loadText "<div>1</div>"
+  -- myTable <- loadText $ renderLucid (table 1)
+  -- counter <- newIORef (1::Int)
+  -- let getCount = atomicModifyIORef counter (\c -> let c' = c+1 in (c', c'))
+  -- let action _ = void $ do
+  --       c <- getCount 
+  --       setText (Text.pack . show $ c) myCount
+  --       setHtml (renderLucid (table c)) myTable
+  -- click action  def myClick
+  -- return myTable
 
 
 lucidExample :: IO JQuery -- renderLucid $ div_ $ do button ; table
 lucidExample = do
-  myClick <- select "<div>click here</div>"
-  myShowHide <- select "<div>show/hide</div>"
-  myCount <- select "<div>1</div>"
-  myTable <- select $ renderLucid (table 1)
-  techDemos' <- select $ renderLucid techDemos
-  mySList' <- select $ renderLucid (slistB 5)
-  mySList <- select "<div></div>" >>= appendJQuery mySList'
-  counter <- newIORef (1::Int)
-  let getCount = atomicModifyIORef counter (\c -> let c' = c+1 in (c', c'))
-  let action _ = void $ do
-        c <- getCount 
-        setText (Text.pack . show $ c) myCount
-        setHtml (renderLucid (table c)) myTable
-  click action  def myClick
-  toggleShow myShowHide myTable
-  JQueryUI.sortable mySList'
-  select "body" >>= appendJQuery techDemos' >>= appendJQuery mySList >>= appendJQuery myClick >>= appendJQuery myShowHide >>= appendJQuery myCount >>= appendJQuery myTable 
+  -- myClick <- loadText "<div>click here</div>"
+  -- myCount <- loadText "<div>1</div>"
+  -- myTable <- loadText $ renderLucid (table 1)
+  -- counter <- newIORef (1::Int)
+  -- let getCount = atomicModifyIORef counter (\c -> let c' = c+1 in (c', c'))
+  -- let action _ = void $ do
+  --       c <- getCount 
+  --       setText (Text.pack . show $ c) myCount
+  --       setHtml (renderLucid (table c)) myTable
+  -- click action  def myClick
+  -- return myTable
+  load hideshow2
+
+--  myShowHide <- loadText "<div>show/hide</div>"
+--  load (outline techDemos)
+--   mySList' <- select $ renderLucid (slistB 5)
+--   mySList <- select "<div></div>" >>= appendJQuery mySList'
+--   toggleShow myShowHide myTable
+--   JQueryUI.sortable mySList'
+-- -- appendJQuery techDemos' >>= 
+--   select "body" >>= appendJQuery mySList
 
 -- button = button_ "Reload"
 
@@ -143,6 +212,7 @@ table n = t n (toHtml $ tshow n)
 t :: Int -> Html () -> Html()
 t n = table_ . mapM_ tr_ . replicate n . mapM_ td_ . replicate n
 
+toggleShow :: JQuery -> JQuery -> IO (IO ())
 toggleShow a b = do
   showFlag <- newIORef (False :: Bool)
   let action _ = void $ do

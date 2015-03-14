@@ -1,3 +1,5 @@
+module Outline where
+
 import Prelude  hiding (mapM, mapM_)
 import Lucid
 import Control.Monad.Identity hiding (mapM, mapM_)
@@ -9,16 +11,20 @@ import qualified Blaze.ByteString.Builder.Html.Utf8 as Blaze
 import           Data.ByteString.Lazy (ByteString)
 import qualified Data.ByteString.Lazy as L
 import Data.Text as Text (Text, pack)
+import Data.Text.Lazy.Encoding as Text (decodeUtf8)
+import Data.Text.Lazy as Text (toStrict)
 import Data.Tree
 import qualified Data.Traversable as T
 import qualified Data.Foldable as F
 
 
-data Op = Op deriving Show
+-- I don't want to pass just thunks here, because I want to register
+-- encodings, event handlers, etc.
+data Op = ToggleShow Ident Ident deriving Show
 type Ident = Text
 type IdentSupply = Int
 
-type Binder = [(Op,Ident,Ident)]
+type Binder = [Op]
 type Outline a = HtmlT (WriterT Binder (StateT IdentSupply Identity)) a
 type OutlineT m a = HtmlT (WriterT Binder (StateT IdentSupply m)) a
 
@@ -26,10 +32,10 @@ new :: Outline Ident
 new = lift $ do
   i <- get
   put (succ i)
-  return $ tshow i
+  return . Text.pack . show $ i
 
-bind :: Op -> Ident -> Ident -> Outline ()
-bind o i j = lift $ tell [(o,i,j)]
+bind :: Op -> Outline ()
+bind o = lift $ tell [o]
 
 runHtmlT' :: Monad m => HtmlT m a -> m (ByteString,a)
 runHtmlT' m =
@@ -46,9 +52,10 @@ runOutlineT = fmap flatten . (flip runStateT 0) . runWriterT . runHtmlT'
   where flatten :: (((ByteString, a), Binder), IdentSupply) -> (ByteString, Binder, IdentSupply, a)
         flatten (((html, a), binder), identSupply) = (html, binder, identSupply, a)
 
+renderOutline :: Outline a -> (Text, Binder)
+renderOutline o =  let (html,ops,_,_) = runOutline o in (render html, ops)
+  where render = Text.toStrict . Text.decodeUtf8
 
-tshow :: Show a => a -> Text
-tshow = Text.pack . show
 
 data A = A deriving Show
 
@@ -75,11 +82,11 @@ example2 = return A >>= div'
 
 bindExample :: Outline A
 bindExample = do
-  i <- fmap tshow new
+  i <- new
   let h = div_ [id_ i] (toHtml "Hello")
-  j <- fmap tshow new
+  j <- new
   let g = div_ [id_ j] (toHtml "Goodbye")
-  bind Op i j
+  bind (ToggleShow i j)
   div_ $ h >> g
   return A
 
@@ -115,3 +122,9 @@ identify = T.mapM (\a -> new >>= (\i -> return (i,a)))
 -- Make some actually widgets, e.g. open close button for another widget
 -- where hovering on either highlights the other.
 
+outline :: (ToHtml a) => Forest a -> Outline (Forest (Ident, a))
+outline ts = ul_ (T.mapM outlineTree ts) >> T.mapM identify ts
+  where outlineTree (Node a []) = li_ $ toHtml a
+        outlineTree (Node a ts) = li_ $ do
+          toHtml a
+          ul_ $ F.mapM_ outlineTree ts

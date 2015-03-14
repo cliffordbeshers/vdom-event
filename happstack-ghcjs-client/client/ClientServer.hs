@@ -146,15 +146,18 @@ mm = AJAXType tname (BSL.toStrict . encode) decode
 
 clientServerWebSite ::  WebSiteM IO (RETURN)
 clientServerWebSite =  do
+  liftIO $ print "clientServerWebsite beginning"
   tell faviconWebSite
   -- GHCJS is now rolling the .js files in.  Pain. Moving it up overrides.
   GHCJSBindings{..} <- ghcjsWebModule ghcjsFiles
+  liftIO $ print "ghcjsWebModule run"
   JQueryBindings{..} <- jQueryModule
   JQueryUIBindings{..} <- jQueryUIModule
   BootstrapBindings{..} <- bootstrapModule
   Sortable.SortableBindings{..} <- Sortable.sortableWebModule
   AJAX.AJAXBindings{..} <- AJAX.ajaxModuleGen mm ((putStrLn "Hello" >> return "hello from moduleGen") :: IO String)
 #if CLIENT
+  liftIO $ print "clientServerWebsite returning"
   return (\webView -> lucidExample >> return ())
 #else
   return ()

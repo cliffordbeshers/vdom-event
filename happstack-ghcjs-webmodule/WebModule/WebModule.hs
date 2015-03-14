@@ -106,6 +106,7 @@ wm_Body_toMarkup :: WM_Body -> Markup
 wm_Body_toMarkup b =
   case b of
     WMB_Initialization s -> H.script $ toMarkup s
+    WMB_JavaScript u -> H.script ! HA.type_ "application/javascript" ! HA.src (toValue u) $ return ()
 
 instance ToMarkup WM_Header where
   toMarkup = wm_Header_toMarkup

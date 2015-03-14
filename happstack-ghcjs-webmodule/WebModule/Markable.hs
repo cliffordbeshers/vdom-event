@@ -16,5 +16,6 @@ data WM_Header =
 
 -- All the types that can be serialized into the HTML head section.
 data WM_Body = 
-  WMB_Initialization String  -- Javascript initialization
+  WMB_Initialization String  | -- Javascript initialization
+  WMB_JavaScript ModuleScopeURL  -- script tag in the body.
   deriving (Eq, Show)

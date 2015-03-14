@@ -37,12 +37,18 @@ ghcjsWebModule _fileMap = return ghcjsBindings
 #else
 ghcjsWebModule fileMap = wimport ws ghcjsBindings
   where ws = mzeroWebSite { serverpart = ghcjsSP fileMap
-                          , headers = [WMH_JavaScript (baseurl +++ jsFilePath)]
-                          , bodies = [WMB_Initialization "console.log('GHCJSWebModule initialization');"]
+                          , headers = headers'
+                          , bodies = bodies'
                           , baseURL = [baseurl]
                           }
-        jsFilePath :: FilePath
-        jsFilePath = rootname fileMap </> "all.js"
+        basename :: FilePath -> ModuleScopeURL
+        basename fp = baseurl +++ ((rootname fileMap) </> fp)
+        headers' = map (WMH_JavaScript . basename )  jsFilePaths
+        bodies' = [ WMB_JavaScript (basename "runmain.js")
+                  , WMB_Initialization "console.log('GHCJSWebModule initialization done');"
+                  ]
+        jsFilePaths :: [FilePath]
+        jsFilePaths = ["rts.js", "lib.js", "out.js"]
         -- TODO ServeEmbedded.ProvideRootName
         rootname (Left (_,r)) = r
         rootname (Right e) = last . splitDirectories . embeddedPath $ e
