@@ -4,12 +4,13 @@ module Bootstrap.Utils
        , aria_controls_
        , classes_
        , role_
+       , textshow
        , toggle_
        ) where
 
 import Lucid
 import Data.Monoid ((<>))
-import Data.Text as Text (Text, intercalate)
+import Data.Text as Text (Text, intercalate, pack)
 import Data.Set as Set
 
 default (Text)
@@ -30,4 +31,6 @@ toggle_ = data_ "toggle"
 classes_ :: [Text] -> Attribute
 classes_ = class_ . Text.intercalate " " . Set.toList . Set.fromList
 
+textshow :: Show a => a -> Text
+textshow = Text.pack . show
 

@@ -2,6 +2,7 @@
 {-# LANGUAGE Rank2Types #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ExtendedDefaultRules #-}
+{-# OPTIONS -fwarn-incomplete-patterns #-}
 module LucidExample where
 
 import Control.Applicative
@@ -10,13 +11,14 @@ import Data.Monoid ((<>))
 import Data.Text as Text (Text, pack, intercalate, concat)
 import Data.Text.Lazy (toStrict)
 #if CLIENT
-import JavaScript.JQuery as JQuery (JQuery, appendJQuery, click, select, setHtml, setText, getHtml)
+import JavaScript.JQuery as JQuery (JQuery, appendJQuery, click, select, setHtml, setText, getHtml, setAttr, getAttr, removeAttr)
 import qualified JavaScript.JQueryExtra as JQuery (hide, show)
 import qualified JavaScript.JQueryUI as JQueryUI (sortable)
 #else
 import JavaScript.JQueryServer as JQuery
 #endif
 import Control.Monad
+import Control.Monad.Trans
 import Data.Default
 import Data.IORef
 
@@ -24,6 +26,8 @@ import Lucid
 import Data.Tree
 import ZipTree
 import Outline
+import Radio
+-- import AppraisalScribe.UIClient
 
 default (Text)
 
@@ -44,7 +48,6 @@ submenu = div_
 instance ToHtml () where
   toHtml () = toHtml ("" :: String)
   toHtmlRaw () = toHtml ("" :: String)
-
 
 -- techDemos :: Monad m => HtmlT m ()
 techDemos :: Forest Text
@@ -111,16 +114,31 @@ hideshow2 = do
   targetMarkup t
   bind $ ToggleShow b t
 
-byId :: Text -> Text
-byId = ("#" <>)
+storeGC :: MonadIO m => Ident -> m () -> m ()
+storeGC ident gc = return ()
+-- writeIOref.
 
-evalOp :: Op -> IO ()
-evalOp op =
+evalOp :: MonadIO m => Op -> m ()
+evalOp op = liftIO $
   case op of
     ToggleShow a b -> do
       a' <- select (byId a)
       b' <- select (byId b)
-      toggleShow a' b'
+      gc <- toggleShow a' b'
+      storeGC a gc
+      storeGC b gc
+      return ()
+    SetAttr a l v -> do
+      a' <- select (byId a)
+      _j <- setAttr l v a'
+      return ()
+    ClearAttr a l -> do
+      a' <- select (byId a)
+      _j <- removeAttr l a'
+      return ()
+    Click a ops -> do
+      a' <- select (byId a) -- ???
+      mapM_ evalOp ops
       return ()
 
 load :: Outline a -> IO JQuery
@@ -131,6 +149,15 @@ load o = do
   j <- select "body" >>= appendJQuery n -- attach to the dom
   mapM_ evalOp ops -- run initializiations.
   return j
+
+loadT :: (Functor m, MonadIO m) => OutlineT m a -> m ()
+loadT o = do
+  (html, ops) <- renderOutlineT o
+  liftIO $ do
+    n <- select html -- use Jquery to turn the html into a node.
+    -- could/should these next two lines be inverted?
+    j <- select "body" >>= appendJQuery n -- attach to the dom
+    mapM_ evalOp ops -- run initializiations.
 
 loadText :: Text -> IO JQuery
 loadText t = do
@@ -152,9 +179,9 @@ loadText t = do
   -- click action  def myClick
   -- return myTable
 
-
-lucidExample :: IO JQuery -- renderLucid $ div_ $ do button ; table
-lucidExample = do
+lucidExample :: (Functor m, Monad m, MonadIO m) => m () -- renderLucid $ div_ $ do button ; table
+lucidExample = loadT radioExample
+--  load radioExample
   -- myClick <- loadText "<div>click here</div>"
   -- myCount <- loadText "<div>1</div>"
   -- myTable <- loadText $ renderLucid (table 1)
@@ -166,8 +193,8 @@ lucidExample = do
   --       setHtml (renderLucid (table c)) myTable
   -- click action  def myClick
   -- return myTable
-  load hideshow2
-
+  --  load hideshow2
+  
 --  myShowHide <- loadText "<div>show/hide</div>"
 --  load (outline techDemos)
 --   mySList' <- select $ renderLucid (slistB 5)
@@ -219,5 +246,19 @@ toggleShow a b = do
         status <- atomicModifyIORef showFlag (\c -> let c' = not c in (c', c'))
         if status then JQuery.hide b 
           else JQuery.show b
-  click action def a
+  -- emphasize that the return value is the gc action
+  gc <- click action def a
+  return gc
+
+-- radioButton ::  -> IO (IO ())
+-- radioButton xs = do
+--   showFlag <- newIORef (False :: Bool)
+--   let action _ = void $ do
+--         status <- atomicModifyIORef showFlag (\c -> let c' = not c in (c', c'))
+--         if status then JQuery.hide b 
+--           else JQuery.show b
+--   -- emphasize that the return value is the gc action
+--   gc <- click action def a
+--   return gc
+
 #endif

@@ -3,6 +3,7 @@
 > module Radio where
 
 > import Control.Monad.Trans
+> import Data.Default (def)
 > import Data.IORef
 > import Outline
 > import Data.Proxy
@@ -11,7 +12,7 @@
 > import Lucid
 > import Bootstrap.Utils (classes_, textshow)
 #if CLIENT
-> import JavaScript.JQuery as JQuery (JQuery, appendJQuery, click, select, setHtml, setText, getHtml)
+> import JavaScript.JQuery as JQuery (Event,JQuery, appendJQuery, click, select, setHtml, setText, getHtml, addClass, removeClass)
 #endif
 
 
@@ -30,12 +31,17 @@
 >   , "https://fbcdn-sphotos-d-a.akamaihd.net/hphotos-ak-prn2/v/t1.0-9/11056894_10204795437740626_1302633900976191151_n.jpg?oh=da776a52e13eba9c1426b03708f1fd15&oe=557A2D8C&__gda__=1437981455_ed50f8cf7a166212a9e087b81fb3cd5c"
 >   ]
 
-> radioExample :: Outline () -- [(Ident,Outline ())]
+> radioExample :: Monad m => OutlineT m () -- [(Ident,Outline ())]
 > radioExample = do
 >   bs <- identify' $ map (button . img 125) imageURLs
 >   vbox $ sequence_ $ map snd bs
->     where img :: Int -> Text -> Outline ()
+>   -- mapM_ (\i -> liftIO (select (byId i) >>= click (mkCircle i) def)) $ map fst bs
+>   return () -- liftIO $ putStrLn "hello"  
+>     where img :: Monad m => Int -> Text -> OutlineT m ()
 >           img sq u = img_ [src_ u, width_ (textshow sq), height_ (textshow sq)]
+>           mkRounded, mkCircle :: Text -> Event -> IO ()
+>           mkRounded ident _ = select (byId ident) >>= addClass "img-rounded" >>= removeClass "img-circle" >> return ()
+>           mkCircle ident _ = select (byId ident) >>= addClass "img-circle" >>= removeClass "img-rounded" >> return ()
 >           button :: Monad m => HtmlT m () -> HtmlT m ()
 >           button = button_ [classes_ ["btn","btn-default"], type_ "submit"]
 > 

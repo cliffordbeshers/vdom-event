@@ -1,3 +1,4 @@
+{-# OPTIONS -fwarn-incomplete-patterns #-}
 module Outline where
 
 import Prelude  hiding (mapM, mapM_)
@@ -16,19 +17,34 @@ import Data.Text.Lazy as Text (toStrict)
 import Data.Tree
 import qualified Data.Traversable as T
 import qualified Data.Foldable as F
+import qualified Data.Foldable as F
+import Data.Map -- as Map (Map)
 
 
 -- I don't want to pass just thunks here, because I want to register
 -- encodings, event handlers, etc.
-data Op = ToggleShow Ident Ident deriving Show
+-- Op's are higher level.  Each defines a series of PrimOps,
+-- which are low level operations on the DOM which can be run in response
+-- to events.  The IdentMap tracks these.
+
+data Op = ToggleShow Ident Ident
+        | SetAttr Ident Text Text
+        | ClearAttr Ident Text
+        | Click Ident [Op] -- Should really be a Free monad lift here.
+        deriving Show
+-- Primitive operations on the DOM that get triggered by events.
+data PrimOp = RemoveHandler (IO ())
+
 type Ident = Text
 type IdentSupply = Int
+
+type IdentMap = Map Ident PrimOp
 
 type Binder = [Op]
 type Outline a = HtmlT (WriterT Binder (StateT IdentSupply Identity)) a
 type OutlineT m a = HtmlT (WriterT Binder (StateT IdentSupply m)) a
 
-new :: Outline Ident
+new :: Monad m => OutlineT m Ident
 new = lift $ do
   i <- get
   put (succ i)
@@ -36,6 +52,10 @@ new = lift $ do
 
 bind :: Op -> Outline ()
 bind o = lift $ tell [o]
+
+byId :: Text -> Text
+byId = (Text.pack "#" <>)
+
 
 runHtmlT' :: Monad m => HtmlT m a -> m (ByteString,a)
 runHtmlT' m =
@@ -55,6 +75,12 @@ runOutlineT = fmap flatten . (flip runStateT 0) . runWriterT . runHtmlT'
 renderOutline :: Outline a -> (Text, Binder)
 renderOutline o =  let (html,ops,_,_) = runOutline o in (render html, ops)
   where render = Text.toStrict . Text.decodeUtf8
+
+renderOutlineT :: (Functor m, Monad m) => OutlineT m a -> m (Text, Binder)
+renderOutlineT o =  do
+  (html,ops,_,_) <- runOutlineT o
+  return (render html, ops)
+    where render = Text.toStrict . Text.decodeUtf8
 
 
 data A = A deriving Show
@@ -117,6 +143,9 @@ forMExample = do
 
 identify :: T.Traversable t => t a -> Outline (t (Ident, a))
 identify = T.mapM (\a -> new >>= (\i -> return (i,a)))
+
+identify' :: Monad m => (T.Traversable t, With a) => t a -> OutlineT m (t (Ident, a))
+identify' = T.mapM (\a -> new >>= (\i -> return (i,a `with` [id_ i])))
 
 -- What's next?
 -- Make some actually widgets, e.g. open close button for another widget
