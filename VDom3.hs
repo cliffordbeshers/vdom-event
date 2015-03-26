@@ -19,6 +19,7 @@ import qualified Data.IntMap as IM
 
 import           System.IO
 
+import           Data.Maybe
 import           GHCJS.VDOM
 import           GHCJS.VDOM.QQ
 import           GHCJS.Foreign
@@ -29,7 +30,7 @@ import           UtilQQ
 import           JavaScript.JQuery (click, select)
 
 
-data State = State Int deriving Show
+data State = State !Int deriving Show
 
 mkState :: Int -> State
 mkState = State
@@ -44,29 +45,30 @@ render s = div_ (cls "state") $$ [button', button2', numDiv]
       button2' = button_ (id_ "2") $$ [textt "wakeup"]
       numDiv   = div_ (cls "numeric") $$ [memo $ textDiv s]
 
-animate :: DOMNode -> VNode -> MVar State -> (State -> IO (IO ())) -> IO ()
+animate :: DOMNode -> VNode -> MVar State -> (MVar State -> State -> IO (IO ())) -> IO ()
 animate n r q ev = do
   print "animate waiting"
-  s <- takeMVar q
+  ms <- tryReadMVar q
+  let s = fromMaybe (State 0) ms
   print "animate woke"
   let r' = render s
       p  = diff r r'
-  atAnimationFrame (print "inside atAnimationFrame" >> patch n p >> ev s >> animate n r' q ev)
-  -- s `seq` redraw n p >> ev s >> threadDelay 20000 >> animate n r' q ev -- for async calculation, sync repaint
+  atAnimationFrame (print "inside atAnimationFrame" >> patch n p >> ev q s >> animate n r' q ev)
+  -- s `seq` redraw n p >> ev q s >> threadDelay 20000 >> animate n r' q ev -- for async calculation, sync repaint
 
 redraw :: DOMNode -> Patch -> IO ()
 redraw node p = p `seq` atAnimationFrame (patch node p)
 
-
 main :: IO ()
 main = do
   root <- mkRoot
-  q <- newMVar $ mkState 0
+  q <- newMVar $ mkState 999
 
-  let ev state = do
+  let ev q state = do
         print ("ev", state)
-        select (byId "1") >>= click (\_ -> print ("click", step state) >> putMVar q (step state)) def
-        select (byId "2") >>= click (\_ -> do print "wakeup" >> takeMVar q >>= (\s-> print ("wakeup",state))) def
+        select (byId "1") >>= click (\_ -> do { s <- takeMVar q ; print ("1 <", s) ; putMVar q (step s) ; print ("1 >", step s); }) def
+        select (byId "2") >>= click (\_ -> do { s <- takeMVar q ; print ("2 <", s) ; putMVar q (step s) ; print ("2 >", step s); }) def
   animate root emptyDiv q ev
+  return ()
 
 
