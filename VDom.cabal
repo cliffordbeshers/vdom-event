@@ -1,0 +1,21 @@
+Name: vdom-experiments
+Synopsis: Virtual DOM GHCJS
+Author: Clifford Beshers <clifford.beshers@gmail.com>
+Cabal-version:  >= 1.22
+build-type: Simple
+version:    2015.3.21
+
+Executable vdom
+  Main-Is: VDom3.hs
+  Buildable: True
+  cpp-options: -DGHCJS_NO_CATCH_MAINLOOP
+  Default-Language: Haskell2010
+  if impl(ghcjs)
+     Build-Depends: 
+         base, containers, data-default,
+         ghcjs-base, ghcjs-ffiqq,
+         ghcjs-vdom, ghcjs-dom, ghcjs-jquery,
+         text
+  Other-Extensions:
+    TemplateHaskell
+  ghcjs-Options:    -O
