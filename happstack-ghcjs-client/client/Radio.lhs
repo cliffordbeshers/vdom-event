@@ -3,6 +3,7 @@
 > module Radio where
 
 > import Control.Monad.Trans
+> import Data.Monoid ((<>))
 > import Data.Default (def)
 > import Data.IORef
 > import Outline
@@ -31,8 +32,8 @@
 >   , "https://fbcdn-sphotos-d-a.akamaihd.net/hphotos-ak-prn2/v/t1.0-9/11056894_10204795437740626_1302633900976191151_n.jpg?oh=da776a52e13eba9c1426b03708f1fd15&oe=557A2D8C&__gda__=1437981455_ed50f8cf7a166212a9e087b81fb3cd5c"
 >   ]
 
-> radioExample :: Monad m => OutlineT m () -- [(Ident,Outline ())]
-> radioExample = do
+> radioExample1 :: Monad m => OutlineT m () -- [(Ident,Outline ())]
+> radioExample1 = do
 >   bs <- identify' $ map (button . img 125) imageURLs
 >   vbox $ sequence_ $ map snd bs
 >   -- mapM_ (\i -> liftIO (select (byId i) >>= click (mkCircle i) def)) $ map fst bs
@@ -46,8 +47,60 @@
 >           button = button_ [classes_ ["btn","btn-default"], type_ "submit"]
 > 
 
+> radioExample :: Monad m => OutlineT m ()
+> radioExample = radioExample2
+
+> radioExample2 :: Monad m => OutlineT m ()
+> radioExample2 = radioState (imageButtonMarkup 125) (RadioState imageURLs 4)
+
+> imageButtonMarkup :: Monad m => Int -> Bool -> URL -> OutlineT m ()
+> imageButtonMarkup sq selected url = img sq url
+>   where
+>     img sq u = img_ [src_ u, width_ (textshow sq), height_ (textshow sq), classes_ cs]
+>     cs = ["img-rounded"] <> (if selected then ["img-circle"] else [])
+
+> data RadioState a = RadioState { rbs :: [a], selected :: Int }
+
+> zipCollected :: Int -> [a] -> [(Bool,a)]
+> zipCollected i xs = zip (map (== i) [0..]) xs
+
+> radioState :: Monad m => (Bool -> a -> OutlineT m ()) -> RadioState a -> OutlineT m ()
+> radioState innerMarkup rs = do
+>   bs <- identify' $  map (unwrap . wrap button . wrap innerMarkup) (zipCollected (selected rs) $ rbs rs)
+>   vbox $ sequence_ $ map snd bs
+>   -- mapM_ (\i -> liftIO (select (byId i) >>= click (mkCircle i) def)) $ map fst bs
+>   return () -- liftIO $ putStrLn "hello"  
+>     where button :: Monad m => Bool -> HtmlT m () -> HtmlT m ()
+>           button sel = button_ [classes_ (["btn","btn-default"] <> active sel), type_ "button"]
+>           active :: Bool -> [Text]
+>           active b = if b then [ "active" ] else []
+>           wrap :: (a -> b -> c) -> (a,b) -> (a,c)
+>           wrap f (a,b) = (a, f a b)
+>           unwrap = snd
+
+-- > renderRadio :: StateRadio -> Html
+-- > renderRadio state = ul_ $ mapM_ li_ els
+-- >   where irs = zip [0..] (rs state)
+-- >         els = map f irs
+-- >         f (i,r) = do el <- if i == (selected state) then unselected r else selected r
+-- >                      click (\ev -> (\s -> s { selected = i })) el
+-- >         unselected :: String -> Html
+-- >         unselected s = button_ [classes ["img-rounded"]
+-- >         button :: Monad m => HtmlT m () -> HtmlT m ()
+-- >         button = button_ [classes_ ["btn","btn-default"], type_ "submit"]
+-- >           mkRounded ident _ = select (byId ident) >>= addClass  >>= removeClass "img-circle" >> return ()
+-- >           mkCircle ident _ = select (byId ident) >>= addClass "img-circle" >>= removeClass "img-rounded" >> return ()
+
+
 > vbox :: Monad m => HtmlT m () -> HtmlT m ()
 > vbox = div_ -- TODO Bootstrap equiv of vbox and hbox
+
+
+-- > data StateRadio = StateRadio { rs :: [String], selected :: Int }
+-- > data RadioStyle = RadioStyle {  }
+
+
+
 
 -- > radioButton :: [a] -> Int -> Outline a
 -- > radioButton xs i = do
