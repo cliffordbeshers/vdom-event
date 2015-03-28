@@ -48,7 +48,10 @@
 > 
 
 > radioExample :: Monad m => OutlineT m ()
-> radioExample = radioExample2
+> radioExample = div_ $ do
+>   radioExample2
+>   fakeRadioState (imageButtonMarkup 125) (FakeRadioState imageURLs Nothing)
+>   fakeRadioState (imageButtonMarkup 125) (FakeRadioState imageURLs (Just 6))
 
 > radioExample2 :: Monad m => OutlineT m ()
 > radioExample2 = radioState (imageButtonMarkup 125) (RadioState imageURLs 4)
@@ -77,6 +80,28 @@
 >           wrap :: (a -> b -> c) -> (a,b) -> (a,c)
 >           wrap f (a,b) = (a, f a b)
 >           unwrap = snd
+
+
+> data FakeRadioState a = FakeRadioState { frbs :: [a], fakeSelected :: Maybe Int }
+
+> zipFakeCollected :: Maybe Int -> [a] -> [(Bool,a)]
+> zipFakeCollected Nothing xs = zip (repeat False) xs
+> zipFakeCollected (Just i) xs = zip (map (== i) [0..]) xs
+
+> fakeRadioState :: Monad m => (Bool -> a -> OutlineT m ()) -> FakeRadioState a -> OutlineT m ()
+> fakeRadioState innerMarkup rs = do
+>   bs <- identify' $  map (unwrap . wrap button . wrap innerMarkup) (zipFakeCollected (fakeSelected rs) $ frbs rs)
+>   vbox $ sequence_ $ map snd bs
+>   -- mapM_ (\i -> liftIO (select (byId i) >>= click (mkCircle i) def)) $ map fst bs
+>   return () -- liftIO $ putStrLn "hello"  
+>     where button :: Monad m => Bool -> HtmlT m () -> HtmlT m ()
+>           button sel = button_ [classes_ (["btn","btn-default"] <> active sel), type_ "button"]
+>           active :: Bool -> [Text]
+>           active b = if b then [ "active" ] else []
+>           wrap :: (a -> b -> c) -> (a,b) -> (a,c)
+>           wrap f (a,b) = (a, f a b)
+>           unwrap = snd
+
 
 -- > renderRadio :: StateRadio -> Html
 -- > renderRadio state = ul_ $ mapM_ li_ els
