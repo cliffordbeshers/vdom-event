@@ -1,16 +1,19 @@
 {-# LANGUAGE QuasiQuotes, OverloadedStrings #-}
 module Bootstrap where
 
+import Data.Text as Text (Text)
 import GHCJS.Foreign.QQ
 import GHCJS.Types (JSString)
+import GHCJS.Foreign (toJSString)
 import GHCJS.VDOM as VDOM (DOMNode)
 
-inlineCSS :: JSString -> IO DOMNode
-inlineCSS css = do
-  node  <- [js| document.createElement('style') |]
-  [js_| (`node).innerText = (`css); |]
-  [js_| document.head.appendChild(`node); |]
-  return node
+inlineCSS :: Text -> IO DOMNode
+inlineCSS csst = let css = toJSString csst in
+  do
+    node  <- [js| document.createElement('style') |]
+    [js_| (`node).innerText = (`css); |]
+    [js_| document.head.appendChild(`node); |]
+    return node
 
 externalScript :: JSString -> IO DOMNode
 externalScript url = do
