@@ -6,7 +6,8 @@ build-type: Simple
 version:    2015.3.21
 
 Executable vdom
-  Main-Is: VDom3.hs
+  -- Main-Is: VDom3.hs
+  Main-Is: MVarTestDOM.hs
   Buildable: True
   cpp-options: -DGHCJS_NO_CATCH_MAINLOOP
   Default-Language: Haskell2010
@@ -15,7 +16,8 @@ Executable vdom
          base, containers, data-default,
          ghcjs-base, ghcjs-ffiqq,
          ghcjs-vdom, ghcjs-dom, ghcjs-jquery,
-         text
+         text, time
+
   Other-Extensions:
     TemplateHaskell
   ghcjs-Options:    -O
