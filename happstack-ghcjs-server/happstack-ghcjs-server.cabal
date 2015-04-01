@@ -31,7 +31,7 @@ Executable happstack-ghcjs-server
      Hs-Source-Dirs: server, ../happstack-ghcjs-client/client, ../happstack-ghcjs-client
      cpp-options: -DSERVE_DYNAMIC
   else
-     Hs-Source-Dirs: server, /usr/share/happstack-ghcjs
+     Hs-Source-Dirs: server, /usr/share/happstack-ghcjs-client, /usr/share/happstack-ghcjs-client/client
 
   if flag (local-happstack-ghcjs-webmodule)
      Hs-Source-Dirs: ../happstack-ghcjs-webmodule
@@ -39,7 +39,7 @@ Executable happstack-ghcjs-server
   else
      Build-Depends: happstack-ghcjs-webmodule
 
-  Main-Is: ClientServer.hs
+  Main-Is: /usr/share/happstack-ghcjs-client/client/ClientServer.hs
   GHC-options: -threaded -O2 -Wall -Wwarn -fno-warn-name-shadowing -fno-warn-type-defaults
   Extensions:
     PackageImports,

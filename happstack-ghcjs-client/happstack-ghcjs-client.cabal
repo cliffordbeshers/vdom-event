@@ -56,6 +56,7 @@ Executable happstack-ghcjs-client
      containers,
      data-default,
      data-lens-template,
+     FileManip,
      filepath,
      lucid >0.9.1,
      mtl,
