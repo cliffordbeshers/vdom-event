@@ -2,6 +2,7 @@
 
 import Control.Concurrent
 import Control.Monad
+import Control.Monad.Writer
 import Data.Default
 import Data.Monoid
 import Data.Text (Text, pack)
@@ -32,10 +33,13 @@ inlineBlock = cls "ib"
 loadInlineBlock :: Text -> IO ()
 loadInlineBlock tag = void $ inlineCSS (tag <> " { display: inline-block; }")
 
-render :: State -> VNode
-render (State i) =
-  if i < 1 then button_ noProps $$ [textt (textshow i)]
-  else div_ inlineBlock $$ [ button_ noProps $$ [textt (textshow i)], render (State (i-1)), render (State (i-1)) ]
+render :: State -> Writer [IO (IO ())] VNode
+render (State i) = do tell $ [print "attach" >> return (print "detach") ]
+                      dom i
+  where dom i = if i < 1 then return $ button_ noProps $$ [textt (textshow i)]
+                else do left <- render (State (i-1))
+                        right <- render (State (i-1))
+                        return $ div_ inlineBlock $$ [ button_ noProps $$ [textt (textshow i)], left, right ]
 
 main = do
   b <- select "<button>Click me.</button>"
@@ -50,17 +54,24 @@ main = do
   return ()
 
 
+type Redraw = MVar State
+
+zippy :: (State -> Writer [IO (IO ())] VNode) -> Redraw -> IO ThreadId
 zippy render redraw =
   forkIO $ do
       top <- mkRoot
       loadInlineBlock "div"
       loadBootstrap
-      lastdraw <- newMVar emptyDiv
+      lastdraw <- newMVar (emptyDiv, [])
       forever $ do
         msg <- takeMVar redraw
         print ("fork",msg)
-        r <- takeMVar lastdraw
-        let r' = render msg
-        putMVar lastdraw r'
+        (r,detach) <- takeMVar lastdraw
+        let (r', attach') = runWriter $ render msg
         let p' = diff r r'
+        sequence detach
         patch top p'
+        detach' <- sequence attach'
+        putMVar lastdraw (r', detach')
+        
+        

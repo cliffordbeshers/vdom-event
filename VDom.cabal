@@ -16,7 +16,7 @@ Executable vdom
          base, containers, data-default,
          ghcjs-base, ghcjs-ffiqq,
          ghcjs-vdom, ghcjs-dom, ghcjs-jquery,
-         text, time
+         mtl, text, time
 
   Other-Extensions:
     TemplateHaskell
