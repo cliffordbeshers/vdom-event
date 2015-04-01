@@ -14,3 +14,10 @@ cabal.sandbox.config
 *.prof
 *.aux
 *.hp
+*.js_hi
+*.js_o
+*.jsexe
+*_stub.h
+*~
+\#*
+.#*
