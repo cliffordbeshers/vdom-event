@@ -38,6 +38,9 @@ mkState = State
 step :: State -> State
 step (State s) = State (s+1)
 
+unstep :: State -> State
+unstep (State s) = State (s-1)
+
 render :: State -> VNode
 render s = div_ (cls "state") $$ [button', button2', numDiv]
     where
@@ -48,8 +51,9 @@ render s = div_ (cls "state") $$ [button', button2', numDiv]
 animate :: DOMNode -> VNode -> MVar State -> (MVar State -> State -> IO (IO ())) -> IO ()
 animate n r q ev = do
   print "animate waiting"
-  ms <- tryReadMVar q
-  let s = fromMaybe (State 0) ms
+  --  ms <- tryReadMVar q
+  s <- takeMVar q
+--   let s = fromMaybe (State 0) ms
   print "animate woke"
   let r' = render s
       p  = diff r r'
@@ -59,16 +63,23 @@ animate n r q ev = do
 redraw :: DOMNode -> Patch -> IO ()
 redraw node p = p `seq` atAnimationFrame (patch node p)
 
+redraw' :: DOMNode -> State -> (State -> IO (IO ())) -> IO ()
+redraw' node s ev =
+  let p = diff (render (unstep s)) (render s)
+  in  p `seq` atAnimationFrame (patch node p >> ev s >> return ())
+
 main :: IO ()
 main = do
   root <- mkRoot
-  q <- newMVar $ mkState 999
+  q <- newMVar $ mkState 99
+  qq <- newEmptyMVar
 
   let ev q state = do
         print ("ev", state)
-        select (byId "1") >>= click (\_ -> do { s <- takeMVar q ; print ("1 <", s) ; putMVar q (step s) ; print ("1 >", step s); }) def
-        select (byId "2") >>= click (\_ -> do { s <- takeMVar q ; print ("2 <", s) ; putMVar q (step s) ; print ("2 >", step s); }) def
-  animate root emptyDiv q ev
+        select (byId "1") >>= click (\_ -> do { s<- return state ; print ("click", s); let s' = step s in s' `seq` (putMVar q s' >> redraw' root s' (ev q)); }) def
+--        select (byId "1") >>= click (\_ -> let s' = step state in s' `seq` putMVar q s') def
+--        select (byId "2") >>= click (\_ -> do { s <- takeMVar q ; print ("2 <", s) ; putMVar q (step s) ; print ("2 >", step s); }) def
+  q `seq` (forkIO $ animate root emptyDiv q ev)
   return ()
 
 
