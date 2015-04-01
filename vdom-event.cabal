@@ -1,13 +1,12 @@
-Name: vdom-experiments
-Synopsis: Virtual DOM GHCJS
+Name: vdom-event
+Synopsis: Event driven vdom example.
 Author: Clifford Beshers <clifford.beshers@gmail.com>
 Cabal-version:  >= 1.22
 build-type: Simple
 version:    2015.3.21
 
-Executable vdom
-  -- Main-Is: VDom3.hs
-  Main-Is: MVarTestDOM.hs
+Executable vdom-event
+  Main-Is: VDomEvent.hs
   Buildable: True
   cpp-options: -DGHCJS_NO_CATCH_MAINLOOP
   Default-Language: Haskell2010
