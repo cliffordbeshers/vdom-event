@@ -49,22 +49,23 @@ main = do
 
   click (\e -> do { m <- fmap mkMsg (update  state); print ("click",m) ;  putMVar redraw m }) def b
 
-  zippy render redraw
+  eventLoop render redraw
 
   return ()
 
 
-type Redraw = MVar State
+-- The outer IO creates an event handler, the returned IO cleans it up
+type MkHandler = IO (IO ())
 
-zippy :: (State -> Writer [IO (IO ())] VNode) -> Redraw -> IO ThreadId
-zippy render redraw =
+eventLoop :: (State -> Writer [MkHandler] VNode) -> MVar State -> IO ThreadId
+eventLoop application redrawChannel =
   forkIO $ do
       top <- mkRoot
       loadInlineBlock "div"
       loadBootstrap
       lastdraw <- newMVar (emptyDiv, [])
       forever $ do
-        msg <- takeMVar redraw
+        msg <- takeMVar redrawChannel
         print ("fork",msg)
         (r,detach) <- takeMVar lastdraw
         let (r', attach') = runWriter $ render msg
