@@ -2,6 +2,7 @@
 
 import Control.Concurrent
 import Control.Monad
+import Control.Monad.Identity
 import Control.Monad.RWS.Lazy
 import Data.Default
 import Data.Monoid
@@ -12,6 +13,7 @@ import GHCJS.Foreign.QQ
 import GHCJS.VDOM
 import GHCJS.VDOM.QQ
 import JavaScript.JQuery
+import ControlMonadSupplyExcept
 import Bootstrap
 import UtilQQ
 
@@ -19,7 +21,7 @@ default (Text)
 
 type MkHandler = IO (IO ())
 
-type Application state = RWS (MVar state) [MkHandler] state VNode
+type Application state = RWST (MVar (state -> state)) [MkHandler] state (Supply Integer) VNode
 type ApplicationT m state = RWST (MVar state) [MkHandler] state m VNode
 
 update :: MVar State -> IO State
@@ -38,17 +40,29 @@ inlineBlock = cls "ib"
 loadInlineBlock :: Text -> IO ()
 loadInlineBlock tag = void $ inlineCSS (tag <> " { display: inline-block; }")
 
+
+click' :: (MVar (State-> State)) -> Text -> (State -> State) -> IO (IO ())
+click' redrawChannel ident update = do
+  select (byId ident) >>= click hnd def
+    where hnd e = do
+            print ("click"::Text,ident)
+            putMVar redrawChannel  update
+
 render :: Application State
 render = do
   State i <- get
-  tell $ [print "attacher" >> return (print "detacher") ]
-  dom i
-    where dom i = if i < 1 then return $ button_ noProps $$ [textt (textshow i)]
+  liftIO $ print ("render", State i)
+  ident <- fmap (textshow) (lift supply)
+  redrawChannel <- ask
+  tell $ [print "tell click" >> click' redrawChannel ident succ']
+  dom i ident
+    where dom i ident =
+                  if i < 1 then return $ button_ (id_ ident) $$ [textt (textshow i)]
                   else do left <- recurse render
                           right <- recurse render
-                          return $ div_ inlineBlock $$ [ button_ noProps $$ [textt (textshow i)], left, right ]
+                          return $ div_ inlineBlock $$ [ button_ (id_ ident) $$ [textt (textshow i)], left, right ]
           recurse :: Application State -> Application State
-          recurse = withRWS (\r s -> (r, succ' s))
+          recurse = withRWST (\r s -> (r, succ' s))
           succ' (State i) = State $ succ i
           
 
@@ -71,20 +85,24 @@ main = do
 eventLoop :: Application State -> State -> IO ThreadId
 eventLoop application s0 =
   forkIO $ do
+      let supply = [0..] :: [Integer]
       top <- mkRoot
       loadInlineBlock "div"
       loadBootstrap
-      lastdraw <- newMVar (emptyDiv, [])
-      redrawChannel <- newMVar s0
+      lastdraw <- newMVar (emptyDiv, [], supply, s0)
+      redrawChannel <- newMVar id
       forever $ do
-        state <- takeMVar redrawChannel
-        print ("fork",state)
-        (r0,detachers0) <- takeMVar lastdraw
-        let (r1, s1, attachers1) = runRWS application redrawChannel state
+        print ("eventLoop", "takeMVar redrawChannel")
+        update <- takeMVar redrawChannel
+        print ("eventLoop", "tookMVar redrawChannel")
+        (r0,detachers0,supply0,state0) <- takeMVar lastdraw
+        print ("eventLoop", "tookMVar lastDraw", state0, update state0, take 3 $ supply0)
+        let ((r1, state1, attachers1), supply1) =
+              runSupply (runRWST application redrawChannel (update state0)) supply0
         let p' = diff r0 r1
         sequence detachers0
         patch top p'
         detachers1 <- sequence attachers1
-        putMVar lastdraw (r1, detachers1)
+        putMVar lastdraw (r1, detachers1, supply1, state1)
         
         

@@ -16,6 +16,7 @@ Executable vdom-event
          ghcjs-base, ghcjs-ffiqq,
          ghcjs-vdom, ghcjs-dom, ghcjs-jquery,
          mtl, text, time
+  -- , monad-supply
 
   Other-Extensions:
     TemplateHaskell
