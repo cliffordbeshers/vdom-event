@@ -21,8 +21,9 @@ default (Text)
 
 type MkHandler = IO (IO ())
 
-type Application state = RWST (MVar (state -> state)) [MkHandler] state (Supply Integer) VNode
-type ApplicationT m state = RWST (MVar state) [MkHandler] state m VNode
+-- type Application state = RWST (MVar (state -> state)) [MkHandler] state (Supply Integer) VNode
+type ApplicationT m state = RWST (MVar (state -> state)) [MkHandler] state (SupplyT Integer m)  VNode
+type Application state = ApplicationT IO state
 
 update :: MVar State -> IO State
 update state = do
@@ -97,8 +98,8 @@ eventLoop application s0 =
         print ("eventLoop", "tookMVar redrawChannel")
         (r0,detachers0,supply0,state0) <- takeMVar lastdraw
         print ("eventLoop", "tookMVar lastDraw", state0, update state0, take 3 $ supply0)
-        let ((r1, state1, attachers1), supply1) =
-              runSupply (runRWST application redrawChannel (update state0)) supply0
+        ((r1, state1, attachers1), supply1) <-
+              runSupplyT (runRWST application redrawChannel (update state0)) supply0
         let p' = diff r0 r1
         sequence detachers0
         patch top p'
