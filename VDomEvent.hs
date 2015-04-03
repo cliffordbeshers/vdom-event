@@ -28,11 +28,11 @@ onesec = threadDelay 1000000
 type ApplicationT m state = RWST (MVar (state -> state)) [MkHandler] state (SupplyT Integer m)  VNode
 type Application state = ApplicationT IO state
 
-update :: MVar State -> IO State
-update state = do
-  State i <- takeMVar state
-  putMVar state (State (i+1))
-  return $ State (i+1)
+-- update :: MVar State -> IO State
+-- update state = do
+--   State i <- takeMVar state
+--   putMVar state (State (i+1))
+--   return $ State (i+1)
 
 mkMsg = id
 
@@ -81,34 +81,79 @@ main = do
   select "body" >>= appendJQuery b
 --   click (\e -> do { m <- fmap mkMsg (update  state); print ("click",m) ;  putMVar redraw m }) def b
 
-  eventLoop render (State 0)
+  loadInlineBlock "div" -- custom css
+  loadBootstrap -- insert dom elements for bootstrap
+  root <- mkRoot -- The DOM element at the root of all updates
+  eventLoop render (State 0) root
 
   return ()
 
 
+data EventLoopState a = ELS { dom :: VNode -- The virtual dom for a frame
+                            , detachers :: [IO ()] -- thunks that remove event handlers
+                            , supplyList :: [Integer] -- Node id supply list
+                            , appState :: a
+                            }
+
+printELS :: Show s => EventLoopState s -> IO ()
+printELS els = do
+  putStrLn "ELS {"
+  print (s "dom", s "<no info>")
+  print (s "length detachers", length (detachers els))
+  print (s "take 3 $ supplyList", take 3 (supplyList els))
+  print (s "appState", appState els)
+  putStrLn "}"
+    where s :: Text -> Text
+          s = id
+
 -- The outer IO creates an event handler, the returned IO cleans it up
-eventLoop :: Application State -> State -> IO ThreadId
-eventLoop application s0 =
+eventLoop :: Show s => Application s -> s -> DOMNode -> IO ThreadId
+eventLoop application s0 root =
   forkIO $ do
-      let supply = [0..] :: [Integer]
-      top <- mkRoot
-      loadInlineBlock "div"
-      loadBootstrap
-      lastdraw <- newMVar (emptyDiv, [], supply, s0)
-      redrawChannel <- newMVar id
-      forever $ do
-        print ("eventLoop", "takeMVar redrawChannel")
-        update <- takeMVar redrawChannel
-        print ("eventLoop", "tookMVar redrawChannel")
-        (r0,detachers0,supply0,state0) <- takeMVar lastdraw
-        print ("eventLoop", "tookMVar lastDraw", state0, update state0, take 3 $ supply0)
-        ((r1, state1, attachers1), supply1) <-
-              runSupplyT (runRWST application redrawChannel (update state0)) supply0
-        let p' = diff r0 r1
-        sequence detachers0
-        patch top p'
-        detachers1 <- sequence attachers1
-        putMVar lastdraw (r1, detachers1, supply1, state1)
-        print "onesec" >> onesec
-        
-        
+    redrawChannel <- newMVar id
+    let els = ELS { dom = emptyDiv, detachers = [], supplyList = [0..], appState = s0 }
+    forever' els redrawChannel
+      where      
+        forever' els redrawChannel = do
+            print ("eventLoop", "takeMVar redrawChannel")
+            -- all event handlers write update :: (s -> s) to this mvar.
+            -- wait for a change.
+            update <- takeMVar redrawChannel
+            print ("eventLoop", "got an update")
+            printELS els
+            ((r1, state1, attachers1), supply1) <-
+              runSupplyT (runRWST application redrawChannel (update (appState els))) (supplyList els)
+            -- Figure out the changes from before event to after.
+            let p' = diff (dom els) r1
+            -- Detach all the handlers from the last loop.
+            sequence (detachers els)
+            -- Update the page with the DOM changes
+            patch root p'
+            -- Attach all the new handlers, save the detachers for the next time around.
+            detachers1 <- sequence attachers1
+            print "forever' debugging pause" >> onesec
+            forever' (ELS { dom = r1, detachers = detachers1, supplyList = supply1, appState = state1 }) redrawChannel
+
+-- eventLoop' :: Application State -> State -> IO ThreadId
+-- eventLoop' application s0 =
+--   forkIO $ do
+--       let supply = [0..] :: [Integer]
+--       root <- mkRoot
+--       loadInlineBlock "div"
+--       loadBootstrap
+--       lastdraw <- newMVar (emptyDiv, [], supply, s0)
+--       redrawChannel <- newMVar id
+--       forever $ do
+--         print ("eventLoop", "takeMVar redrawChannel")
+--         update <- takeMVar redrawChannel
+--         print ("eventLoop", "tookMVar redrawChannel")
+--         (r0,detachers0,supply0,state0) <- takeMVar lastdraw
+--         print ("eventLoop", "tookMVar lastDraw", state0, update state0, take 3 $ supply0)
+--         ((r1, state1, attachers1), supply1) <-
+--               runSupplyT (runRWST application redrawChannel (update state0)) supply0
+--         let p' = diff r0 r1
+--         sequence detachers0
+--         patch root p'
+--         detachers1 <- sequence attachers1
+--         putMVar lastdraw (r1, detachers1, supply1, state1)
+--         print "onesec" >> onesec
