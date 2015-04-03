@@ -21,6 +21,9 @@ default (Text)
 
 type MkHandler = IO (IO ())
 
+onesec :: IO ()
+onesec = threadDelay 1000000
+
 -- type Application state = RWST (MVar (state -> state)) [MkHandler] state (Supply Integer) VNode
 type ApplicationT m state = RWST (MVar (state -> state)) [MkHandler] state (SupplyT Integer m)  VNode
 type Application state = ApplicationT IO state
@@ -51,6 +54,7 @@ click' redrawChannel ident update = do
 
 render :: Application State
 render = do
+  liftIO $ print "render onesec" >> onesec
   State i <- get
   liftIO $ print ("render", State i)
   ident <- fmap (textshow) (lift supply)
@@ -105,5 +109,6 @@ eventLoop application s0 =
         patch top p'
         detachers1 <- sequence attachers1
         putMVar lastdraw (r1, detachers1, supply1, state1)
+        print "onesec" >> onesec
         
         
