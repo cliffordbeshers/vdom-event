@@ -77,8 +77,8 @@ render = do
 
 main = do
   print "No button"
-  b <- select "<button>Click me.</button>"
-  select "body" >>= appendJQuery b
+  -- b <- select "<button>Click me.</button>"
+  -- select "body" >>= appendJQuery b
 --   click (\e -> do { m <- fmap mkMsg (update  state); print ("click",m) ;  putMVar redraw m }) def b
 
   loadInlineBlock "div" -- custom css
