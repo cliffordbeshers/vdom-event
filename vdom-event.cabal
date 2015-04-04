@@ -6,6 +6,23 @@ build-type: Simple
 version:    2015.3.21
 
 Executable vdom-event
+  Main-Is: VDomEvent.hs
+  Buildable: True
+  cpp-options: -DGHCJS_NO_CATCH_MAINLOOP
+  Default-Language: Haskell2010
+  if impl(ghcjs)
+     Build-Depends: 
+         base, containers, data-default,
+         ghcjs-base, ghcjs-ffiqq,
+         ghcjs-vdom, ghcjs-dom, ghcjs-jquery,
+         mtl, text, time
+  -- , monad-supply
+
+  Other-Extensions:
+    TemplateHaskell
+  ghcjs-Options:    -O
+
+Executable byhand
   Main-Is: ByHand.hs
   Buildable: True
   cpp-options: -DGHCJS_NO_CATCH_MAINLOOP
@@ -21,3 +38,19 @@ Executable vdom-event
   Other-Extensions:
     TemplateHaskell
   ghcjs-Options:    -O
+
+Executable TestDetach
+  Main-Is: TestDetach.hs
+  Buildable: True
+  cpp-options: -DGHCJS_NO_CATCH_MAINLOOP
+  Default-Language: Haskell2010
+  if impl(ghcjs)
+     Build-Depends: 
+         base, data-default,
+         ghcjs-base,
+         ghcjs-jquery,
+         text
+  Other-Extensions:
+    TemplateHaskell
+  ghcjs-Options:    -O
+
