@@ -5,9 +5,9 @@ Cabal-version:  >= 1.22
 build-type: Simple
 version:    2015.3.21
 
-Executable vdom-event
+Executable VDomEvent
   Main-Is: VDomEvent.hs
-  Buildable: True
+  Buildable: False
   cpp-options: -DGHCJS_NO_CATCH_MAINLOOP
   Default-Language: Haskell2010
   if impl(ghcjs)
@@ -24,7 +24,7 @@ Executable vdom-event
 
 Executable byhand
   Main-Is: ByHand.hs
-  Buildable: True
+  Buildable: False
   cpp-options: -DGHCJS_NO_CATCH_MAINLOOP
   Default-Language: Haskell2010
   if impl(ghcjs)
@@ -49,6 +49,23 @@ Executable TestDetach
          base, data-default,
          ghcjs-base,
          ghcjs-jquery,
+         mtl, ghcjs-dom,
+         text
+  Other-Extensions:
+    TemplateHaskell
+  ghcjs-Options:    -O
+
+Executable TestDetachDOM
+  Main-Is: TestDetachDOM.hs
+  Buildable: False
+  cpp-options: -DGHCJS_NO_CATCH_MAINLOOP
+  Default-Language: Haskell2010
+  if impl(ghcjs)
+     Build-Depends: 
+         base, data-default,
+         ghcjs-base,
+         ghcjs-jquery,
+         mtl, ghcjs-dom,
          text
   Other-Extensions:
     TemplateHaskell
