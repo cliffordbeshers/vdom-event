@@ -28,20 +28,50 @@ def' = def { hsSynchronous = False }
 
 click' a = onn a "click"
 
-foreign import javascript unsafe "$1.off()"
-  jq_off' :: JQuery -> IO ()
+foreign import javascript unsafe "$4.off($2,$3,$1)"
+  jq_off' :: JSRef c                -- ^ callback
+         -> JSString               -- ^ event type
+         -> JSString               -- ^ descendant selector
+         -> JQuery
+         -> IO (JSFun ())
+
+
+foreign import javascript unsafe "((function () { lr=h$jquery_makeListener($1, $5, $6, $7); $8.on($2, $3, $4,lr); return lr; })())"
+  jq_on' :: JSFun a                -- ^ callback
+        -> JSString               -- ^ event type
+        -> JSString               -- ^ descendant selector
+        -> JSRef b                -- ^ data
+        -> Bool                   -- ^ stopPropagation
+        -> Bool                   -- ^ stopImmediatePropagation
+        -> Bool                   -- ^ preventDefault
+        -> JQuery
+        -> IO (JSRef c)
+
 
 convertHandlerSettings :: HandlerSettings -> (Bool, Bool, Bool, JSString, JSRef ())
 convertHandlerSettings (HandlerSettings pd sp sip _ ds hd) =
   (pd, sp, sip, maybe jsNull toJSString ds, fromMaybe jsNull hd)
+
+-- foreign import javascript unsafe "h$makeCallback($1, h$runSync, [$2], $3)"
+--   js_syncCallback :: JSRef a -> Bool -> Int -> IO (JSFun (IO b))
+-- foreign import javascript unsafe "h$makeCallback($1, h$run, [], $2)"
+--   js_asyncCallback :: JSRef a -> Int -> IO (JSFun (IO b))
+
+-- foreign import javascript unsafe "h$makeCallbackApply($1, $3, h$runSync, [$2], $4)"
+--   js_syncCallbackApply :: JSRef a -> Bool -> Int -> Int -> IO (JSRef b)
+-- foreign import javascript unsafe "h$makeCallbackApply($1, $2, h$run, [], $3)"
+--   js_asyncCallbackApply :: JSRef a -> Int -> Int -> IO (JSRef b)
+
+foreign import javascript unsafe "h$jquery_makeListener($1, $2, $3, $4);"
+  jq_makeListener :: JSFun a -> Bool -> Bool -> Bool -> IO (JSRef b)
 
 onn :: (Event -> IO ()) -> EventType -> HandlerSettings -> JQuery -> IO (IO ())
 onn a et hs jq = do
   cb <- if hsSynchronous hs
           then F.syncCallback1 F.AlwaysRetain True a
           else F.asyncCallback1 F.AlwaysRetain a
-  jq_on cb et' ds hd sp sip pd jq
-  return (jq_off' jq >> F.release cb >> print "jq_off")
+  cb' <- jq_on' cb et' ds hd sp sip pd jq
+  return (jq_off' cb' et' ds jq >> F.release cb >> print "jq_off")
     where
       et'                   = toJSString et
       (pd, sp, sip, ds, hd) = convertHandlerSettings hs
