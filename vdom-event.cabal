@@ -24,7 +24,7 @@ Executable VDomEvent
 
 Executable byhand
   Main-Is: ByHand.hs
-  Buildable: False
+  Buildable: True
   cpp-options: -DGHCJS_NO_CATCH_MAINLOOP
   Default-Language: Haskell2010
   if impl(ghcjs)
@@ -41,7 +41,7 @@ Executable byhand
 
 Executable TestDetach
   Main-Is: TestDetach.hs
-  Buildable: True
+  Buildable: False
   cpp-options: -DGHCJS_NO_CATCH_MAINLOOP
   Default-Language: Haskell2010
   if impl(ghcjs)
