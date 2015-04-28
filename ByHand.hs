@@ -45,6 +45,7 @@ render redrawChannel (State i) = do
   let ident = textshow i
   let dv1 x = div_ noProps $$ [x]
   let dv xs = div_ noProps $$ xs
+--   let bsb id = button_  -- need to be able to merge properties.
   let scene =
         if odd i then
           dv  [ dv1 $ button_ (id_ ident) $$ [textt "Click odd to update" ]
