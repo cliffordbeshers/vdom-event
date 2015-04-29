@@ -1,6 +1,6 @@
+add some bootstrap theming
 expose UtilQQ unsafe
 Look at Alder data structures
-add some bootstrap theming
 zip together data, layout, theme-- use the simpler types and runtime checking.
 
 make tabs
