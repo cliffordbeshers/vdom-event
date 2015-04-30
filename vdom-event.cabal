@@ -32,6 +32,9 @@ Executable byhand
          base, containers, data-default,
          ghcjs-base, ghcjs-ffiqq,
          ghcjs-vdom, ghcjs-dom, ghcjs-jquery,
+         dlist,
+         hashable,
+         unordered-containers,
          mtl, text, time
   -- , monad-supply
 

@@ -1,7 +1,7 @@
 {-# LANGUAGE ForeignFunctionInterface #-}
 {-# LANGUAGE JavaScriptFFI            #-}
 -- | JavaScript marshalling. This module is pretty unsafe. Be careful.
-module Alderon.JavaScript
+module Alder.JavaScript
     ( JSObj
     , JSValue(..)
     , JSArgs(..)

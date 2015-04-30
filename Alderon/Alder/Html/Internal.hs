@@ -1,6 +1,6 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedStrings          #-}
-module Alderon.Html.Internal
+module Alder.Html.Internal
     ( -- * Elements
       Node(..)
       -- * Attributes
@@ -43,7 +43,7 @@ import           Data.Text           as Text
 import           Data.Tree
 import           Unsafe.Coerce
 
-import           Alderon.JavaScript
+import           Alder.JavaScript
 
 infixl 1 !, !?, !#, !., !?.
 

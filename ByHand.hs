@@ -17,6 +17,10 @@ import ControlMonadSupplyExcept
 import Bootstrap
 import UtilQQ
 
+import qualified Alderon.Html as H
+import qualified Alderon.Html.Attributes as H
+import qualified Alderon.Html.Elements as H
+
 default (Text)
 
 type MkHandler = IO (IO ())
