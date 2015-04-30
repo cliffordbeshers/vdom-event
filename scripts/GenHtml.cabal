@@ -1,0 +1,13 @@
+Name: vdom-event-genhtml
+Synopsis: Event driven vdom example.
+Author: Clifford Beshers <beshers@seereason.com>
+Cabal-version:  >= 1.22
+build-type: Simple
+version:    2015.4.29
+
+Executable GenHtml
+  Main-Is: GenHtml.hs
+  Buildable: True
+  Default-Language: Haskell2010
+  Build-Depends: 
+    base, filepath
