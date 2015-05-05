@@ -16,6 +16,7 @@ import JavaScript.JQuery
 import ControlMonadSupplyExcept
 import Bootstrap
 import UtilQQ
+import BuildDOM
 
 import qualified Alderon.Html as H
 import qualified Alderon.Html.Attributes as H
