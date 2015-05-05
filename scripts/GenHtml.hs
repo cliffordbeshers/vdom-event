@@ -85,7 +85,7 @@ attributeCode = header <> concat (map attr1code attr1_tags <> map attr0code attr
   where header = map cats
                  [ ["{-# LANGUAGE OverloadedStrings #-}"]
                  , []
-                 , ["module", moduleDir (htmlDir </> "Attributes"), "(", ")", "where"]
+                 , ["module", moduleDir (htmlDir </> "Attributes"), "where"]
                  , ["import", moduleDir (htmlDir </> "Internal")]
                  , ["import Data.Text (Text)"]
                  , []
