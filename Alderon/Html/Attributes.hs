@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Alderon.Html.Attributes ( ) where
+module Alderon.Html.Attributes where
 import Alderon.Html.Internal
 import Data.Text (Text)
 

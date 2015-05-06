@@ -14,7 +14,7 @@ module Alderon.Html.Internal
     , runHtml
     , parent
     , leaf
-    , text
+    , text_
       -- * Event handlers
     , EventType(..)
     , Event(..)
@@ -49,7 +49,7 @@ infixl 1 !, !?, !#, !., !?.
 
 data Node
     = Element !Text Attributes
-    | Text !Text
+    | TextNode !Text
 
 type Id = Text
 
@@ -101,8 +101,8 @@ parent t h = HtmlM $ \a -> DList.singleton (Node (Element t a) (runHtml h))
 leaf :: Text -> Html
 leaf t = HtmlM $ \a -> DList.singleton (Node (Element t a) [])
 
-text :: Text -> Html
-text t = HtmlM $ \_ -> DList.singleton (Node (Text t) [])
+text_ :: Text -> Html
+text_ t = HtmlM $ \_ -> DList.singleton (Node (TextNode t) [])
 
 addAttribute :: Attribute -> HtmlM a -> HtmlM a
 addAttribute (Attribute f) (HtmlM g) = HtmlM (g . f)

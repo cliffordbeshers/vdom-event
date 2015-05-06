@@ -43,5 +43,11 @@ foreign import javascript unsafe "$r = $1.getAttribute($2)"
 getAttribute :: ToJSString a => JSRef DOMElement -> a -> IO JSString
 getAttribute e k = getAttribute' e (toJSString k)
 
+foreign import javascript unsafe "$r = document.body"
+  documentBody :: IO (JSRef DOMElement)
+
+foreign import javascript unsafe "$1.appendChild($2)"
+  appendChild :: JSRef DOMElement -> JSRef DOMElement -> IO ()
+
 
 

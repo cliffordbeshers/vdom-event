@@ -5,6 +5,25 @@ Cabal-version:  >= 1.22
 build-type: Simple
 version:    2015.3.21
 
+Executable testalderon
+  Main-Is: TestAlderon.hs
+  Buildable: True
+  Default-Language: Haskell2010
+  if impl(ghcjs)
+     Build-Depends: 
+         base, containers, data-default,
+         ghcjs-base, ghcjs-ffiqq,
+         ghcjs-vdom, ghcjs-dom, ghcjs-jquery,
+         dlist,
+         hashable,
+         unordered-containers,
+         mtl, text, time
+  -- , monad-supply
+  Other-Extensions:
+    TemplateHaskell
+  ghcjs-Options:    -O
+
+
 Executable VDomEvent
   Main-Is: VDomEvent.hs
   Buildable: False

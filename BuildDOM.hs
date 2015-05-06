@@ -28,6 +28,7 @@ buildNode :: Tree Node -> IO (JSRef DOMElement)
 buildNode (Node (Element tag attrs) fs) = do
   n <- createElement tag
   setAttributes n attrs
+  buildForest fs >>= appendChildren n
   return n
 buildNode (Node (TextNode t) fs) = do
   createTextNode t
@@ -39,3 +40,7 @@ setAttributes n (Attributes{..}) = do
   -- Ignore the key element, I think it is for sodium tracking.
   setAttribute n "class" (Text.intercalate " " elementClass)
   mapM_ (uncurry (setAttribute n)) (HashMap.toList otherAttributes)
+
+appendChildren :: JSRef DOMElement -> [JSRef DOMElement] -> IO ()
+appendChildren node = mapM_ (appendChild node)
+

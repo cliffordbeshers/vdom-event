@@ -16,17 +16,13 @@ import JavaScript.JQuery
 import ControlMonadSupplyExcept
 import Bootstrap
 import UtilQQ
-import BuildDOM
-
-import qualified Alderon.Html as H
-import qualified Alderon.Html.Attributes as H
-import qualified Alderon.Html.Elements as H
 
 default (Text)
 
 type MkHandler = IO (IO ())
 
 data State = State Int deriving (Show)
+
 
 inlineBlock :: Properties
 inlineBlock = cls "ib"
