@@ -4,50 +4,86 @@ module MicroDOM where
 import GHCJS.Foreign
 import GHCJS.Types
 
-data DOMWindow = DOMWindow
-data DOMDocument = DOMDocument
-data DOMElement = DOMElement
+data DOMWindow_ = DOMWindow_
+-- type DOMWindow = JSRef DOMWindow_
+type DOMWindow = JSRef ()
+
+data DOMDocument_ = DOMDocument_
+-- type DOMDocument = JSRef DOMDocument_
+type DOMDocument = JSRef ()
+
+data DOMElement_ = DOMElement_
+-- type DOMElement = JSRef DOMElement_
+type DOMElement = JSRef ()
+
+data DOMEvent_ = DOMEvent_
+-- type DOMEvent = JSRef DOMEvent_
+type DOMEvent = JSRef ()
 
 foreign import javascript unsafe "$r = window"
-  currentWindow :: IO (JSRef DOMWindow)
+  currentWindow :: IO (DOMWindow)
 foreign import javascript unsafe "$r = document"
-  currentDocument :: IO (JSRef DOMDocument)
+  currentDocument :: IO (DOMDocument)
 
 foreign import javascript unsafe "$r = $1.createElement($2)"
-  documentCreateElement :: JSRef DOMDocument -> JSString -> IO (JSRef DOMElement)
+  documentCreateElement :: DOMDocument -> JSString -> IO (DOMElement)
 
 foreign import javascript unsafe "$r = document.createElement($1)"
-  createElement' :: JSString -> IO (JSRef DOMElement)
+  createElement' :: JSString -> IO (DOMElement)
 
-createElement :: ToJSString a => a -> IO (JSRef DOMElement)
+createElement :: ToJSString a => a -> IO (DOMElement)
 createElement s = createElement' (toJSString s)
 
 foreign import javascript unsafe "$r = $1.createTextNode($2)"
-  documentCreateTextNode :: JSRef DOMDocument -> JSString -> IO (JSRef DOMElement)
+  documentCreateTextNode :: DOMDocument -> JSString -> IO (DOMElement)
 
 foreign import javascript unsafe "$r = document.createTextNode($1)"
-  createTextNode' :: JSString -> IO (JSRef DOMElement)
+  createTextNode' :: JSString -> IO (DOMElement)
 
-createTextNode :: ToJSString a => a -> IO (JSRef DOMElement)
+createTextNode :: ToJSString a => a -> IO (DOMElement)
 createTextNode n = createTextNode' (toJSString n)
 
 foreign import javascript unsafe "$r = $1.setAttribute($2,$3)"
-  setAttribute' :: JSRef DOMElement -> JSString -> JSString -> IO JSString
+  setAttribute' :: DOMElement -> JSString -> JSString -> IO JSString
 
-setAttribute :: ToJSString a => JSRef DOMElement -> a -> a -> IO JSString
+setAttribute :: ToJSString a => DOMElement -> a -> a -> IO JSString
 setAttribute e k v = setAttribute' e (toJSString k) (toJSString v)
 
 foreign import javascript unsafe "$r = $1.getAttribute($2)"
-  getAttribute' :: JSRef DOMElement -> JSString -> IO JSString
+  getAttribute' :: DOMElement -> JSString -> IO JSString
 
-getAttribute :: ToJSString a => JSRef DOMElement -> a -> IO JSString
+getAttribute :: ToJSString a => DOMElement -> a -> IO JSString
 getAttribute e k = getAttribute' e (toJSString k)
 
 foreign import javascript unsafe "$r = document.body"
-  documentBody :: IO (JSRef DOMElement)
+  documentBody :: IO (DOMElement)
 
 foreign import javascript unsafe "$1.appendChild($2)"
-  appendChild :: JSRef DOMElement -> JSRef DOMElement -> IO ()
+  appendChild :: DOMElement -> DOMElement -> IO ()
 
+foreign import javascript unsafe
+        "$1.addEventListener($2, $3, $4)"
+        addEventListener ::
+        DOMElement -> JSString -> JSRef a -> Bool -> IO ()
 
+foreign import javascript unsafe
+        "$1.removeEventListener($2, $3, $4)"
+        removeEventListener ::
+        DOMElement -> JSString -> JSRef a -> Bool -> IO Bool
 
+eventTargetAddEventListener :: ToJSString eventName =>
+                           DOMElement -> eventName -> Bool -> (DOMElement -> DOMEvent -> IO ()) -> IO (IO ())
+eventTargetAddEventListener element eventName bubble user = do
+    callback <- syncCallback1 AlwaysRetain True $ \e -> user element e
+    addEventListener
+        element
+        (toJSString eventName)
+        callback
+        bubble
+    return $ do
+        removeEventListener
+            element
+            (toJSString eventName)
+            callback
+            bubble
+        release callback

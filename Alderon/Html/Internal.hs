@@ -32,6 +32,7 @@ module Alderon.Html.Internal
     , attribute
     , boolean
     , onEvent
+    , JSObj
     ) where
 
 import           Control.Applicative
@@ -42,6 +43,8 @@ import           Data.Monoid
 import           Data.Text           as Text
 import           Data.Tree
 import           Unsafe.Coerce
+import           GHCJS.Types
+import           MicroDOM
 
 import           Alderon.JavaScript
 
@@ -164,6 +167,14 @@ attribute k v = Attribute $ \a ->
 
 boolean :: Text -> Attribute
 boolean k = attribute k ""
+
+-- onEvent' :: (Handler f, Event e) => EventType -> f e -> Attribute
+-- onEvent' k handler = Attribute $ \a ->
+--     a { handlers = HashMap.insert k h (handlers a) }
+--   where
+--     h v = do
+--         e <- extractEvent v
+--         fire handler e
 
 onEvent :: (Handler f, Event e) => EventType -> f e -> Attribute
 onEvent k handler = Attribute $ \a ->

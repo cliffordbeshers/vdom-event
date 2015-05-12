@@ -16,24 +16,31 @@ import MicroDOM
 
 default (Text)
 
-buildDOM :: Html -> IO [JSRef DOMElement]
+buildDOM :: Html -> IO [DOMElement]
 buildDOM h = do
   let fs = runHtml h
   buildForest fs
 
-buildForest :: Forest Node -> IO [JSRef DOMElement]
+buildForest :: Forest Node -> IO [DOMElement]
 buildForest = mapM buildNode
 
-buildNode :: Tree Node -> IO (JSRef DOMElement)
+buildNode :: Tree Node -> IO DOMElement
 buildNode (Node (Element tag attrs) fs) = do
   n <- createElement tag
   setAttributes n attrs
+  setHandlers n attrs
   buildForest fs >>= appendChildren n
   return n
 buildNode (Node (TextNode t) fs) = do
   createTextNode t
 
-setAttributes :: JSRef DOMElement -> Attributes -> IO ()
+setHandlers :: DOMElement -> Attributes -> IO ()
+setHandlers e attrs = do
+  let ehs = HashMap.toList $ handlers attrs
+  mapM_ f ehs
+    where f (et,eh) = eventTargetAddEventListener e "click" False (\elm ev -> eh ev)
+
+setAttributes :: DOMElement -> Attributes -> IO ()
 setAttributes n (Attributes{..}) = do
   -- This does not clear the id if already set and elementId is Nothing.
   when (isJust elementId) (void $ setAttribute n "id" (fromJust elementId))
@@ -41,6 +48,6 @@ setAttributes n (Attributes{..}) = do
   setAttribute n "class" (Text.intercalate " " elementClass)
   mapM_ (uncurry (setAttribute n)) (HashMap.toList otherAttributes)
 
-appendChildren :: JSRef DOMElement -> [JSRef DOMElement] -> IO ()
+appendChildren :: DOMElement -> [DOMElement] -> IO ()
 appendChildren node = mapM_ (appendChild node)
 
