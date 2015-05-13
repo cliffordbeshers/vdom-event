@@ -34,11 +34,11 @@ buildNode (Node (Element tag attrs) fs) = do
 buildNode (Node (TextNode t) fs) = do
   createTextNode t
 
-setHandlers :: DOMElement -> Attributes -> IO ()
+setHandlers :: DOMElement -> Attributes -> IO [IO ()]
 setHandlers e attrs = do
   let ehs = HashMap.toList $ handlers attrs
-  mapM_ f ehs
-    where f (et,eh) = eventTargetAddEventListener e "click" False (\elm ev -> eh ev)
+  mapM f ehs
+    where f (et,eh) = eventTargetAddEventListener e (eventName et) False (\elm ev -> eh ev)
 
 setAttributes :: DOMElement -> Attributes -> IO ()
 setAttributes n (Attributes{..}) = do

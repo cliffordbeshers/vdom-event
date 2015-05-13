@@ -113,6 +113,7 @@ addAttribute (Attribute f) (HtmlM g) = HtmlM (g . f)
 data EventType
     = KeyDown | KeyPress | KeyUp
     | Focus | Blur
+--    | FocusIn | FocusOut -- These are not widely supported yet.
     | Input | Change
     | Submit
     | MouseDown | MouseUp | Click | DoubleClick | MouseMove | MouseEnter | MouseLeave

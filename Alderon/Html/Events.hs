@@ -9,6 +9,9 @@ module Alderon.Html.Events
       -- * Events
     , KeyboardEvent(..)
     , FocusEvent(..)
+    , BlurEvent(..)
+    , FocusInEvent(..)
+    , FocusOutEvent(..)
     , InputEvent(..)
     , SubmitEvent(..)
     , MouseEvent(..)
@@ -83,9 +86,20 @@ instance Event InputEvent where
             <*> target .: "value"
 
 data FocusEvent = FocusEvent deriving (Eq, Read, Show)
+data BlurEvent = BlurEvent deriving (Eq, Read, Show)
+
+data FocusInEvent = FocusInEvent deriving (Eq, Read, Show)
+data FocusOutEvent = FocusOutEvent deriving (Eq, Read, Show)
 
 instance Event FocusEvent where
     extractEvent _ = return FocusEvent
+instance Event BlurEvent where
+    extractEvent _ = return BlurEvent
+
+instance Event FocusInEvent where
+    extractEvent _ = return FocusInEvent
+instance Event FocusOutEvent where
+    extractEvent _ = return FocusOutEvent
 
 data SubmitEvent = SubmitEvent deriving (Eq, Read, Show)
 

@@ -11,8 +11,10 @@ module Alderon.Html
     , (!?.)
     , module Alderon.Html.Elements
     , module Alderon.Html.Attributes
+    , module Alderon.Handler
     ) where
 
 import Alderon.Html.Internal
 import Alderon.Html.Elements hiding (data_)
 import Alderon.Html.Attributes hiding (span_, form_, label_, style_, title_)
+import Alderon.Handler
