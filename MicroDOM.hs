@@ -61,10 +61,31 @@ foreign import javascript unsafe "$r = document.body"
 foreign import javascript unsafe "$1.appendChild($2)"
   appendChild :: DOMElement -> DOMElement -> IO ()
 
+foreign import javascript unsafe "$r = $1.firstChild"
+  firstChild :: DOMElement -> IO DOMElement
+
+foreign import javascript unsafe "$r = $1.lastChild"
+  lastChild :: DOMElement -> IO DOMElement
+
+foreign import javascript unsafe "$1.removeChild($2)"
+  removeChild :: DOMElement -> DOMElement -> IO ()
+
 foreign import javascript unsafe
         "$1.addEventListener($2, $3, $4)"
         addEventListener ::
         DOMElement -> JSString -> JSRef a -> Bool -> IO ()
+
+getFirstChild :: DOMElement -> IO (Maybe DOMElement)
+getFirstChild e = do
+  c <- firstChild e
+  if isNull c then return Nothing else return (Just c)
+
+getLastChild :: DOMElement -> IO (Maybe DOMElement)
+getLastChild e = do
+  c <- lastChild e
+  if isNull c then return Nothing else return (Just c)
+
+
 
 foreign import javascript unsafe
         "$1.removeEventListener($2, $3, $4)"
@@ -87,3 +108,7 @@ eventTargetAddEventListener element eventName bubble user = do
             callback
             bubble
         release callback
+
+maybeJSNull :: JSRef a -> Maybe (JSRef a)
+maybeJSNull r | isNull r = Nothing
+maybeJSNull r = Just r

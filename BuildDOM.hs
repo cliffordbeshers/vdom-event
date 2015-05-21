@@ -34,10 +34,11 @@ buildNode (Node (Element tag attrs) fs) = do
 buildNode (Node (TextNode t) fs) = do
   createTextNode t
 
-setHandlers :: DOMElement -> Attributes -> IO [IO ()]
+setHandlers :: DOMElement -> Attributes -> IO (IO ())
 setHandlers e attrs = do
   let ehs = HashMap.toList $ handlers attrs
-  mapM f ehs
+  gcs <- mapM f ehs
+  return $ sequence_ gcs
     where f (et,eh) = eventTargetAddEventListener e (eventName et) False (\elm ev -> eh ev)
 
 setAttributes :: DOMElement -> Attributes -> IO ()
@@ -50,4 +51,17 @@ setAttributes n (Attributes{..}) = do
 
 appendChildren :: DOMElement -> [DOMElement] -> IO ()
 appendChildren node = mapM_ (appendChild node)
+
+detachChildren :: DOMElement -> IO [DOMElement]
+detachChildren node = go node
+  where go n = do
+          mc <- getFirstChild n
+          case mc of
+            Nothing -> return []
+            Just c -> do
+              removeChild n c
+              cs <- go n
+              return (c:cs)
+          
+          
 

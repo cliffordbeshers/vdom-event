@@ -31,15 +31,21 @@ hello :: Html
 hello  = let inputText = "Hello this is in put" in
   div_ !# "Hello Header" $ do
     div_ !# "Goodbye Header" $ do
-      h1_ ! clicker ! clicker2 $ (text_ "single/double click")
+      h1_ ! clicker $ (text_ "single click")
       input_ !# "new-hello"
         ! placeholder_ "Hi, how are you?"
         ! autofocus_
         ! value_ inputText
         ! focus'
         ! blur'
+      input_ !# "2-hello"
+        ! placeholder_ "Yo."
+        ! autofocus_
+        ! value_ (Text.reverse inputText)
+        ! focus'
+        ! blur'
   where clicker = onClick (Inputt (\e -> print ("hello", e)))
-        clicker2 = onDoubleClick (Inputt (\e -> print ("hello2", e)))
+--        clicker2 = onDoubleClick (Inputt (\e -> print ("hello2", e)))
         focus' = onFocus (Inputt (\e -> print ("hello focus", e)))
         blur' = onBlur (Inputt (\e -> print ("hello blur", e)))
 --        focusin' = onFocusIn (Inputt (\e -> print ("FocusIn", e)))
@@ -61,8 +67,8 @@ alderon :: Html -> IO ()
 alderon html = do
   root <- documentBody
   h' <- buildDOM html
+  h'' <- buildDOM html
   appendChildren root h'
-  
-
+  appendChildren root h''
   
 main = alderon hello
