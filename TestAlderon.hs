@@ -27,24 +27,25 @@ import Alderon.Html.Events as E (MouseEvent)
 
 default (Text.Text)
 
-hello :: Html
-hello  = let inputText = "Hello this is in put" in
-  div_ !# "Hello Header" $ do
-    div_ !# "Goodbye Header" $ do
+hello :: MVar (Bool -> Bool) -> Bool -> Html
+hello  redrawChannel b = let inputText = "Hello this is in put" in
+  div_ !# (if b then "Hello Header" else "Goodbye Header") $ do
       h1_ ! clicker $ (text_ "single click")
-      input_ !# "new-hello"
-        ! placeholder_ "Hi, how are you?"
-        ! autofocus_
-        ! value_ inputText
-        ! focus'
-        ! blur'
-      input_ !# "2-hello"
-        ! placeholder_ "Yo."
-        ! autofocus_
-        ! value_ (Text.reverse inputText)
-        ! focus'
-        ! blur'
-  where clicker = onClick (Inputt (\e -> print ("hello", e)))
+      if b then
+          input_ !# "new-hello"
+            ! placeholder_ "Hi, how are you?"
+            ! autofocus_
+            ! value_ inputText
+            ! focus'
+            ! blur'
+        else
+          input_ !# "2-hello"
+            ! placeholder_ "Yo."
+            ! autofocus_
+            ! value_ (Text.reverse inputText)
+            ! focus'
+            ! blur'
+  where clicker = onClick (Inputt (\e -> print "clicker" >> putMVar redrawChannel not))
 --        clicker2 = onDoubleClick (Inputt (\e -> print ("hello2", e)))
         focus' = onFocus (Inputt (\e -> print ("hello focus", e)))
         blur' = onBlur (Inputt (\e -> print ("hello blur", e)))
@@ -62,13 +63,26 @@ onClick = onEvent Click
 onDoubleClick :: Handler f => f E.MouseEvent -> Attribute
 onDoubleClick = onEvent DoubleClick
 
-
-alderon :: Html -> IO ()
+alderon :: (MVar (Bool -> Bool) -> Bool -> Html) -> IO ()
 alderon html = do
   root <- documentBody
-  h' <- buildDOM html
-  h'' <- buildDOM html
-  appendChildren root h'
-  appendChildren root h''
-  
-main = alderon hello
+  putStr "redrawChannel <"
+  redrawChannel <- newMVar id
+  putStr "> redrawChannel"
+  putStr "putMVar <"
+  putStrLn ">"
+  eventLoop root redrawChannel html True
+
+
+eventLoop root redrawChannel render state = do
+  update <- takeMVar redrawChannel
+  let state' = update state
+  hs <- buildDOM (render redrawChannel state')
+  old <- detachChildren root
+  appendChildren root hs
+  eventLoop root redrawChannel render state'
+
+main = do
+  putStrLn "main <"
+  alderon hello
+  putStrLn "> main"
