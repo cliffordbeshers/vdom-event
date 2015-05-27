@@ -11,13 +11,14 @@ Executable testalderon
   Default-Language: Haskell2010
   if impl(ghcjs)
      Build-Depends: 
+        ghcjs-base
+  Build-Depends: 
          base, containers, data-default,
-         ghcjs-base, ghcjs-ffiqq,
-         ghcjs-vdom, ghcjs-dom, ghcjs-jquery,
          dlist,
          hashable,
-         unordered-containers,
-         mtl, text, time
+         lens,
+         mtl, text, time,
+         unordered-containers
   -- , monad-supply
   Other-Extensions:
     TemplateHaskell

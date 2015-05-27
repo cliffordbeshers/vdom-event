@@ -58,6 +58,9 @@ getAttribute e k = getAttribute' e (toJSString k)
 foreign import javascript unsafe "$r = document.body"
   documentBody :: IO (DOMElement)
 
+foreign import javascript unsafe "$r = document.head"
+  documentHead :: IO (DOMElement)
+
 foreign import javascript unsafe "$1.appendChild($2)"
   appendChild :: DOMElement -> DOMElement -> IO ()
 

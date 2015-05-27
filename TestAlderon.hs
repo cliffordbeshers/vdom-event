@@ -10,11 +10,8 @@ import Data.Monoid
 import Data.Text as Text (Text, pack, reverse)
 import Data.Time
 import GHCJS.Foreign
-import GHCJS.Foreign.QQ
 import GHCJS.Types
 
-import GHCJS.VDOM
-import GHCJS.VDOM.QQ
 import ControlMonadSupplyExcept
 import Bootstrap
 
@@ -24,9 +21,20 @@ import BuildDOM
 import Alderon.Html
 import Alderon.Html.Internal
 import Alderon.Html.Events as E (MouseEvent)
+import History
 
 default (Text.Text)
 
+
+data R = R
+data W = W
+data S = S
+
+instance Monoid W where
+  mempty = W
+  W `mappend` W = W
+
+type Z a = RWST R W S a
 
 hello :: MVar (Bool -> Bool) -> Bool -> Html
 hello  redrawChannel b = let inputText = "Hello this is in put" in
@@ -62,6 +70,7 @@ onDoubleClick = onEvent DoubleClick
 
 alderon :: (MVar (Bool -> Bool) -> Bool -> Html) -> IO ()
 alderon html = do
+  loadBootstrap
   root <- documentBody
   redrawChannel <- newMVar id
   eventLoop root redrawChannel html True
@@ -74,6 +83,8 @@ eventLoop root redrawChannel render state = do
   old <- detachChildren root
   appendChildren root hs
   eventLoop root redrawChannel render state'
+
+
 
 main = do
   alderon hello
