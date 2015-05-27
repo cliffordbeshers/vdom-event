@@ -15,3 +15,4 @@ handle page load etc events
 
 
 
+input events are notification that the DOM has been changed by the browser.  Log the change, but do not update the display.

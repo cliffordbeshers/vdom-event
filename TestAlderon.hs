@@ -27,30 +27,27 @@ import Alderon.Html.Events as E (MouseEvent)
 
 default (Text.Text)
 
+
 hello :: MVar (Bool -> Bool) -> Bool -> Html
 hello  redrawChannel b = let inputText = "Hello this is in put" in
   div_ !# (if b then "Hello Header" else "Goodbye Header") $ do
-      h1_ ! clicker $ (text_ "single click")
-      if b then
+      h1_ ! clicker $ (text_ "Click to reverse")
+      textform b "This is the input Text." ! onInput'
+  where clicker = onClick (Inputt (\e -> print "clicker" >> putMVar redrawChannel not))
+        onInput' = onInput (Inputt (\e -> print "input" >> putMVar redrawChannel id))
+
+textform :: Bool -> Text -> Html
+textform b t = form' (xform b t)
+  where xform b = if b then id else Text.reverse
+        form' t = 
           input_ !# "new-hello"
             ! placeholder_ "Hi, how are you?"
             ! autofocus_
-            ! value_ inputText
+            ! value_ t
             ! focus'
             ! blur'
-        else
-          input_ !# "2-hello"
-            ! placeholder_ "Yo."
-            ! autofocus_
-            ! value_ (Text.reverse inputText)
-            ! focus'
-            ! blur'
-  where clicker = onClick (Inputt (\e -> print "clicker" >> putMVar redrawChannel not))
---        clicker2 = onDoubleClick (Inputt (\e -> print ("hello2", e)))
         focus' = onFocus (Inputt (\e -> print ("hello focus", e)))
         blur' = onBlur (Inputt (\e -> print ("hello blur", e)))
---        focusin' = onFocusIn (Inputt (\e -> print ("FocusIn", e)))
---        focusout' = onFocusOut (Inputt (\e -> print ("FocusOut", e)))
 
 instance Handler Inputt where
     fire (Inputt m) = m
@@ -66,11 +63,7 @@ onDoubleClick = onEvent DoubleClick
 alderon :: (MVar (Bool -> Bool) -> Bool -> Html) -> IO ()
 alderon html = do
   root <- documentBody
-  putStr "redrawChannel <"
   redrawChannel <- newMVar id
-  putStr "> redrawChannel"
-  putStr "putMVar <"
-  putStrLn ">"
   eventLoop root redrawChannel html True
 
 
@@ -83,6 +76,4 @@ eventLoop root redrawChannel render state = do
   eventLoop root redrawChannel render state'
 
 main = do
-  putStrLn "main <"
   alderon hello
-  putStrLn "> main"
