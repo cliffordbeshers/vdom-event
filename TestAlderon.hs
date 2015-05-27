@@ -41,6 +41,7 @@ hello :: MVar (Bool -> Bool) -> Bool -> Html
 hello  redrawChannel b = let inputText = "Hello this is in put" in
   div_ !# (if b then "Hello Header" else "Goodbye Header") $ do
       h1_ ! clicker $ (text_ "Click to reverse")
+      mkButton (text_ "Click to reverse") ! clicker >> br_
       textarea b bigText ! onInput'
   where clicker = onClick (Inputt (\e -> print "clicker" >> putMVar redrawChannel not))
         onInput' = onInput (Inputt (\e -> print "input" >> putMVar redrawChannel id))
@@ -73,7 +74,11 @@ textarea b t = form' (xform b t)
         focus' = onFocus (Inputt (\e -> print ("hello focus", e)))
         blur' = onBlur (Inputt (\e -> print ("hello blur", e)))
 
+mkButton :: Html -> Html
+mkButton = button_ ! type_ "button"
+
 instance Handler Inputt where
+
     fire (Inputt m) = m
 
 newtype Inputt e = Inputt (e -> IO ())
