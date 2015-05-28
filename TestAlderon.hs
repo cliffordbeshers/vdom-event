@@ -44,7 +44,7 @@ hello  redrawChannel b = let inputText = "Hello this is in put" in
       mkButton (text_ "Click to reverse") ! clicker >> br_
       textarea b bigText ! onInput' >> br_
       mkCheckbox "Check1" "Check2" >> (text_ "Check") >> br_
-      mkSelect "menu1" ["One","Two","Three"] "Three" >>  br_
+      mkSelect "menu1" [("1","One"),("2","Two"),("3","Three")] "3" >>  br_
       
   where clicker = onClick (Inputt (\e -> print "clicker" >> putMVar redrawChannel not))
         onInput' = onInput (Inputt (\e -> print "input" >> putMVar redrawChannel id))
@@ -91,12 +91,12 @@ mkCheckbox nm v = input_
   ! name_ nm
   ! value_ v
 
-mkSelect :: Text -> [Text] -> Text -> Html
+mkSelect :: Text -> [(Text,Text)] -> Text -> Html
 mkSelect nm vs v =
   select_ ! name_ nm $ mapM_ opt' vs
-    where opt' val = if val == v
-                     then option_ ! value_ val ! selected_ "" $ text_ val
-                     else option_ ! value_ val $ text_ val
+    where opt' (val,lbl) = if val == v
+                           then option_ ! value_ val ! selected_ "" $ text_ lbl
+                           else option_ ! value_ val $ text_ lbl
 
 
 instance Handler Inputt where
