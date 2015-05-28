@@ -30,7 +30,7 @@ html_tags = html_tags' \\ void_tags
 
 void_tags :: [String]
 void_tags = concat $ map words
-  [ "area base br col command embed hr img"
+  [ "area base br col command embed hr img input"
   , "keygen link meta param source track wbr"
   ]
 
