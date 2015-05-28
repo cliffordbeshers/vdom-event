@@ -135,6 +135,9 @@ i_ = parent "i"
 iframe_ :: Html -> Html
 iframe_ = parent "iframe"
 
+input_ :: Html -> Html
+input_ = parent "input"
+
 ins_ :: Html -> Html
 ins_ = parent "ins"
 
@@ -311,9 +314,6 @@ hr_ = leaf "hr"
 
 img_ :: Html
 img_ = leaf "img"
-
-input_ :: Html
-input_ = leaf "input"
 
 keygen_ :: Html
 keygen_ = leaf "keygen"
