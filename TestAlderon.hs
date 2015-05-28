@@ -42,8 +42,10 @@ hello  redrawChannel b = let inputText = "Hello this is in put" in
   div_ !# (if b then "Hello Header" else "Goodbye Header") $ do
       h1_ ! clicker $ (text_ "Click to reverse")
       mkButton (text_ "Click to reverse") ! clicker >> br_
+      textarea b bigText ! onInput' >> br_
       mkCheckbox "Check1" "Check2" >> (text_ "Check") >> br_
-      textarea b bigText ! onInput'
+      mkSelect "menu1" ["One","Two","Three"] "Three" >>  br_
+      
   where clicker = onClick (Inputt (\e -> print "clicker" >> putMVar redrawChannel not))
         onInput' = onInput (Inputt (\e -> print "input" >> putMVar redrawChannel id))
         bigText = Text.concat $ replicate 10 "This is the input Text. "
@@ -88,6 +90,13 @@ mkCheckbox nm v = input_
   ! type_ "checkbox"
   ! name_ nm
   ! value_ v
+
+mkSelect :: Text -> [Text] -> Text -> Html
+mkSelect nm vs v =
+  select_ ! name_ nm $ mapM_ opt' vs
+    where opt' val = if val == v
+                     then option_ ! value_ val ! selected_ "" $ text_ val
+                     else option_ ! value_ val $ text_ val
 
 
 instance Handler Inputt where
