@@ -42,6 +42,7 @@ hello  redrawChannel b = let inputText = "Hello this is in put" in
   div_ !# (if b then "Hello Header" else "Goodbye Header") $ do
       h1_ ! clicker $ (text_ "Click to reverse")
       mkButton (text_ "Click to reverse") ! clicker >> br_
+      mkCheckbox "Check1" "Check2" >> (text_ "Check") >> br_
       textarea b bigText ! onInput'
   where clicker = onClick (Inputt (\e -> print "clicker" >> putMVar redrawChannel not))
         onInput' = onInput (Inputt (\e -> print "input" >> putMVar redrawChannel id))
@@ -50,6 +51,7 @@ hello  redrawChannel b = let inputText = "Hello this is in put" in
 textform :: Bool -> Text -> Html
 textform b t = form' (xform b t)
   where xform b = if b then id else Text.reverse
+        form' :: Text -> Html
         form' t = 
           input_ !# "new-hello"
             ! placeholder_ "Hi, how are you?"
@@ -63,6 +65,7 @@ textform b t = form' (xform b t)
 textarea :: Bool -> Text -> Html
 textarea b t = form' (xform b t)
   where xform b = if b then id else Text.reverse
+        form' :: Text -> Html
         form' t = 
           textarea_ !# "new-hello"
             ! autofocus_
@@ -76,6 +79,16 @@ textarea b t = form' (xform b t)
 
 mkButton :: Html -> Html
 mkButton = button_ ! type_ "button"
+
+mkKeygen :: Text -> Html
+mkKeygen nm = keygen_ ! name_ nm
+
+mkCheckbox :: Text -> Text -> Html
+mkCheckbox nm v = input_
+  ! type_ "checkbox"
+  ! name_ nm
+  ! value_ v
+
 
 instance Handler Inputt where
 
