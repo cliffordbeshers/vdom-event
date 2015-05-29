@@ -100,7 +100,7 @@ textarea b t = form' (xform b t)
             ! autofocus_
 --            ! cols_ (tshow (80 :: Int))
 --            ! rows_ (tshow (10 :: Int))
-            ! A.style_ "min-width:30%;width:50%;max-width:80%;height:10em;"
+            ! A.style_ "min-width:fill-available;max-width:80%;min-height:fill-available;"
             ! focus'
             ! blur'
             ! dragEnd'
