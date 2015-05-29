@@ -22,7 +22,8 @@ import           Data.Maybe
 import           Data.Set            as Set
 import           Data.Text           as Text
 
-import           Alder.Html.Internal
+import           Alder.Html.Internal hiding (EventType(..))
+import qualified Alder.Html.Internal as I (EventType(..))
 import           Alder.JavaScript
 
 -- | A mouse modifier key.

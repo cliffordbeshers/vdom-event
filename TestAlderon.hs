@@ -20,6 +20,7 @@ import BuildDOM
 
 import Alderon.Html
 import Alderon.Html.Internal
+import qualified Alderon.Html.Attributes as A (style_)
 import Alderon.Html.Events as E (MouseEvent)
 import History
 import Utils
@@ -81,6 +82,15 @@ textform b t = form' (xform b t)
         focus' = onFocus (Inputt (\e -> print ("hello focus", e)))
         blur' = onBlur (Inputt (\e -> print ("hello blur", e)))
 
+-- Notes on textarea you do not have to use rows,cols, you can use css
+-- width/height.  The specifies both the default and the minimum.
+-- Playing with min-width and max-width as well doesn't seem to fix
+-- that.
+
+-- mouseUp event notifies of the resize, at least in chrome.
+-- AS should trap and remember for all text widths.  At least until we
+-- get full wysiwyg going.
+
 textarea :: Bool -> Text -> Html
 textarea b t = form' (xform b t)
   where xform b = if b then id else Text.reverse
@@ -88,13 +98,18 @@ textarea b t = form' (xform b t)
         form' t = 
           textarea_ !# "new-hello"
             ! autofocus_
-            ! cols_ (tshow (80 :: Int))
-            ! rows_ (tshow (10 :: Int))
+--            ! cols_ (tshow (80 :: Int))
+--            ! rows_ (tshow (10 :: Int))
+            ! A.style_ "min-width:30%;width:50%;max-width:80%;height:10em;"
             ! focus'
             ! blur'
+            ! dragEnd'
+            ! mouseUp'
             $ text_ t
         focus' = onFocus (Inputt (\e -> print ("hello focus", e)))
         blur' = onBlur (Inputt (\e -> print ("hello blur", e)))
+        dragEnd' = onDragEnd (Inputt (\e -> print ("received DragEnd", e)))
+        mouseUp' = onMouseUp (Inputt (\e -> print ("received mouseUp", e)))
 
 mkButton :: Html -> Html
 mkButton = button_ ! type_ "button"
@@ -131,6 +146,9 @@ onClick = onEvent Click
 
 onDoubleClick :: Handler f => f E.MouseEvent -> Attribute
 onDoubleClick = onEvent DoubleClick
+
+onDragEnd :: Handler f => f E.MouseEvent -> Attribute
+onDragEnd = onEvent DragEnd
 
 alderon :: (MVar (Bool -> Bool) -> Bool -> Html) -> IO ()
 alderon html = do

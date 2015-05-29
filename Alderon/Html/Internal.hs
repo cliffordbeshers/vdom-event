@@ -117,6 +117,7 @@ data EventType
     | Input | Change
     | Submit
     | MouseDown | MouseUp | Click | DoubleClick | MouseMove | MouseEnter | MouseLeave
+    | Drag | DragStart | DragEnd | DragEnter | DragLeave | DragOver | Drop
     deriving (Eq, Ord, Read, Show, Enum, Bounded)
 
 instance Hashable EventType where
