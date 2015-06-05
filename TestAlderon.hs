@@ -9,6 +9,7 @@ import Data.Default
 import Data.Monoid
 import Data.Text as Text (Text, pack, reverse, concat)
 import Data.Time
+import Documentation
 import GHCJS.Foreign
 import GHCJS.Types
 
@@ -24,6 +25,7 @@ import qualified Alderon.Html.Attributes as A (style_)
 import Alderon.Html.Events as E (MouseEvent)
 import History
 import Utils
+import SampleImages as Samples (imageURLs)
 
 default (Text.Text)
 
@@ -38,40 +40,35 @@ instance Monoid W where
 
 type Z a = RWST R W S a
 
+data ModelTab = This | That deriving (Show, Bounded, Enum, Eq)
 
-type URL = Text
+data Model = Model ModelTab Text
 
-imageURLs :: [URL]
-imageURLs =
-  [ "https://fbcdn-sphotos-e-a.akamaihd.net/hphotos-ak-xaf1/t31.0-8/11082361_10204865703177218_7142048938861798417_o.jpg"
-  , "https://scontent-ord.xx.fbcdn.net/hphotos-xpa1/v/t1.0-9/s720x720/10676351_10204875971793927_291876182821710665_n.jpg?oh=77cf176c31c46ac933272de0480dcfe1&oe=55818649"
-  , "https://fbcdn-sphotos-c-a.akamaihd.net/hphotos-ak-xpf1/t31.0-8/10914721_10204856412024945_2607390891971097151_o.jpg"
-  , "https://scontent-ord.xx.fbcdn.net/hphotos-xpf1/v/t1.0-9/10988282_10204849112762468_7979569982779097370_n.jpg?oh=712dc71ac4a1a5c7a6d452ec57d6799f&oe=5583185E"
-  , "https://scontent-ord.xx.fbcdn.net/hphotos-xfp1/t31.0-8/11073500_10204842190469415_875697331045021877_o.jpg"
-  , "https://fbcdn-sphotos-g-a.akamaihd.net/hphotos-ak-xpa1/v/t1.0-9/10710956_10204829354548525_3840378263239480270_n.jpg?oh=a6f915cf68b916c6c84c6e8baeecb028&oe=55B52B34&__gda__=1434306594_f075e1695ab5a3a56ff0a6d7921b6254"
-  , "https://scontent-ord.xx.fbcdn.net/hphotos-xpf1/v/t1.0-9/10983182_10204802735643069_2375287011727111812_n.jpg?oh=c57d524c6be33146eb175548a7f46200&oe=5573FFE1"
-  , "https://fbcdn-sphotos-d-a.akamaihd.net/hphotos-ak-prn2/v/t1.0-9/11056894_10204795437740626_1302633900976191151_n.jpg?oh=da776a52e13eba9c1426b03708f1fd15&oe=557A2D8C&__gda__=1437981455_ed50f8cf7a166212a9e087b81fb3cd5c"
-  ]
+data WH = WH Int Int
+data View = View { wh :: WH }
+type AppState = (View, Model)
 
-
-hello :: MVar (Bool -> Bool) -> Bool -> Html
-hello  redrawChannel b = let inputText = "Hello this is in put" in
-  div_ !# (if b then "Hello Header" else "Goodbye Header") $ do
-      h1_ ! clicker $ (text_ "Click to reverse")
+hello :: MVar ( AppState -> AppState) -> AppState -> Html
+hello  redrawChannel (view, Model tab inputText) = let b = if tab == This then True else False in
+  div_ !# "top" $ do
+      h1_ ! clicker $ (text_ (if tab == This then "This Header" else "That Header"))
       mkButton (text_ "Click to reverse") ! clicker >> br_
-      textarea b bigText ! onInput' >> br_
+      textarea (if b then inputText else Text.reverse inputText) ! onInput' ! mouseUp' >> br_
       mkCheckbox "Check1" "Check2" >> (text_ "Check") >> br_
       mkSelect "menu1" [("1","One"),("2","Two"),("3","Three")] "3" >>  br_
-      mapM_ (\u -> mkImg u 50 50 >> br_) imageURLs
-      
-  where clicker = onClick (Inputt (\e -> print "clicker" >> putMVar redrawChannel not))
+      mapM_ (\u -> mkImg u 50 50 >> br_) Samples.imageURLs
+  where clicker = onClick (Inputt (\e -> print "clicker" >> putMVar redrawChannel clickerF))
         onInput' = onInput (Inputt (\e -> print "input" >> putMVar redrawChannel id))
-        bigText = Text.concat $ replicate 10 "This is the input Text. "
+        mouseUp' = onMouseUp (Inputt (\e -> print ("received mouseUp", e)))
+        clickerF (v, Model tab text) = (v, Model (cycleEB tab) text)
 
-textform :: Bool -> Text -> Html
-textform b t = form' (xform b t)
-  where xform b = if b then id else Text.reverse
-        form' :: Text -> Html
+cycleEB :: (Eq a, Bounded a, Enum a) => a -> a
+cycleEB a = if a == maxBound then minBound else succ a
+
+
+textform :: Text -> Html
+textform = form'
+  where form' :: Text -> Html
         form' t = 
           input_ !# "new-hello"
             ! placeholder_ "Hi, how are you?"
@@ -91,10 +88,9 @@ textform b t = form' (xform b t)
 -- AS should trap and remember for all text widths.  At least until we
 -- get full wysiwyg going.
 
-textarea :: Bool -> Text -> Html
-textarea b t = form' (xform b t)
-  where xform b = if b then id else Text.reverse
-        form' :: Text -> Html
+textarea :: Text -> Html
+textarea = form'
+  where form' :: Text -> Html
         form' t = 
           textarea_ !# "new-hello"
             ! autofocus_
@@ -103,16 +99,14 @@ textarea b t = form' (xform b t)
             ! A.style_ "min-width:fill-available;max-width:80%;min-height:fill-available;"
             ! focus'
             ! blur'
-            ! dragEnd'
-            ! mouseUp'
             $ text_ t
         focus' = onFocus (Inputt (\e -> print ("hello focus", e)))
         blur' = onBlur (Inputt (\e -> print ("hello blur", e)))
-        dragEnd' = onDragEnd (Inputt (\e -> print ("received DragEnd", e)))
-        mouseUp' = onMouseUp (Inputt (\e -> print ("received mouseUp", e)))
 
 mkButton :: Html -> Html
 mkButton = button_ ! type_ "button"
+
+type URL = Text
 
 mkImg :: URL -> Int -> Int -> Html
 mkImg url w h =
@@ -150,12 +144,12 @@ onDoubleClick = onEvent DoubleClick
 onDragEnd :: Handler f => f E.MouseEvent -> Attribute
 onDragEnd = onEvent DragEnd
 
-alderon :: (MVar (Bool -> Bool) -> Bool -> Html) -> IO ()
-alderon html = do
+alderon :: (MVar (a -> a) -> a -> Html) -> a -> IO ()
+alderon html s0 = do
   loadBootstrap
   root <- documentBody
   redrawChannel <- newMVar id
-  eventLoop root redrawChannel html True
+  eventLoop root redrawChannel html s0
 
 
 eventLoop root redrawChannel render state = do
@@ -169,4 +163,4 @@ eventLoop root redrawChannel render state = do
 
 
 main = do
-  alderon hello
+  alderon hello (View (WH 60 60), Model This "Model text.")
