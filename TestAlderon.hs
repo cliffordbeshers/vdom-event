@@ -7,8 +7,9 @@ import Control.Monad.Identity
 import Control.Monad.RWS.Lazy
 import Data.Default
 import Data.Monoid
-import Data.Text as Text (Text, pack, reverse, concat)
+import Data.Text as Text (Text, pack, reverse, concat, intercalate)
 import Data.Time
+-- import Data.Tagged
 import Documentation
 import GHCJS.Foreign
 import GHCJS.Types
@@ -30,37 +31,39 @@ import SampleImages as Samples (imageURLs)
 default (Text.Text)
 
 
-data R = R
-data W = W
-data S = S
-
-instance Monoid W where
-  mempty = W
-  W `mappend` W = W
-
-type Z a = RWST R W S a
-
 data ModelTab = This | That deriving (Show, Bounded, Enum, Eq)
 
-data Model = Model ModelTab Text
+data Model = Model ModelTab Text deriving Show
 
-data WH = WH Int Int
-data View = View { wh :: WH }
+data WH = WH Text Text deriving Show
+data View = View { wh :: WH } deriving Show
 type AppState = (View, Model)
+
+testIdent = "testIdent"
 
 hello :: MVar ( AppState -> AppState) -> AppState -> Html
 hello  redrawChannel (view, Model tab inputText) = let b = if tab == This then True else False in
   div_ !# "top" $ do
       h1_ ! clicker $ (text_ (if tab == This then "This Header" else "That Header"))
       mkButton (text_ "Click to reverse") ! clicker >> br_
-      textarea (if b then inputText else Text.reverse inputText) ! onInput' ! mouseUp' >> br_
+      ta <- textarea (wh view) (if b then inputText else Text.reverse inputText) ! onInput'
+      (return ta) !# testIdent
+      (return ta) ! mouseUp' redrawChannel testIdent
+      br_
       mkCheckbox "Check1" "Check2" >> (text_ "Check") >> br_
       mkSelect "menu1" [("1","One"),("2","Two"),("3","Three")] "3" >>  br_
       mapM_ (\u -> mkImg u 50 50 >> br_) Samples.imageURLs
   where clicker = onClick (Inputt (\e -> print "clicker" >> putMVar redrawChannel clickerF))
         onInput' = onInput (Inputt (\e -> print "input" >> putMVar redrawChannel id))
-        mouseUp' = onMouseUp (Inputt (\e -> print ("received mouseUp", e)))
+        mouseUp' redrawChannel ta = onMouseUp (Inputt (\e -> getWH ta >>= (putMVar redrawChannel. setWH )))
         clickerF (v, Model tab text) = (v, Model (cycleEB tab) text)
+        setWH :: WH -> (AppState -> AppState)
+        setWH wh' (v,m) = (v { wh = wh'}, m)
+
+type DOMIdent = Text
+
+getWH :: DOMIdent -> IO WH
+getWH i = return (WH "492px" "300px")
 
 cycleEB :: (Eq a, Bounded a, Enum a) => a -> a
 cycleEB a = if a == maxBound then minBound else succ a
@@ -88,15 +91,29 @@ textform = form'
 -- AS should trap and remember for all text widths.  At least until we
 -- get full wysiwyg going.
 
-textarea :: Text -> Html
-textarea = form'
+
+class ShowCSS a where
+  showCSS :: a -> Text
+
+instance ShowCSS Text where
+  showCSS = id
+
+instance (ShowCSS a) => ShowCSS [a] where
+  showCSS = Text.intercalate ";" . map showCSS
+
+instance (ShowCSS a, ShowCSS b) => ShowCSS (a,b) where
+  showCSS (a,b) = Text.concat [showCSS a, ":", showCSS b]
+
+instance ShowCSS WH where
+  showCSS (WH w h) = showCSS [("width" :: Text,w), ("height",h)]
+
+textarea :: WH -> Text -> Html
+textarea wh = form'
   where form' :: Text -> Html
         form' t = 
           textarea_ !# "new-hello"
             ! autofocus_
---            ! cols_ (tshow (80 :: Int))
---            ! rows_ (tshow (10 :: Int))
-            ! A.style_ "min-width:fill-available;max-width:80%;min-height:fill-available;"
+            ! A.style_ (showCSS wh)
             ! focus'
             ! blur'
             $ text_ t
@@ -144,7 +161,7 @@ onDoubleClick = onEvent DoubleClick
 onDragEnd :: Handler f => f E.MouseEvent -> Attribute
 onDragEnd = onEvent DragEnd
 
-alderon :: (MVar (a -> a) -> a -> Html) -> a -> IO ()
+alderon :: Show a => (MVar (a -> a) -> a -> Html) -> a -> IO ()
 alderon html s0 = do
   loadBootstrap
   root <- documentBody
@@ -152,15 +169,17 @@ alderon html s0 = do
   eventLoop root redrawChannel html s0
 
 
+eventLoop :: Show a => DOMElement -> MVar (a -> a) -> (MVar (a -> a) -> a -> Html) -> a -> IO ()
 eventLoop root redrawChannel render state = do
   update <- takeMVar redrawChannel
   let state' = update state
   hs <- buildDOM (render redrawChannel state')
   old <- detachChildren root
   appendChildren root hs
+  print state'
   eventLoop root redrawChannel render state'
 
 
 
 main = do
-  alderon hello (View (WH 60 60), Model This "Model text.")
+  alderon hello (View (WH "80%" "5em"), Model This "Model text.")

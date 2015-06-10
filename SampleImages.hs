@@ -1,7 +1,10 @@
+{-# LANGUAGE OverloadedStrings, ExtendedDefaultRules #-}
+
 module SampleImages where
 
 import Data.Text (Text)
 
+default (Text)
 
 imageURLs :: [Text]
 imageURLs =
