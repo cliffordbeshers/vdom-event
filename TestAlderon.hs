@@ -44,16 +44,17 @@ testIdent = "testIdent"
 hello :: MVar ( AppState -> AppState) -> AppState -> Html
 hello  redrawChannel (view, Model tab inputText) = let b = if tab == This then True else False in
   div_ !# "top" $ do
-      h1_ ! clicker $ (text_ (if tab == This then "This Header" else "That Header"))
+      h1_ ! clicker $ (text_ (if tab == This then "Forward Text" else "Backward Text"))
       mkButton (text_ "Click to reverse") ! clicker >> br_
-      ta <- textarea (wh view) (if b then inputText else Text.reverse inputText) ! onInput' ! mouseUp' redrawChannel testIdent
+      ta <- textarea (wh view) (if b then inputText else Text.reverse inputText) ! onInput' ! mouseUp' redrawChannel testIdent ! onDragEnd'
       br_
       mkCheckbox "Check1" "Check2" >> (text_ "Check") >> br_
       mkSelect "menu1" [("1","One"),("2","Two"),("3","Three")] "3" >>  br_
       mapM_ (\u -> mkImg u 50 50 >> br_) Samples.imageURLs
-  where clicker = onClick (Inputt (\e -> print "clicker" >> putMVar redrawChannel clickerF))
-        onInput' = onInput (Inputt (\e -> print "input" >> putMVar redrawChannel id))
-        mouseUp' redrawChannel ta = onMouseUp (Inputt (\e -> print "mouseUp" >> getWH ta >>= (putMVar redrawChannel. setWH )))
+  where clicker = onClick (Inputt (\e -> putStr "clicker" >> putMVar redrawChannel clickerF))
+        onInput' = onInput (Inputt (\e -> putStr "input" >> putMVar redrawChannel id))
+        mouseUp' redrawChannel ta = onMouseUp (Inputt (\e -> print e >> print "mouseUp" >> getWH ta >>= (putMVar redrawChannel. setWH )))
+        onDragEnd' = onDragEnd (Inputt (\e -> putStr "onDragEnd" >> print e))
         clickerF (v, Model tab text) = (v, Model (cycleEB tab) text)
         setWH :: WH -> (AppState -> AppState)
         setWH wh' (v,m) = (v { wh = wh'}, m)
