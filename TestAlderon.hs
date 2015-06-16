@@ -12,6 +12,7 @@ import Data.Time
 -- import Data.Tagged
 import Documentation
 import GHCJS.Foreign
+import GHCJS.Marshal
 import GHCJS.Types
 
 import ControlMonadSupplyExcept
@@ -39,6 +40,7 @@ data WH = WH Text Text deriving Show
 data View = View { wh :: WH } deriving Show
 type AppState = (View, Model)
 
+testIdent :: Text
 testIdent = "testIdent"
 
 hello :: MVar ( AppState -> AppState) -> AppState -> Html
@@ -46,7 +48,7 @@ hello  redrawChannel (view, Model tab inputText) = let b = if tab == This then T
   div_ !# "top" $ do
       h1_ ! clicker $ (text_ (if tab == This then "Forward Text" else "Backward Text"))
       mkButton (text_ "Click to reverse") ! clicker >> br_
-      ta <- textarea (wh view) (if b then inputText else Text.reverse inputText) ! onInput' ! mouseUp' redrawChannel testIdent ! onDragEnd'
+      ta <- textarea testIdent (wh view) (if b then inputText else Text.reverse inputText) ! onInput' ! mouseUp' redrawChannel testIdent ! onDragEnd'
       br_
       mkCheckbox "Check1" "Check2" >> (text_ "Check") >> br_
       mkSelect "menu1" [("1","One"),("2","Two"),("3","Three")] "3" >>  br_
@@ -56,23 +58,33 @@ hello  redrawChannel (view, Model tab inputText) = let b = if tab == This then T
         mouseUp' redrawChannel ta = onMouseUp (Inputt (\e -> print e >> print "mouseUp" >> getWH ta >>= (putMVar redrawChannel. setWH )))
         onDragEnd' = onDragEnd (Inputt (\e -> putStr "onDragEnd" >> print e))
         clickerF (v, Model tab text) = (v, Model (cycleEB tab) text)
-        setWH :: WH -> (AppState -> AppState)
-        setWH wh' (v,m) = (v { wh = wh'}, m)
+        setWH :: Maybe WH -> (AppState -> AppState)
+        setWH Nothing (v,m) = (v, m)
+        setWH (Just wh') (v,m) = (v { wh = wh'}, m)
 
 type DOMIdent = Text
 
-getWH :: DOMIdent -> IO WH
-getWH i = return (WH "492px" "300px")
+getWH :: DOMIdent -> IO (Maybe WH)
+getWH i = do
+  e <- documentGetElementById (toJSString i)
+  s <- getComputedStyle e
+  mw <- getPropMaybe "width" s
+  mh <- getPropMaybe "height" s
+  print (fmap fromJSString mw, fmap fromJSString mh)
+  case (mw,mh) of
+    (Nothing,_) -> return Nothing
+    (_,Nothing) -> return Nothing
+    (Just w, Just h) -> return (Just (WH (fromJSString w) (fromJSString h)))
 
 cycleEB :: (Eq a, Bounded a, Enum a) => a -> a
 cycleEB a = if a == maxBound then minBound else succ a
 
 
-textform :: Text -> Html
-textform = form'
+textform :: Text -> Text -> Html
+textform ident = form'
   where form' :: Text -> Html
         form' t = 
-          input_ !# "new-hello"
+          input_ !# ident
             ! placeholder_ "Hi, how are you?"
             ! autofocus_
             ! value_ t
@@ -106,11 +118,11 @@ instance (ShowCSS a, ShowCSS b) => ShowCSS (a,b) where
 instance ShowCSS WH where
   showCSS (WH w h) = showCSS [("width" :: Text,w), ("height",h)]
 
-textarea :: WH -> Text -> Html
-textarea wh = form'
+textarea :: Text -> WH -> Text -> Html
+textarea ident wh = form'
   where form' :: Text -> Html
         form' t = 
-          textarea_ !# "new-hello"
+          textarea_ !# ident
             ! autofocus_
             ! A.style_ (showCSS wh)
             ! focus'

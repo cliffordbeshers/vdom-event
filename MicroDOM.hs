@@ -28,8 +28,14 @@ foreign import javascript unsafe "$r = document"
 foreign import javascript unsafe "$r = $1.createElement($2)"
   documentCreateElement :: DOMDocument -> JSString -> IO (DOMElement)
 
+foreign import javascript unsafe "$r = document.getElementById($1)"
+  documentGetElementById :: JSString -> IO (DOMElement)
+
 foreign import javascript unsafe "$r = document.createElement($1)"
   createElement' :: JSString -> IO (DOMElement)
+
+foreign import javascript unsafe "$r = getComputedStyle($1)"
+  getComputedStyle :: DOMElement -> IO (JSObject a)
 
 createElement :: ToJSString a => a -> IO (DOMElement)
 createElement s = createElement' (toJSString s)
