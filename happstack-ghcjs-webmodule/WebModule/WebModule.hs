@@ -14,7 +14,7 @@ module WebModule.WebModule ( WebSite(..)
                            ) where
 
 import Control.Monad as Monad (mplus)
-import Data.Lens.Template (nameMakeLens)
+import Control.Lens
 import Data.List (nub)
 import Data.Monoid ((<>))
 import Data.Text as T (Text)
@@ -23,6 +23,7 @@ import ClientStub.Happstack.Server (Response, ServerPartT)
 #else
 import Happstack.Server (Response, ServerPartT)
 #endif
+import Language.Haskell.TH
 import Network.URI (URI)
 import Text.Blaze.Html5 as H ((!), body, docTypeHtml, head, link, Markup, script, ToMarkup(toMarkup), ToValue(toValue))
 import qualified Text.Blaze.Html5.Attributes as HA (href, manifest, rel, src, type_)
@@ -115,7 +116,7 @@ instance ToMarkup WM_Body where
   toMarkup = wm_Body_toMarkup
 
 
-$(nameMakeLens ''WebSite (Just . (++ "Lens")))
+$(reify ''WebSite >>= \(TyConI (DataD _ _ _ [RecC _ vsts] _)) -> makeLensesFor (map (\(n,_,_) -> (nameBase n, nameBase n ++ "Lens")) vsts) ''WebSite)
 
 
 wplus :: WebSite -> WebSite -> WebSite

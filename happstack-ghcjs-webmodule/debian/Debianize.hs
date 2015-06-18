@@ -1,12 +1,11 @@
 import Control.Monad.State (get)
 import Control.Lens
 import Debian.Debianize
-import Debian.Debianize.Optparse (parseProgramArguments, CommandLineOptions(..))
 import Distribution.Compiler
 import Debian.Relation
 
 main :: IO ()
-main = parseProgramArguments >>= newCabalInfo . _flags >>= evalCabalT (debianize (debianDefaults >> customize) >> liftCabal writeDebianization)
+main = performDebianization (debianDefaults >> customize)
 
 customize :: CabalT IO ()
 customize = do
