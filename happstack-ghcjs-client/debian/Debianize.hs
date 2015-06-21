@@ -1,4 +1,4 @@
-{-# FlexibleContexts #-}
+{-# LANGUAGE FlexibleContexts #-}
 import Control.Applicative ((<$>))
 import Control.Lens
 import Data.Set as Set (insert)
