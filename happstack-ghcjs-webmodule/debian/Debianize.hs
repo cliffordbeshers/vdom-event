@@ -1,3 +1,4 @@
+{-# FlexibleContexts #-}
 import Control.Monad.State (get)
 import Control.Lens
 import Debian.Debianize

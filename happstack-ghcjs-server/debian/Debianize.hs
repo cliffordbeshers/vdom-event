@@ -1,3 +1,4 @@
+{-# FlexibleContexts #-}
 -- requires autobuilder-seereason
 import Control.Lens
 import Debian.Debianize
