@@ -25,6 +25,20 @@ Executable testalderon
   ghcjs-Options:    -O
 
 
+Executable TestHTML
+  Main-Is: Alderon/TestHTML.hs
+  Buildable: True
+  Default-Language: Haskell2010
+  if impl(ghcjs)
+     Build-Depends: 
+         base, data-default,
+         ghcjs-base,
+         mtl, ghcjs-dom,
+         text
+  Other-Extensions:
+    TemplateHaskell
+  ghcjs-Options:    -O
+
 Executable VDomEvent
   Main-Is: VDomEvent.hs
   Buildable: False
