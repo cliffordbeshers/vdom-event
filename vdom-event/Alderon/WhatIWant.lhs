@@ -2,6 +2,7 @@
 
 > import Data.Monoid
 > import Control.Applicative
+> import Alderon.GenericZip
 
 > newtype Forest a = Forest { deForest :: [Tree a] } deriving (Show)
 > data Tree a = Node a (Forest a) deriving (Show)
@@ -65,9 +66,9 @@ a].  And Forest a should probably be the default type for composition.
 > --        Node (f x) (fmap (fmap (f <$>)) fxs <> fmap (fmap (<*> tx)) ffs)
 
 
-> instance Applicative Forest where
->   pure = Forest . (:[]) . pure
->   Forest fs <*> Forest xs = Forest (fs <*> xs)
+-- > instance Applicative Forest where
+-- >   pure = Forest . (:[]) . pure
+-- >   Forest fs <*> Forest xs = Forest (fs <*> xs)
 
 -- > af :: Applicative f => f (Tree (a ->  b)) -> f (Tree a) -> f (Tree b)
 -- > af `af` ax = Forest [t]
