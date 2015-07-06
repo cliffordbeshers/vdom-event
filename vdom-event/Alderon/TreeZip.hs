@@ -37,4 +37,4 @@ ulli = Node (Left UL) . map (Node (Left LI) . listify . leaf . Right)
 div_ :: [Tree (Either Tag a)] -> Tree (Either Tag a)
 div_ = Node (Left DIV)
 
-exam = zipWithTFM
+testM = zipWithTFM
