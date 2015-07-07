@@ -27,7 +27,7 @@ Executable testalderon
 
 Executable TestHTML
   Main-Is: Alderon/TestHTML.hs
-  Buildable: True
+  Buildable: False
   Default-Language: Haskell2010
   if impl(ghcjs)
      Build-Depends: 
@@ -35,6 +35,13 @@ Executable TestHTML
          ghcjs-base,
          mtl, ghcjs-dom,
          text
+  Build-Depends:
+         base, containers, data-default,
+         dlist,
+         hashable,
+         lens,
+         mtl, text, time,
+         unordered-containers
   Other-Extensions:
     TemplateHaskell
   ghcjs-Options:    -O
@@ -48,7 +55,7 @@ Executable VDomEvent
      Build-Depends: 
          base, containers, data-default,
          ghcjs-base, ghcjs-ffiqq,
-         ghcjs-vdom, ghcjs-dom, ghcjs-jquery,
+         ghcjs-dom, ghcjs-jquery,
          mtl, text, time
   -- , monad-supply
 
@@ -58,14 +65,14 @@ Executable VDomEvent
 
 Executable byhand
   Main-Is: ByHand.hs
-  Buildable: True
+  Buildable: False
   cpp-options: -DGHCJS_NO_CATCH_MAINLOOP
   Default-Language: Haskell2010
   if impl(ghcjs)
      Build-Depends: 
          base, containers, data-default,
          ghcjs-base, ghcjs-ffiqq,
-         ghcjs-vdom, ghcjs-dom, ghcjs-jquery,
+         ghcjs-dom, ghcjs-jquery,
          dlist,
          hashable,
          unordered-containers,
