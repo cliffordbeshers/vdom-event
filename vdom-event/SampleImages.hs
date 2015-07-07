@@ -8,15 +8,15 @@ default (Text)
 
 imageURLs :: [Text]
 imageURLs =
-  [ "https://www.facebook.com/photo.php?fbid=10205727901251631&l=18589f7f04"
-  , "https://www.facebook.com/photo.php?fbid=10205694236330029&l=e54c2ca1df"
-  , "https://www.facebook.com/photo.php?fbid=10205736881796139&l=2e00038ff0"
-  , "https://www.facebook.com/photo.php?fbid=10205660064795762&l=72d51726f6"
-  , "https://www.facebook.com/photo.php?fbid=10205656505746788&l=de71a7d405"
-  , "https://www.facebook.com/photo.php?fbid=10205596917177111&l=a1564b91e4"
-  , "https://www.facebook.com/photo.php?fbid=10205532857615662&l=423822b3d9"
-  , "https://www.facebook.com/photo.php?fbid=10205499530862514&l=2eed5d0cdd"
-  , "https://www.facebook.com/photo.php?fbid=10205469578553725&l=426cd83ae8"
+  [ "http://i.imgur.com/JNzgrXn.jpg"
+  , "http://i.imgur.com/MU2dD8E.jpg"
+  , "http://i.imgur.com/RpikbHf.jpg"
+  , "http://i.imgur.com/aums7ar.jpg"
+  , "http://i.imgur.com/BCceSvW.jpg"
+  , "http://i.imgur.com/lklRUbB.jpg"
+  , "http://i.imgur.com/TosqSii.jpg"
+  , "http://i.imgur.com/TosqSii.jpg"
+  , "http://i.imgur.com/XLlMUS2.jpg"
+  , "http://i.imgur.com/2g33bRf.jpg"
+  , "http://i.imgur.com/pHSdFlP.jpg"
   ]
-
-
